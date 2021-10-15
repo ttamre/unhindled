@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 # Create your models here.
 
@@ -8,6 +9,9 @@ class Author(models.Model):
 	host = models.CharField(max_length=100)
 	profileUrl = models.CharField(max_length=100)
 	githubUrl = models.CharField(max_length=100)
+
+	def __str__(self):
+		return self.displayName
 
 # leaving commented out because there is probably better implementations
 #class Friend(models.Model):
@@ -28,9 +32,12 @@ class Post(models.Model):
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
 	#will need to change
-	content = models.CharField(max_length=1000)
+	content = models.TextField()
 	#class Meta:
 		#abstract = True
+
+	def get_absolute_url():
+		return reverse()
 
 #maybe use depending on implementation		
 #class PublicPost(Post):

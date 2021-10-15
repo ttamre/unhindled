@@ -13,3 +13,7 @@ class CreatePostView(generic.CreateView):
     model = Post
     template_name = "unhindled/create_post.html"
     fields = "__all__"
+
+class PostView(generic.DetailView):
+    model = Post
+    template_name = "unhindled/view_post.html"
