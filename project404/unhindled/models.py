@@ -1,5 +1,7 @@
+import uuid
 from django.db import models
 from django.urls import reverse
+from datetime import datetime, date
 
 # Create your models here.
 
@@ -26,18 +28,19 @@ class Post(models.Model):
 		("png","image/png;base64"),
 		("jpeg","image/jpeg;base64"),
 	)
-	ID = models.CharField(max_length=100, primary_key=True)
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(Author, on_delete=models.CASCADE)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
+	created_on = models.DateTimeField(auto_now_add=True)
 	#will need to change
 	content = models.TextField()
 	#class Meta:
 		#abstract = True
 
-	def get_absolute_url():
-		return reverse()
+	def get_absolute_url(self):
+		return reverse('viewPost', args=(str(self.author), self.pk))
 
 #maybe use depending on implementation		
 #class PublicPost(Post):
