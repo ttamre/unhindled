@@ -1,3 +1,5 @@
+{% load markdown_extras %}
+
 <h1>{{post.title}}</h1>
 <small>Author: {{post.author}}</small>
 <br>
@@ -12,4 +14,13 @@
 <a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
 <br>
 <br>
-{{post.content}}
+{% if post.contentType == "md" %}
+<p>{{post.content | markdown | safe }}</p>
+{% else %}
+<p>{{post.content}}</p>
+{% endif %}
+<br>
+<br>
+{% if post.images %}
+<img src="{{post.images.url}}">
+{% endif %}
