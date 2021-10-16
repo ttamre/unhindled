@@ -1,0 +1,26 @@
+{% load markdown_extras %}
+
+<h1>{{post.title}}</h1>
+<small>Author: {{post.author}}</small>
+<br>
+{% load tz %}
+{% localtime on %}
+<small>Created: {{post.created_on}}</small>
+{% endlocaltime %}
+<br>
+<hr>
+<a href="{% url 'index' %}">Home</a>
+<a href="{% url 'updatePost' post.author.displayName post.pk %}">Edit</a>
+<a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
+<br>
+<br>
+{% if post.contentType == "md" %}
+<p>{{post.content | markdown | safe }}</p>
+{% else %}
+<p>{{post.content}}</p>
+{% endif %}
+<br>
+<br>
+{% if post.images %}
+<img src="{{post.images.url}}">
+{% endif %}

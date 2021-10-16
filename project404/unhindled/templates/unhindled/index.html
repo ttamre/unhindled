@@ -1,0 +1,19 @@
+<h1>HOME</h1>
+<li><a href="{% url 'createPost' %}">Create Post Button</a></li>
+<li><a href="{% url 'stream' %}">View your stream</a></li>
+<h2>Posts</h2>
+<ul>
+{% if object_list %}
+
+    {% for post in object_list %}
+    <li>
+        <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+        {{ post.author }} <br>
+        {{ post.content }}
+    </li>
+    {% endfor %}
+    
+{% else %}
+<p>No Posts to show.</p>
+{% endif %}
+</ul>
