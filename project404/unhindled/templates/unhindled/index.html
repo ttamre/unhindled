@@ -1,19 +1,39 @@
-<h1>HOME</h1>
-<li><a href="{% url 'createPost' %}">Create Post Button</a></li>
-<li><a href="{% url 'stream' %}">View your stream</a></li>
-<h2>Posts</h2>
-<ul>
-{% if object_list %}
-
-    {% for post in object_list %}
-    <li>
-        <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
-        {{ post.author }} <br>
-        {{ post.content }}
-    </li>
-    {% endfor %}
-    
-{% else %}
-<p>No Posts to show.</p>
-{% endif %}
-</ul>
+<!DOCTYPE html>
+<html>
+    <head>
+    <meta charset="utf-8">
+    <title>Unhindled</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'unhindled/styles.css' %}" />
+    </head>
+    <body>
+        <main>
+            {% if user.is_authenticated %}
+                Hi {{ user.username }}!
+                <li><a href="{% url 'createPost' %}">Create Post Button</a></li>
+                <li><a href="{% url 'stream' %}">View your stream</a></li>
+                <h2>Posts</h2>
+                <ul>
+                    {% if object_list %}
+                        {% for post in object_list %}
+                            <li>
+                                <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+                                {{ post.author }} <br>
+                                {{ post.content }}
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <p>No Posts to show.</p>
+                    {% endif %}
+                </ul>
+                <p><a href="{% url 'logout' %}">Log Out</a></p>
+            {% else %}
+                <div class="login-page">
+                    <p class="title">Unhindled</p>
+                    <p>You are not logged in</p>
+                    <a href="{% url 'login' %}">Log In</a>
+                </div>
+            {% endif %}
+        </main>
+    </body>
+</html>

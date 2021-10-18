@@ -1,8 +1,10 @@
+from django.contrib.auth import login
 from django.shortcuts import render
 from django.urls.base import reverse
 from django.views import generic
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
 
 from .models import Post
 # Create your views here.
