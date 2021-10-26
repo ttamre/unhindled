@@ -1,0 +1,14 @@
+.title {
+  margin: .5rem;
+  font-size: 2rem;
+}
+
+.login-page {
+  height: 3rem;
+  display: flex;
+  background-color: lightskyblue;
+}
+
+.login-text {
+  margin: auto .5rem auto auto;
+}

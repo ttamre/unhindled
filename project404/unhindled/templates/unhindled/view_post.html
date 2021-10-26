@@ -10,8 +10,10 @@
 <br>
 <hr>
 <a href="{% url 'index' %}">Home</a>
-<a href="{% url 'updatePost' post.author.displayName post.pk %}">Edit</a>
-<a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
+{% if user.username == post.author %}
+  <a href="{% url 'updatePost' post.author.displayName post.pk %}">Edit</a>
+  <a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
+{% endif %}
 <br>
 <br>
 {% if post.contentType == "md" %}
