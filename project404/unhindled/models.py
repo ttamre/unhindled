@@ -3,6 +3,9 @@ from django.db import models
 from django.urls import reverse
 from datetime import datetime, date
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 # Create your models here.
 
@@ -27,11 +30,17 @@ class Post(models.Model):
 		("md", "text/markdown"),
 		("txt","text/plain"),
 	)
+	VISIBILITY = (
+		("public", "Public"),
+		("friends", "Friends Only"),
+		("private", "Private"),
+	)
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(Author, on_delete=models.CASCADE)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1],null=False)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
+	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0], null=False)
 	created_on = models.DateTimeField(auto_now_add=True)
 	#will need to change
 	content = models.TextField(blank=True)

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Unhindled</title>
     {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'unhindled/styles.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
     </head>
     <body>
         <main>
@@ -30,9 +30,21 @@
             {% else %}
                 <div class="login-page">
                     <p class="title">Unhindled</p>
-                    <p>You are not logged in</p>
-                    <a href="{% url 'login' %}">Log In</a>
+                    <a class="login-text" href="{% url 'login' %}">Log In</a>
                 </div>
+                {% if object_list %}
+                        {% for post in object_list %}
+                            {% if post.visibility == "public" %}
+                                <li>
+                                    <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+                                    {{ post.author }} <br>
+                                    {{ post.content }}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <p>No Posts to show.</p>
+                    {% endif %}
             {% endif %}
         </main>
     </body>
