@@ -12,17 +12,26 @@ from django.dispatch import receiver
 class Author(models.Model):
 	ID = models.CharField(max_length=100, primary_key=True)
 	displayName =  models.CharField(max_length=100)
-	host = models.CharField(max_length=100)
-	profileUrl = models.CharField(max_length=100)
-	githubUrl = models.CharField(max_length=100)
+	host = models.CharField(max_length=100, blank = True)
+	profileUrl = models.CharField(max_length=100, blank = True)
+	githubUrl = models.CharField(max_length=100, blank = True)
 
 	def __str__(self):
 		return self.displayName
+	def get_absolute_url(self):
+		return reverse('viewPost', args=(str(self.author), self.pk))
 
-# leaving commented out because there is probably better implementations
-#class Friend(models.Model):
-	#author1 = models.ForeignKey(Author, on_delete=models.CASCADE)
-	#author2 = models.ForeignKey(Author, on_delete=models.CASCADE)
+# maybe not best implementation
+#class Friendship(models.Model):
+	#FRIEND_STATUS = (
+		#("pn", "Pending"),
+		#("ac", "Accepted"),
+	#)
+	#requesterId = models.ForeignKey(Author, on_delete=models.CASCADE)
+	#adresseeId = models.ForeignKey(Author, on_delete=models.CASCADE)
+	#status = models.CharField(max_length=4, choices=FRIEND_STATUS, default=FRIEND_STATUS[0])
+	#class Meta:
+        	#unique_together = (("requesterId", "adresseeId"),)
 	
 
 class Post(models.Model):

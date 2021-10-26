@@ -6,13 +6,18 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 
-from .models import Post
+from .models import Post, Author
 # Create your views here.
 
 class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
+    
+class AccountView(generic.CreateView):
+    model = Author
+    template_name = "unhindled/account.html"
+    fields = "__all__"
 
 class CreatePostView(generic.CreateView):
     model = Post
