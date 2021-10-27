@@ -45,7 +45,7 @@ class Post(models.Model):
 		("private", "Private"),
 	)
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(Author, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1],null=False)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
@@ -63,6 +63,10 @@ class Post(models.Model):
 	def clean(self):
 		if not (self.images or self.content):
 			raise ValidationError("You must specify either email or telephone")
+
+class SharedPost(Post):
+	originalPostID = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post")
+	sharedBy = models.ForeignKey(User, on_delete=models.CASCADE)
 
 #maybe use depending on implementation		
 #class PublicPost(Post):

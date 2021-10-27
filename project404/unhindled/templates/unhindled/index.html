@@ -18,7 +18,7 @@
                     {% if object_list %}
                         {% for post in object_list %}
                             <li>
-                                <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+                                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                                 {{ post.author }} <br>
                                 {{ post.content }}
                             </li>
@@ -37,7 +37,7 @@
                         {% for post in object_list %}
                             {% if post.visibility == "public" %}
                                 <li>
-                                    <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+                                    <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                                     {{ post.author }} <br>
                                     {{ post.content }}
                                 </li>

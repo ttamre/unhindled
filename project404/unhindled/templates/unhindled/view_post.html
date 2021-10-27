@@ -10,9 +10,10 @@
 <br>
 <hr>
 <a href="{% url 'index' %}">Home</a>
-{% if user.username == post.author %}
+{% if user.username == post.author.username %}
   <a href="{% url 'updatePost' post.author.displayName post.pk %}">Edit</a>
   <a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
+  <a href="{% url 'sharePost' post.author.displayName post.pk %}" onclick="return confirm('Are you sure?');">Delete</a>
 {% endif %}
 <br>
 <br>
