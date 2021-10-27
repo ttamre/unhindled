@@ -2,6 +2,7 @@
 <html>
     <head>
     <meta charset="utf-8">
+    
     <title>Unhindled</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
@@ -10,7 +11,7 @@
         <main>
             {% if user.is_authenticated %}
                 Hi {{ user.username }}!
-                <li><a href="{% url 'account' %}">Manage Account</a></li>
+                <li><a href="{% url 'profile' user.profile.pk %}">Profile</a></li>
                 <li><a href="{% url 'createPost' %}">Create Post Button</a></li>
                 <li><a href="{% url 'stream' %}">View your stream</a></li>
                 <h2>Posts</h2>
