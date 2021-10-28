@@ -1,8 +1,17 @@
-.title {
-  margin: .5rem;
-  font-size: 2rem;
+/* General */
+.mr-2 {
+  margin-right: .5rem;
 }
 
+.ml-2 {
+  margin-left: .5rem;
+}
+
+.mt-3 {
+  margin-top: .75rem;
+}
+
+/* Login Page */
 .login-page {
   height: 3rem;
   display: flex;
@@ -11,4 +20,27 @@
 
 .login-text {
   margin: auto .5rem auto auto;
+}
+
+.title {
+  margin: .5rem;
+  font-size: 2rem;
+}
+
+/* Home Page */
+.home-page {
+}
+
+/* 'Components' Page */
+.user-info {
+  display: flex;
+  margin-left: auto;
+}
+
+.post {
+  margin-top: 12px;
+}
+
+.account-management {
+  margin-left: auto;
 }
