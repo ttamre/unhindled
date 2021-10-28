@@ -21,17 +21,19 @@ class Author(models.Model):
 	def get_absolute_url(self):
 		return reverse('viewPost', args=(str(self.author), self.pk))
 
-# maybe not best implementation
-#class Friendship(models.Model):
-	#FRIEND_STATUS = (
-		#("pn", "Pending"),
-		#("ac", "Accepted"),
-	#)
-	#requesterId = models.ForeignKey(Author, on_delete=models.CASCADE)
-	#adresseeId = models.ForeignKey(Author, on_delete=models.CASCADE)
-	#status = models.CharField(max_length=4, choices=FRIEND_STATUS, default=FRIEND_STATUS[0])
-	#class Meta:
-        	#unique_together = (("requesterId", "adresseeId"),)
+#maybe not best implementation
+class Friendship(models.Model):
+	FRIEND_STATUS = (
+		("pn", "Pending"),
+		("ac", "Accepted"),
+	)
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	requesterId = models.CharField(max_length=100)
+	adresseeId = models.CharField(max_length=100)
+	status = models.CharField(max_length=4, choices=FRIEND_STATUS, default=FRIEND_STATUS[0])
+	class Meta:
+        	unique_together = (("requesterId", "adresseeId"),)
+
 
 class Post(models.Model):
 	CONTENT_TYPES = (
