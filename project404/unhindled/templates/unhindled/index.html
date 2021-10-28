@@ -8,45 +8,54 @@
     </head>
     <body>
         <main>
-            {% if user.is_authenticated %}
-                Hi {{ user.username }}!
-                <li><a href="{% url 'account' %}">Manage Account</a></li>
-                <li><a href="{% url 'createPost' %}">Create Post Button</a></li>
-                <li><a href="{% url 'stream' %}">View your stream</a></li>
-                <h2>Posts</h2>
-                <ul>
+            <div class="home-page">
+                {% if user.is_authenticated %}
+                    <div class="user-info">
+                        Hi {{ user.username }}!
+                        <a class="ml-2" href="{% url 'mystream' %}">View your stream</a>
+                        <a class="ml-2" href="{% url 'createPost' %}">Create Post Button</a>
+                        <div class="account-management">
+                            <a href="{% url 'account' %}">Manage Account</a>
+                            <a href="{% url 'logout' %}">Log Out</a>
+                        </div>
+                    </div>
+                    <h2>Posts</h2>
                     {% if object_list %}
                         {% for post in object_list %}
-                            <li>
-                                <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
-                                {{ post.author }} <br>
-                                {{ post.content }}
-                            </li>
-                        {% endfor %}
-                    {% else %}
-                        <p>No Posts to show.</p>
-                    {% endif %}
-                </ul>
-                <p><a href="{% url 'logout' %}">Log Out</a></p>
-            {% else %}
-                <div class="login-page">
-                    <p class="title">Unhindled</p>
-                    <a class="login-text" href="{% url 'login' %}">Log In</a>
-                </div>
-                {% if object_list %}
-                        {% for post in object_list %}
-                            {% if post.visibility == "public" %}
-                                <li>
+                            <!-- if (x and y) or z -->
+                            {% if post.visibility == "friends" and post.author.id in user.friends_list or post.visibility == "public" %}
+                                <div class="post">
                                     <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
-                                    {{ post.author }} <br>
+                                    By: {{ post.author }} <br>
                                     {{ post.content }}
-                                </li>
+                                </div>
+                                <hr>
                             {% endif %}
                         {% endfor %}
                     {% else %}
                         <p>No Posts to show.</p>
                     {% endif %}
-            {% endif %}
+                {% else %}
+                    <div class="login-page">
+                        <p class="title">Unhindled</p>
+                        <a class="login-text" href="{% url 'login' %}">Log In</a>
+                    </div>
+                    {% if object_list %}
+                            {% for post in object_list %}
+                                {% if post.visibility == "public" %}
+                                    <div class="post">
+                                        <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+                                        By: {{ post.author }} <br>
+                                        {{ post.content }}
+                                    </div>
+                                    <hr>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p>No Posts to show.</p>
+                        {% endif %}
+                {% endif %}
+            </div>
         </main>
     </body>
 </html>

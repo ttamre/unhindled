@@ -13,7 +13,12 @@ class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
-    
+
+class StreamView(generic.ListView):
+    model = Post
+    template_name = "unhindled/mystream.html"
+    ordering = ['-created_on']
+
 class AccountView(generic.CreateView):
     model = Author
     template_name = "unhindled/account.html"
