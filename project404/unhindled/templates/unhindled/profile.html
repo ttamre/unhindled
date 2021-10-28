@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--fontawesome.com-->
+<script src="https://kit.fontawesome.com/1d71f92e0a.js" crossorigin="anonymous"></script>
+</head>
+</html>
+
+
+{% block content %}
+<div class="container">
+    <div >
+        <div >
+            <a href="{% url 'index' %}" >Back</a>
+        </div>
+    </div>
+    <div >
+        <div >
+            <img src="{{ profile.photo.url }}" width="115" height="100" >
+            {% if profile.name %}
+            <h2 >{{ profile.name }}
+                <span>
+                    {% if request.user == user %}
+                    
+                        <a href="{% url 'editProfile' profile.pk %}" style='color: black; font-size:22px' ><i class="far fa-edit"></i></a>
+                    {% endif %}
+                </span>
+                {% else %}
+                <h2 >{{ user.username }}
+                    <span>
+                        {% if request.user == user %}
+                            <a href="{% url 'editProfile' profile.pk %}" style='color: black; font-size:22px'><i class="far fa-edit"></i></a>
+                        {% endif %}
+                    </span>
+                </h2>
+                {% endif %}
+            </h3>
+
+            {% if profile.date_of_birth %}
+            <p>{{ profile.date_of_birth }}</p>
+            {% endif %}
+
+            {% if profile.location %}
+            <p>{{ profile.location }}</p>
+            {% endif %}
+
+            {% if profile.more_info %}
+            <p>{{ profile.more_info }}</p>
+            {% endif %}
+            
+        </div>
+    </div>
+    
+</div>
+{% endblock content %}
