@@ -6,7 +6,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 
-from .models import Post, Author
+from .models import Post, Author, Friendship
+from .forms import FriendRequestForm
 # Create your views here.
 
 class HomeView(generic.ListView):
@@ -18,6 +19,16 @@ class AccountView(generic.CreateView):
     model = Author
     template_name = "unhindled/account.html"
     fields = "__all__"
+
+class ManageFriendView(generic.ListView):
+    model = Friendship
+    template_name = "unhindled/friends.html"
+    fields = "__all__"
+    
+def friendRequest(request):
+    if Author.objects.filter(ID=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0:
+    	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pn")
+    return render(request, 'unhindled/friends.html')
 
 class CreatePostView(generic.CreateView):
     model = Post
