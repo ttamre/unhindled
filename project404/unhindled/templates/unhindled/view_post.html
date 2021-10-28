@@ -10,9 +10,14 @@
 <br>
 <hr>
 <a href="{% url 'index' %}">Home</a>
-{% if post.author.displayName == user.username %}
-  <a href="{% url 'updatePost' post.author.displayName post.pk %}">Edit</a>
-  <a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
+{% if user.username == post.author.username %}
+  {% if post.is_shared_post %}
+  <a href="{% url 'viewPost' post.author.username post.originalPost.pk %}">View Original</a>
+  {% else %}
+  <a href="{% url 'updatePost' post.author.username post.pk %}">Edit</a>
+  {% endif %}
+  <a href="{% url 'deletePost' post.author.username post.pk %}">Delete</a>
+  <a href="{% url 'sharePost' post.author.username post.pk %}" onclick="return confirm('Are you sure?');">Share</a>
 {% endif %}
 <br>
 <br>

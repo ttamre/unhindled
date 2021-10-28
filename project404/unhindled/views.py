@@ -1,5 +1,6 @@
 from django.contrib.auth import login
-from django.shortcuts import render
+from django.contrib.auth.models import AnonymousUser
+from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.views import generic, View
 from django.http import HttpResponse, HttpResponseRedirect
@@ -28,6 +29,25 @@ class CreatePostView(generic.CreateView):
     template_name = "unhindled/create_post.html"
     fields = "__all__"
 
+class SharePost(generic.View):
+    def get(self, request, user, pk):
+        post_object = get_object_or_404(Post, pk=pk)
+        current_user = request.user
+        if current_user == AnonymousUser:
+            return HttpResponseRedirect(reverse('viewPost', args=(str(current_user ), post_object.ID)))
+
+        if post_object.is_shared_post:
+            post_object = post_object.originalPost
+
+        sharedPost = Post.objects.create(author=post_object.author, contentType=post_object.contentType, 
+        title=post_object.title, description=post_object.description,
+        visibility=post_object.visibility, created_on=post_object.created_on, content=post_object.content,
+        images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
+        return HttpResponseRedirect(reverse('index'))
+
+# def SharePost(request, user, post_id):
+#     return HttpResponseRedirect(reverse('index'))
+  
 class PostView(generic.DetailView):
     model = Post
     template_name = "unhindled/view_post.html"

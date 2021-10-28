@@ -7,10 +7,10 @@ urlpatterns = [
     path('post/', views.CreatePostView.as_view(), name='createPost'),
     path('mystream/', views.StreamView.as_view(), name='mystream'),
     path('account', views.AccountView.as_view(), name='account'),
+    path('profile/<str:pk>/', views.ProfileView.as_view(), name='profile'),
+    path('profile/edit/<str:pk>/', views.EditProfileView.as_view(), name='editProfile'),
     path('<str:user>/articles/<str:pk>', views.PostView.as_view(), name='viewPost'),
     path('<str:user>/articles/<str:pk>/edit', views.UpdatePostView.as_view(), name='updatePost'),
     path('<str:user>/articles/<str:pk>/delete', views.DeletePostView.as_view(), name='deletePost'),
-    path('profile/<str:pk>/', views.ProfileView.as_view(), name='profile'),
-    path('profile/edit/<str:pk>/', views.EditProfileView.as_view(), name='editProfile'),
-
+    path('<str:user>/articles/<str:pk>/share', views.SharePost.as_view(), name='sharePost'),
 ]
