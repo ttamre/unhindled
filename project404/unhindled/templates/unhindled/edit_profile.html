@@ -1,0 +1,26 @@
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="container">
+    <div >
+        <div >
+            <a href="{% url 'profile' object.pk %}" >Back to Profile</a>
+        </div>
+    </div>
+    <div >
+        <div >
+            <h5>Update Profile</h5>
+        </div>
+    </div>
+    <div>
+        <div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form | crispy }}
+                <div >
+                    <button>Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

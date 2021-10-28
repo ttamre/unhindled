@@ -44,7 +44,7 @@ class Post(models.Model):
 		("send", "Send to Author")
 	)
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(Author, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1],null=False)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
@@ -72,9 +72,26 @@ class Post(models.Model):
 	
 class Comment(models.Model):
 	ID = models.CharField(max_length=100, primary_key=True)
-	author = models.ForeignKey(Author, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE)
 	comment = models.CharField(max_length=1000)
 	published = models.DateField()
 	
 	
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
+    name = models.CharField(max_length=20, blank=True, null=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    location = models.CharField(max_length=100, blank=True, null=True)
+    more_info = models.TextField(max_length=500, blank=True)
+    photo = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png', blank=True)
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+	if created:
+		UserProfile.objects.create(user = instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+	instance.profile.save()
+
