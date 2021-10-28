@@ -18,6 +18,7 @@
                         <div class="account-management">
                             <a href="{% url 'profile' user.profile.pk %}">Profile</a>
                             <a href="{% url 'account' %}">Manage Account</a>
+                            <a href="{% url 'friends' user.username %}">Manage Friends</a>
                             <a href="{% url 'logout' %}">Log Out</a>
                         </div>
                     </div>
