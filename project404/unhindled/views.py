@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 from .models import Post, Author, Friendship, UserProfile
-from .forms import FriendRequestForm
 
 # Create your views here.
 
@@ -34,7 +33,7 @@ class ManageFriendView(generic.ListView):
     fields = "__all__"
     
 def friendRequest(request):
-    if User.objects.filter(username=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0:
+    if User.objects.filter(username=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0 and Friendship.objects.filter(adresseeId=request.user.username,requesterId=request.POST["adressee"]).count() == 0: 
     	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pn")
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
