@@ -34,9 +34,23 @@ class ManageFriendView(generic.ListView):
     
 def friendRequest(request):
     if User.objects.filter(username=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0 and Friendship.objects.filter(adresseeId=request.user.username,requesterId=request.POST["adressee"]).count() == 0: 
-    	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pn")
+    	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pending")
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
+    
+def friendRequestAccept(request):
+   friendship = Friendship.objects.get(requesterId=request.POST["follower"],adresseeId=request.user.username)
+   friendship.status="accepted"
+   friendship.save()
+   next = request.POST.get('next', '/')
+   return HttpResponseRedirect(next)
+
+def unfriend(request):
+   friendship = Friendship.objects.get(requesterId=request.POST["requester"],adresseeId=request.POST["adressee"])
+   friendship.delete()
+   next = request.POST.get('next', '/')
+   return HttpResponseRedirect(next)
+
 
 class CreatePostView(generic.CreateView):
     model = Post
