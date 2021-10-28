@@ -18,7 +18,7 @@
         <div >
             <img src="{{ profile.photo.url }}" width="115" height="100" >
             {% if profile.name %}
-            <h2 >{{ profile.name }}
+            <h2>{{ profile.name }}
                 <span>
                     {% if request.user == user %}
                     
@@ -26,7 +26,7 @@
                     {% endif %}
                 </span>
                 {% else %}
-                <h2 >{{ user.username }}
+                <h2>{{ user.username }}
                     <span>
                         {% if request.user == user %}
                             <a href="{% url 'editProfile' profile.pk %}" style='color: black; font-size:22px'><i class="far fa-edit"></i></a>

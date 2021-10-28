@@ -2,7 +2,6 @@
 <html>
     <head>
     <meta charset="utf-8">
-    
     <title>Unhindled</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
@@ -13,15 +12,14 @@
                 {% if user.is_authenticated %}
                     <div class="user-info">
                         Hi {{ user.username }}!
-                        <a class="ml-2" href="{% url 'mystream' %}">View your stream</a>
-                        <a class="ml-2" href="{% url 'createPost' %}">Create Post Button</a>
+                        <a class="ml-2" href="{% url 'mystream' %}">Your stream</a>
+                        <a class="ml-2" href="{% url 'createPost' %}">Create Post</a>
                         <div class="account-management">
                             <a href="{% url 'profile' user.profile.pk %}">Profile</a>
-                            <a href="{% url 'account' %}">Manage Account</a>
                             <a href="{% url 'logout' %}">Log Out</a>
                         </div>
                     </div>
-                    <h2>Posts</h2>
+                    <p class="non-white-title">Posts</p>
                     {% if object_list %}
                         {% for post in object_list %}
                             <!-- if (x and y) or z -->
@@ -34,17 +32,16 @@
                                         <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                                     {% endif %}
                                     Author: {{ post.author }} <br>
-                                    {{ post.content }}
+                                    {{ post.description }}
                                 </div>
-                                <hr>
                             {% endif %}
                         {% endfor %}
                     {% else %}
                         <p>No Posts to show.</p>
                     {% endif %}
                 {% else %}
-                    <div class="login-page">
-                        <p class="title">Unhindled</p>
+                    <div class="login-banner">
+                        <p class="white-title">Unhindled</p>
                         <a class="login-text" href="{% url 'login' %}">Log In</a>
                     </div>
                     {% if object_list %}
@@ -58,9 +55,8 @@
                                             <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                                         {% endif %}
                                         By: {{ post.author }} <br>
-                                        {{ post.content }}
+                                        {{ post.description }}
                                     </div>
-                                    <hr>
                                 {% endif %}
                             {% endfor %}
                         {% else %}

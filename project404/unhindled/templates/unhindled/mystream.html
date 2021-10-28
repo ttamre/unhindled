@@ -13,36 +13,33 @@
           <div class="user-info">
             Hi {{ user.username }}!
             <a class="ml-2" href="{% url 'index' %}">Home</a>
-            <a class="ml-2" href="{% url 'createPost' %}">Create Post Button</a>
+            <a class="ml-2" href="{% url 'createPost' %}">Create Post</a>
             <div class="account-management">
                 <a href="{% url 'profile' user.profile.pk %}">Profile</a>
-                <a href="{% url 'account' %}">Manage Account</a>
                 <a href="{% url 'logout' %}">Log Out</a>
             </div>
         </div>
-            <h2>My Stream</h2>
+            <p class="non-white-title">My Stream</p>
             {% if object_list %}
               <h3>My Posts</h3>
               {% for post in object_list %}
                 <!-- change this to ID when author and user are matched -->
-                {% if post.author.displayName == user.username %}
+                {% if post.author.username == user.username %}
                   <div class="post">
-                      <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+                      <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                       By: {{ post.author }} <br>
-                      {{ post.content }}
+                      {{ post.description }}
                   </div>
-                  <hr>
                 {% endif %}
               {% endfor %}
               <h3>Sent to me</h3>
               {% for post in object_list %}
-                {% if post.send_to.displayName == user.username and post.visibility == "send" %}
+                {% if post.send_to.username == user.username and post.visibility == "send" %}
                   <div class="post">
-                      <a href="{% url 'viewPost' post.author.displayName post.pk %}">{{ post.title }}</a> <br>
+                      <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                       By: {{ post.author }} <br>
-                      {{ post.content }}
+                      {{ post.description }}
                   </div>
-                  <hr>
                 {% endif %}
               {% endfor %}
             {% else %}
