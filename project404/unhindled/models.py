@@ -31,7 +31,7 @@ class Author(models.Model):
 	#adresseeId = models.ForeignKey(Author, on_delete=models.CASCADE)
 	#status = models.CharField(max_length=4, choices=FRIEND_STATUS, default=FRIEND_STATUS[0])
 	#class Meta:
-        	#unique_together = (("requesterId", "adresseeId"),)
+			#unique_together = (("requesterId", "adresseeId"),)
 	
 
 class Post(models.Model):
@@ -57,16 +57,19 @@ class Post(models.Model):
 	#class Meta:
 		#abstract = True
 
+	sharedBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shared_by', null=True, blank=True)
+	originalPost = models.ForeignKey("Post", on_delete=models.CASCADE, null=True, blank=True)
+
+	@property
+	def is_shared_post(self):
+		return self.sharedBy != None
+
 	def get_absolute_url(self):
 		return reverse('viewPost', args=(str(self.author), self.pk))
 
 	def clean(self):
 		if not (self.images or self.content):
 			raise ValidationError("You must specify either email or telephone")
-
-class SharedPost(Post):
-	originalPostID = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post")
-	sharedBy = models.ForeignKey(User, on_delete=models.CASCADE)
 
 #maybe use depending on implementation		
 #class PublicPost(Post):

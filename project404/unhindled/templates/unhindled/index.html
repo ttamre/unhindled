@@ -18,8 +18,13 @@
                     {% if object_list %}
                         {% for post in object_list %}
                             <li>
-                                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                                {{ post.author }} <br>
+                                {% if post.is_shared_post %}
+                                    <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                                    Shared by: {{ post.sharedBy.username }} <br>
+                                {% else %}
+                                    <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                                {% endif %}
+                                Author: {{ post.author }} <br>
                                 {{ post.content }}
                             </li>
                         {% endfor %}
@@ -37,8 +42,13 @@
                         {% for post in object_list %}
                             {% if post.visibility == "public" %}
                                 <li>
-                                    <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                                    {{ post.author }} <br>
+                                    {% if post.is_shared_post %}
+                                        <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                                        Shared by: {{ post.sharedBy.username }} <br>
+                                    {% else %}
+                                        <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                                    {% endif %}
+                                    Author: {{ post.author }} <br>
                                     {{ post.content }}
                                 </li>
                             {% endif %}
