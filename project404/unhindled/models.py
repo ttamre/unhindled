@@ -51,13 +51,20 @@ class Post(models.Model):
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0], null=False)
-	send_to = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="send_to", null=True)
+	send_to = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="send_to", null=True, blank=True)
 	created_on = models.DateTimeField(auto_now_add=True)
 	#will need to change
 	content = models.TextField(blank=True)
 	images = models.ImageField(null=True,blank=True, upload_to='images/')
 	#class Meta:
 		#abstract = True
+
+	sharedBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shared_by', null=True, blank=True, editable =False)
+	originalPost = models.ForeignKey("Post", on_delete=models.CASCADE, null=True, blank=True, editable =False)
+
+	@property
+	def is_shared_post(self):
+		return self.sharedBy != None
 
 	def get_absolute_url(self):
 		return reverse('viewPost', args=(str(self.author), self.pk))
