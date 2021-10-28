@@ -16,6 +16,7 @@
                         <a class="ml-2" href="{% url 'mystream' %}">View your stream</a>
                         <a class="ml-2" href="{% url 'createPost' %}">Create Post Button</a>
                         <div class="account-management">
+                            <a href="{% url 'profile' user.profile.pk %}">Profile</a>
                             <a href="{% url 'account' %}">Manage Account</a>
                             <a href="{% url 'logout' %}">Log Out</a>
                         </div>
