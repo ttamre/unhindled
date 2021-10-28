@@ -32,9 +32,10 @@ class ManageFriendView(generic.ListView):
     fields = "__all__"
     
 def friendRequest(request):
-    if Author.objects.filter(ID=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0:
+    if User.objects.filter(ID=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0:
     	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pn")
-    return render(request, 'unhindled/friends.html')
+    next = request.POST.get('next', '/')
+    return HttpResponseRedirect(next)
 
 class CreatePostView(generic.CreateView):
     model = Post

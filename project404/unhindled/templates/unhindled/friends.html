@@ -1,0 +1,22 @@
+<h1>Manage Friends</h1>
+
+<form action="/friend_request" method="POST">
+	{% csrf_token %}
+	<label for="adressee">Friends Username: </label>
+	<input id="adressee" type="text" name="adressee" value="">
+	<input type="hidden" name="next" value="{{ request.path }}">
+    	<input type="submit" value="OK">
+</form>
+<ul>
+{% if object_list %}
+	{% for friendship in object_list %}
+		<li>
+			{{ friendship.adresseeId }}<br>
+	                {{ friendship.requesterId }} <br>
+	                {{ friendship.status }}
+	        </li>
+	{% endfor %}
+{% else %}
+	<p>No Friends to show.</p>
+{% endif %}
+</ul>
