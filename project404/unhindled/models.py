@@ -80,20 +80,28 @@ class Post(models.Model):
 	#pass
 	
 class Comment(models.Model):
-	ID = models.CharField(max_length=100, primary_key=True)
+	CONTENT_TYPES = (
+		("md", "text/markdown"),
+		("txt","text/plain"),
+	)
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
-	post = models.ForeignKey(Post, on_delete=models.CASCADE)
+	post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comment")
 	comment = models.CharField(max_length=1000)
-	published = models.DateField()
+	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[0],null=False)
+	published = models.DateTimeField(auto_now_add=True)
 	
+	def __str__(self):
+		return self.comment
+
 	
 class UserProfile(models.Model):
     user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
-    name = models.CharField(max_length=20, blank=True, null=True)
+    displayName = models.CharField(max_length=20, blank=True, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
     location = models.CharField(max_length=100, blank=True, null=True)
     more_info = models.TextField(max_length=500, blank=True)
-    photo = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png', blank=True)
+    profileImage = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png', blank=True)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

@@ -16,9 +16,9 @@
     </div>
     <div >
         <div >
-            <img src="{{ profile.photo.url }}" width="115" height="100" >
-            {% if profile.name %}
-            <h2 >{{ profile.name }}
+            <img src="{{ profile.profileImage.url }}" width="115" height="100" >
+            {% if profile.displayName %}
+            <h2 >{{ profile.displayName }}
                 <span>
                     {% if request.user == user %}
                     
@@ -48,6 +48,22 @@
             <p>{{ profile.more_info }}</p>
             {% endif %}
             
+        </div>
+
+        <div>
+            {% if posts %}
+                {% for post in posts %}
+                        <li>
+                            <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                            {{ post.author }} <br>
+                            {{ post.content }}
+                        </li>
+                {% endfor %}
+            {% else %}
+                <p>No Posts to show.</p>
+            {% endif %}
+
+
         </div>
     </div>
     
