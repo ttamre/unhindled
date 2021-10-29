@@ -30,7 +30,7 @@ class Friendship(models.Model):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	requesterId = models.CharField(max_length=100)
 	adresseeId = models.CharField(max_length=100)
-	status = models.CharField(max_length=10, choices=FRIEND_STATUS, default=FRIEND_STATUS[0])
+	status = models.CharField(max_length=10, choices=FRIEND_STATUS, default=FRIEND_STATUS[0][0])
 	class Meta:
         	unique_together = (("requesterId", "adresseeId"),)
 
@@ -47,10 +47,10 @@ class Post(models.Model):
 	)
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
-	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1],null=False)
+	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
-	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0], null=False)
+	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0][0], null=False)
 	send_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name="send_to", null=True, blank=True)
 	created_on = models.DateTimeField(auto_now_add=True)
 	#will need to change
@@ -72,12 +72,6 @@ class Post(models.Model):
 	def clean(self):
 		if not (self.images or self.content):
 			raise ValidationError("Invalid Value")
-
-#maybe use depending on implementation		
-#class PublicPost(Post):
-	#pass
-#class FriendPost(Post):
-	#pass
 	
 class Comment(models.Model):
 	CONTENT_TYPES = (
