@@ -15,4 +15,5 @@ Zoey Pu: jpu1
 Legion Script: https://www.youtube.com/watch?v=XBMatmjS5yM&t=1576s \
 Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
 
-
+## Jira Board (for quick access)
+https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1
