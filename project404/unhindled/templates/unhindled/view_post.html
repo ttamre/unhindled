@@ -31,3 +31,33 @@
 {% if post.images %}
 <img src="{{post.images.url}}">
 {% endif %}
+
+
+<br><br>
+<hr>
+
+<form method = 'post'>
+  {% csrf_token %}
+  {{ comment_form.as_p }}
+  {% if request.user.is_authenticated %}
+    <button>Send</button>
+    {% else %}
+    <button type="button" disabled>Send</button>
+  {% endif %}
+</form>
+
+
+
+<div>
+  {{ post.comment.count}} Comment{{ post.comment.count|pluralize}}
+  <br>
+  {% for comment in post.comment.all %}
+  <br>
+    <strong>
+      {{comment.author}} - {{comment.published}}
+    </strong>
+    <p>{{ comment.comment}}</p>
+
+
+  {% endfor %}
+</div>
