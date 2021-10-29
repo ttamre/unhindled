@@ -1,3 +1,11 @@
+<!DOCTYPE html>
+<html>
+<head>
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
+<title>Unhindled</title>
+</head>
+</html>
 {% load crispy_forms_tags %}
 {% block content %}
 <div class="container">
@@ -7,8 +15,8 @@
         </div>
     </div>
     <div >
-        <div >
-            <h5>Update Profile</h5>
+        <div>
+            <p class="non-white-title">Update Profile</p>
         </div>
     </div>
     <div>
@@ -17,7 +25,7 @@
                 {% csrf_token %}
                 {{ form | crispy }}
                 <div >
-                    <button>Update</button>
+                    <button class="mt-5">Update</button>
                 </div>
             </form>
         </div>

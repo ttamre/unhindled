@@ -1,3 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>Unhindled</title>
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
+</head>
+<body>
+<main>
+</main>
+</body>
+</html>
 {% load markdown_extras %}
 
 <h1>{{post.title}}</h1>
@@ -17,10 +31,12 @@
   <a href="{% url 'updatePost' post.author.username post.pk %}">Edit</a>
   {% endif %}
   <a href="{% url 'deletePost' post.author.username post.pk %}">Delete</a>
+{% else %}
   <a href="{% url 'sharePost' post.author.username post.pk %}" onclick="return confirm('Are you sure?');">Share</a>
 {% endif %}
 <br>
 <br>
+{{post.description}}
 {% if post.contentType == "md" %}
 <p>{{post.content | markdown | safe }}</p>
 {% else %}
@@ -32,8 +48,6 @@
 <img src="{{post.images.url}}">
 {% endif %}
 
-
-<br><br>
 <hr>
 
 <form method = 'post'>
@@ -46,9 +60,7 @@
   {% endif %}
 </form>
 
-
-
-<div>
+<div class="mt-5">
   {{ post.comment.count}} Comment{{ post.comment.count|pluralize}}
   <br>
   {% for comment in post.comment.all %}
