@@ -71,7 +71,7 @@ class Post(models.Model):
 
 	def clean(self):
 		if not (self.images or self.content):
-			raise ValidationError("You must specify either email or telephone")
+			raise ValidationError("Invalid Value")
 
 #maybe use depending on implementation		
 #class PublicPost(Post):

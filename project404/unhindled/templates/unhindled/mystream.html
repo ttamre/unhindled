@@ -11,11 +11,11 @@
         <div class="home-page">
           {% if user.is_authenticated %}
           <div class="user-info">
-            Hi {{ user.username }}!
-            <a class="ml-2" href="{% url 'index' %}">Home</a>
-            <a class="ml-2" href="{% url 'createPost' %}">Create Post</a>
+            <a class="mr-2" href="{% url 'index' %}">Home</a>
+            <a href="{% url 'createPost' %}">Create Post</a>
             <div class="account-management">
                 <a href="{% url 'profile' user.profile.pk %}">Profile</a>
+                <a href="{% url 'friends' user.username %}">Manage Friends</a>
                 <a href="{% url 'logout' %}">Log Out</a>
             </div>
         </div>

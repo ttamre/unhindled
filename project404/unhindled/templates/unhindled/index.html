@@ -8,23 +8,22 @@
     </head>
     <body>
         <main>
-            <div class="home-page">
+            <div>
                 {% if user.is_authenticated %}
                     <div class="user-info">
-                        Hi {{ user.username }}!
-                        <a class="ml-2" href="{% url 'mystream' %}">Your stream</a>
-                        <a class="ml-2" href="{% url 'createPost' %}">Create Post</a>
+                        <a class="mr-2" href="{% url 'mystream' %}">My Stream</a>
+                        <a href="{% url 'createPost' %}">Create Post</a>
                         <div class="account-management">
                             <a href="{% url 'profile' user.profile.pk %}">Profile</a>
                             <a href="{% url 'friends' user.username %}">Manage Friends</a>
                             <a href="{% url 'logout' %}">Log Out</a>
                         </div>
                     </div>
-                    <p class="non-white-title">Posts</p>
+                    <p class="non-white-title">HOME</p>
                     {% if object_list %}
                         {% for post in object_list %}
                             <!-- if (x and y) or z -->
-                            {% if post.visibility == "friends" and post.author.id in user.friends_list or post.visibility == "public" %}
+                            {% if post.visibility == "friends" or post.visibility == "public" %}
                                 <div class="post">
                                     {% if post.is_shared_post %}
                                         <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
@@ -38,7 +37,7 @@
                             {% endif %}
                         {% endfor %}
                     {% else %}
-                        <p>No Posts to show.</p>
+                        <p>No Posts to Show.</p>
                     {% endif %}
                 {% else %}
                     <div class="login-banner">
