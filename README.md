@@ -18,8 +18,8 @@ Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
 ## Jira Board (for quick access)
 https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1 
 
-## Project Part 1 Stories Complete (21/42)
-PROJ-1 UI - UI is complete for all implemented stories\
+## Project Part 1 Stories Complete (20/43)
+PROJ-1 UI - UI is complete for all implemented stories (custom)\
 PROJ-2 Authors can make public posts\
 PROJ-3 Authors can edit public posts\
 PROJ-4 Authors can link to photos in their posts\
