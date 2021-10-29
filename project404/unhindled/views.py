@@ -8,8 +8,8 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
-
-from .models import Post, Author, Friendship, UserProfile
+from .forms import *
+from .models import Post, Author, Friendship, UserProfile, Comment
 
 # Create your views here.
 
@@ -40,9 +40,23 @@ class ManageFriendView(generic.ListView):
     
 def friendRequest(request):
     if User.objects.filter(username=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0 and Friendship.objects.filter(adresseeId=request.user.username,requesterId=request.POST["adressee"]).count() == 0: 
-    	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pn")
+    	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pending")
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
+    
+def friendRequestAccept(request):
+   friendship = Friendship.objects.get(requesterId=request.POST["follower"],adresseeId=request.user.username)
+   friendship.status="accepted"
+   friendship.save()
+   next = request.POST.get('next', '/')
+   return HttpResponseRedirect(next)
+
+def unfriend(request):
+   friendship = Friendship.objects.get(requesterId=request.POST["requester"],adresseeId=request.POST["adressee"])
+   friendship.delete()
+   next = request.POST.get('next', '/')
+   return HttpResponseRedirect(next)
+
 
 class CreatePostView(generic.CreateView):
     model = Post
@@ -68,9 +82,25 @@ class SharePost(generic.View):
 # def SharePost(request, user, post_id):
 #     return HttpResponseRedirect(reverse('index'))
   
-class PostView(generic.DetailView):
-    model = Post
-    template_name = "unhindled/view_post.html"
+def view_post(request, user, pk):
+    post = get_object_or_404(Post, ID=pk)
+    comments = Comment.objects.filter(post=post).order_by('-published')
+    if request.method == 'POST':
+        form_comment = FormComment(request.POST or None)
+        if form_comment.is_valid():
+            comment = request.POST.get('comment')
+            comm = Comment.objects.create(post=post, author=request.user, comment=comment)
+            comm.save()
+            return HttpResponseRedirect(post.get_absolute_url())
+    else:
+        form_comment= FormComment()
+    
+    context = {
+        'post': post,
+        'comments': comments,
+        'comment_form': form_comment
+    }
+    return render(request, 'unhindled/view_post.html', context)
 
 class UpdatePostView(generic.UpdateView):
     model = Post
@@ -94,6 +124,8 @@ class DeletePostView(generic.DeleteView):
         else:
             return super(DeletePostView, self).post(request, *args, **kwargs)
 
+
+
 class ProfileView(View):
     def get(self, request, pk, *args, **kwargs):
         profile = UserProfile.objects.get(pk=pk)
@@ -109,7 +141,7 @@ class ProfileView(View):
 
 class EditProfileView(generic.UpdateView):
     model = UserProfile
-    fields = ['name', 'date_of_birth',  'location', 'more_info', 'photo']
+    fields = ['displayName', 'date_of_birth',  'location', 'more_info', 'profileImage']
     template_name = 'unhindled/edit_profile.html'
     
     def get_success_url(self):

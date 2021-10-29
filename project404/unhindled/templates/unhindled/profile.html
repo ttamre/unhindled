@@ -25,7 +25,7 @@
     </div>
     <div >
         <div >
-            <img class="mt-3" src="{{ profile.photo.url }}" width="115" height="100" >
+            <img class="mt-3" src="{{ profile.profileImage.url }}" width="115" height="100" >
             <span>
                 {% if request.user == user %}
                     <a href="{% url 'editProfile' profile.pk %}" style='color: black; font-size:22px' ><i class="far fa-edit"></i></a>
@@ -34,8 +34,8 @@
 
             <div class="flex">
                 <p class="mr-2">Username: </p>
-                {% if profile.name %}
-                    <p> {{ profile.name }}</p>
+                {% if profile.displayName %}
+                    <p> {{ profile.displayName }}</p>
                 {% else %}
                     <p>{{ user.username }}</p>
                 {% endif %}
@@ -62,6 +62,22 @@
                 <p>{{ profile.more_info }}</p>
                 {% endif %}
             </div>
+
+        </div>
+
+        <div>
+            {% if posts %}
+                {% for post in posts %}
+                        <li>
+                            <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                            {{ post.author }} <br>
+                            {{ post.content }}
+                        </li>
+                {% endfor %}
+            {% else %}
+                <p>No Posts to show.</p>
+            {% endif %}
+
 
         </div>
     </div>
