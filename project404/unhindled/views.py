@@ -6,6 +6,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from .models import Post, Author, UserProfile
+
+import requests
+import json
 # Create your views here.
 
 class HomeView(generic.ListView):
@@ -17,6 +20,22 @@ class StreamView(generic.ListView):
     model = Post
     template_name = "unhindled/mystream.html"
     ordering = ['-created_on']
+
+    def get(self, request, *args, **kwargs):
+        # events = requests.get(f'https://api.github.com/users/ttamre/events/public').json()
+        event_list = [
+            {"repo": "1", "url": 'link to repo 1', "issue": 'issue'},
+            {"repo": "2", "url": 'link to repo 2', "issue": 'issue'},
+            {"repo": "3", "url": 'link to repo 3', "issue": 'issue'}
+        ]
+        # for event in events:
+            # repo = event.get("repo", {}).get("name")
+            # url  = event.get("repo", {}).get("url")
+            # issue = event.get("payload", {}).get("issue", {}).get("number")
+
+            # context.append({"repo": repo, "url": url, "issue": issue})
+
+        return render(request, 'unhindled/mystream.html', {"context": event_list})
 
 class AccountView(generic.CreateView):
     model = Author

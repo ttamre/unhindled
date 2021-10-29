@@ -21,8 +21,9 @@
             </div>
         </div>
             <h2>My Stream</h2>
+
+            <h3>My Posts</h3>
             {% if object_list %}
-              <h3>My Posts</h3>
               {% for post in object_list %}
                 <!-- change this to ID when author and user are matched -->
                 {% if post.author.displayName == user.username %}
@@ -49,6 +50,48 @@
                 <p>No Posts to show.</p>
             {% endif %}
           {% endif %}
+
+          <h3>My Activity</h3>
+          {% if event_list %}
+              <ul>
+              {% for event in event_list %}
+                  <li>{{ event }}</a></li>
+              {% endfor %}
+              </ul>
+          {% else %}
+              <p>No activity to show.</p>
+          {% endif %}
+
+          <!-- script>
+            fetch("https://api.github.com/users/ttamre/events/public")
+              .then(function (response) {
+                document.getElementById("activity").innerHTML = response.json();
+              })
+              .catch(function (error) {
+                document.getElementById("activity").innerHTML = "Error: " + error;
+              });
+          </script>
+
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js">
+            $(document).ready(function() {
+              const Url = "https://api.github.com/users/ttamre/events/public";
+              $('.btn').click(function() {
+                  $.ajax({
+                    url: Url,
+                    type: "GET",
+                    success: function(result) {
+                      document.getElementById("activity").innerHTML = result
+                    },
+                    error:function(error) {
+                      document.getElementById("activity").innerHTML = error
+                  }
+                })
+              })
+            })
+          </script>
+
+          <p id="activity"></p-->
+
         </div>
     </main>
   </body>
