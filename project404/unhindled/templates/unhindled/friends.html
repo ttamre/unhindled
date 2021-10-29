@@ -1,20 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
-<title>Unhindled</title>
-</head>
-</html>
-<div class="user-info">
-	<a class="mr-2" href="{% url 'index' %}" >Home</a>
-	<a class="mr-2" href="{% url 'mystream' %}">My Stream</a>
-	<a href="{% url 'createPost' %}">Create Post</a>
-	<div class="account-management">
-		<a href="{% url 'profile' user.profile.pk %}">Profile</a>
-			<a href="{% url 'logout' %}">Log Out</a>
-	</div>
-</div>
 <h1>Manage Friends</h1>
 
 <form action="/friend_request" method="POST">

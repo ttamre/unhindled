@@ -12,16 +12,11 @@ from .forms import *
 from .models import Post, Author, Friendship, UserProfile, Comment
 
 # Create your views here.
-
 class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
-
-    # def get_friend_list(request, user_id, author_id):
-    #     query = Friendship.object.get(Q(requesterId__exact=user_id) | Q(adresseeId__exact=user_id))
-    #     # if query
-    #     return True
+        
 
 class StreamView(generic.ListView):
     model = Post
