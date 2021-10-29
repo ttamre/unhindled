@@ -39,4 +39,4 @@ PROJ-31 Posts can only be modified by original author\
 PROJ-33 Authors can comment on posts\
 PROJ-36 Authors can follow other authors, and are friends when requst is accepted\
 PROJ-37 Authors can see their friend requests\
-PROJ-38 Authors can browse all public posts\
+PROJ-38 Authors can browse all public posts
