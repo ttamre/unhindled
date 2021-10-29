@@ -6,16 +6,19 @@
 <title>Unhindled</title>
 </head>
 </html>
-<div class="user-info">
-	<a class="mr-2" href="{% url 'index' %}" >Home</a>
-	<a class="mr-2" href="{% url 'mystream' %}">My Stream</a>
-	<a href="{% url 'createPost' %}">Create Post</a>
-	<div class="account-management">
-		<a href="{% url 'profile' user.profile.pk %}">Profile</a>
-			<a href="{% url 'logout' %}">Log Out</a>
+<div class="login-banner">
+	<div class="user-info">
+			<p class="white-title">Unhindled</p>
+			<a class="header-link" href="{% url 'index' %}">Home</a>
+			<a class="header-link" href="{% url 'mystream' %}">My Stream</a>
+			<a class="header-link" href="{% url 'createPost' %}">Create Post</a>
+			<div class="account-management">
+				<a class="white-text mr-2" href="{% url 'profile' user.profile.pk %}">Profile</a>
+					<a class="white-text mr-2" href="{% url 'logout' %}">Log Out</a>
+			</div>
 	</div>
 </div>
-<h1>Manage Friends</h1>
+<p class="non-white-title">Manage Friends</p>
 
 <form action="/friend_request" method="POST">
 	{% csrf_token %}

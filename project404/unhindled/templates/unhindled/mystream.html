@@ -8,17 +8,20 @@
     </head>
     <body>
       <main>
-        <div class="home-page">
+        <div>
           {% if user.is_authenticated %}
-          <div class="user-info">
-            <a class="mr-2" href="{% url 'index' %}">Home</a>
-            <a href="{% url 'createPost' %}">Create Post</a>
-            <div class="account-management">
-                <a class="mr-2" href="{% url 'profile' user.profile.pk %}">Profile</a>
-                <a class="mr-2" href="{% url 'friends' user.username %}">Manage Friends</a>
-                <a href="{% url 'logout' %}">Log Out</a>
+            <div class="login-banner">
+              <div class="user-info">
+                <p class="white-title">Unhindled</p>
+                <a class="header-link" href="{% url 'index' %}">Home</a>
+                <a class="header-link" href="{% url 'createPost' %}">Create Post</a>
+                <div class="account-management">
+                    <a class="white-text mr-2" href="{% url 'profile' user.profile.pk %}">Profile</a>
+                    <a class="white-text mr-2" href="{% url 'friends' user.username %}">Manage Friends</a>
+                    <a class="white-text mr-2" href="{% url 'logout' %}">Log Out</a>
+                </div>
+              </div>
             </div>
-        </div>
             <p class="non-white-title">My Stream</p>
             {% if object_list %}
               <h3>My Posts</h3>
