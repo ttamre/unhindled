@@ -18,7 +18,7 @@
             <a class="mr-2" href="{% url 'mystream' %}">My Stream</a>
             <a href="{% url 'createPost' %}">Create Post</a>
             <div class="account-management">
-                <a href="{% url 'friends' user.username %}">Manage Friends</a>
+                <a class="mr-2" href="{% url 'friends' user.username %}">Manage Friends</a>
                 <a href="{% url 'logout' %}">Log Out</a>
             </div>
         </div>

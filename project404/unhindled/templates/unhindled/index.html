@@ -14,12 +14,12 @@
                         <a class="mr-2" href="{% url 'mystream' %}">My Stream</a>
                         <a href="{% url 'createPost' %}">Create Post</a>
                         <div class="account-management">
-                            <a href="{% url 'profile' user.profile.pk %}">Profile</a>
-                            <a href="{% url 'friends' user.username %}">Manage Friends</a>
+                            <a class="mr-2" href="{% url 'profile' user.profile.pk %}">Profile</a>
+                            <a class="mr-2" href="{% url 'friends' user.username %}">Manage Friends</a>
                             <a href="{% url 'logout' %}">Log Out</a>
                         </div>
                     </div>
-                    <p class="non-white-title">HOME</p>
+                    <p class="non-white-title">Home</p>
                     {% if object_list %}
                         {% for post in object_list %}
                             <!-- if (x and y) or z -->
