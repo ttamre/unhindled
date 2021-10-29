@@ -84,8 +84,8 @@ class PostTests(TestCase):
         response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.ID))
 
         # Checking For unauthorized access
-        response_str = str(response.rendered_content)
-        print(response_str)
+        # response_str = str(response.rendered_content)
+        response_str = str(response.content)
         self.assertEqual("Edit" in response_str, False)
         self.assertEqual("Delete" in response_str, False)
 
@@ -93,7 +93,7 @@ class PostTests(TestCase):
         response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.ID))
 
         # Checking for authorized access
-        response_str = str(response.rendered_content)
+        response_str = str(response.content)
         self.assertEqual("Edit" in response_str, True)
         self.assertEqual("Delete" in response_str, True)
 
