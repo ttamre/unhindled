@@ -100,7 +100,7 @@ class PostTests(TestCase):
 
 # User tests
 class UserTests(TestCase):
-	def setup(self):
+	def setUp(self):
 		self.user = User.objects.create_user(username="user1", email="u@u.com")
 		self.user.set_password('password1')
 		self.user.save()
@@ -110,14 +110,12 @@ class UserTests(TestCase):
 	#   data = {'username': "user1", 'email': "u@u.com", 'password': "password1"}
 
 	def test_login(self):
-		c = Client()
-		c.login(username='user1', password='password1')
-		c.get('/')
+		resp = self.client.post(reverse('login'), {'username': "user1", 'password': "password1"}, follow=True)
+		self.assertTrue(resp.context['user'].is_active)
 
 class HTMLTests(TestCase):
-	def setup(self):
-		self.user = User.objects.create_user(username="user1", email="u@u.com")
-		self.user.set_password('password1')
+	def setUp(self):
+		self.user = User.objects.create_user(username='testuser', password='12345')
 		self.user.save()
 
 	def test_index(self):
@@ -129,16 +127,34 @@ class HTMLTests(TestCase):
 		resp = self.client.get(reverse("index"))
 		self.assertContains(resp, '<p>No Posts to show.</p>')
 
-		resp = self.client.post(reverse("login"), {'username': 'user1', 'password': 'password1'})
-		print(resp.content)
-		# self.assertTrue(resp.context['user'].is_authenticated)
-		# self.assertRedirects(resp, reverse("index"), 302)
+		self.client.force_login(self.user)
+		resp = self.client.get(reverse("index"))
+		self.assertContains(resp, '<p class="non-white-title">Home</p>')
 
-		# print(resp.content)
+	def test_logout_index(self):
+		self.client.force_login(self.user)
+		resp = self.client.get(reverse("index"))
+		self.assertContains(resp, '<p class="non-white-title">Home</p>')
 
-		# resp = c.get(reverse("index"))
-		# # print(resp.content)
-		# self.assertContains(resp, '<p class="non-white-title">HOME</p>')
+		resp = self.client.get(reverse("logout"))
+		self.assertEqual(resp.status_code, 302)
+		resp = self.client.get(reverse("index"))
+		self.assertContains(resp, '<p>No Posts to show.</p>')
+
+	def test_mystream(self):
+		self.client.force_login(self.user)
+		resp = self.client.get(reverse("mystream"))
+		self.assertContains(resp, '<p class="non-white-title">My Stream</p>')
+
+	def test_profile(self):
+		self.client.force_login(self.user)
+		resp = self.client.get(reverse("profile", args=[self.user.id]))
+		self.assertContains(resp, '<p class="mr-2">Username: </p>')
+
+	def test_manage_friends(self):
+		self.client.force_login(self.user)
+		resp = self.client.get(reverse("friends", args=['user']))
+		self.assertContains(resp, '<h1>Manage Friends</h1>')
 
 class FriendshipTests(TestCase):
    def setUp(self):
