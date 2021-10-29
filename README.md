@@ -16,9 +16,9 @@ Legion Script: https://www.youtube.com/watch?v=XBMatmjS5yM&t=1576s \
 Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
 
 ## Jira Board (for quick access)
-https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1 \
+https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1 
 
-## Project Part 1 Stories Complete (21/42)\
+## Project Part 1 Stories Complete (21/42)
 PROJ-1 UI - UI is complete for all implemented stories\
 PROJ-2 Authors can make public posts\
 PROJ-3 Authors can edit public posts\
