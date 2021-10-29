@@ -8,6 +8,7 @@
     </head>
     <body>
         <main>
+            <a href="{% url 'index' %}">Home</a>
             <h1>Create Post</h1>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}

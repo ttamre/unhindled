@@ -9,12 +9,14 @@
     <body>
       {% if not user.is_authenticated %}
         <main>
-          <h2>Log In</h2>
-          <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Log In</button>
-          </form>
+          <div class="login-page">
+            <p class="non-white-title">Login</p>
+            <form method="post">
+              {% csrf_token %}
+              {{ form.as_p }}
+              <button type="submit">Log In</button>
+            </form>
+          </div>
         </main>
       {% else %}
         <meta http-equiv="refresh" content="time; URL=/" />
