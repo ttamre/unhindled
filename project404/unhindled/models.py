@@ -10,7 +10,7 @@ from django.dispatch import receiver
 # Create your models here.
 
 class Author(models.Model):
-	ID = models.CharField(max_length=100, primary_key=True)
+	ID = models.CharField(max_length=100, default=uuid.uuid4, primary_key=True)
 	displayName =  models.CharField(max_length=100)
 	host = models.CharField(max_length=100, blank = True)
 	profileUrl = models.CharField(max_length=100, blank = True)
@@ -21,18 +21,19 @@ class Author(models.Model):
 	def get_absolute_url(self):
 		return reverse('viewPost', args=(str(self.author), self.pk))
 
-# maybe not best implementation
-#class Friendship(models.Model):
-	#FRIEND_STATUS = (
-		#("pn", "Pending"),
-		#("ac", "Accepted"),
-	#)
-	#requesterId = models.ForeignKey(Author, on_delete=models.CASCADE)
-	#adresseeId = models.ForeignKey(Author, on_delete=models.CASCADE)
-	#status = models.CharField(max_length=4, choices=FRIEND_STATUS, default=FRIEND_STATUS[0])
-	#class Meta:
-        	#unique_together = (("requesterId", "adresseeId"),)
-	
+#maybe not best implementation
+class Friendship(models.Model):
+	FRIEND_STATUS = (
+		("pending", "Pending"),
+		("accepted", "Accepted"),
+	)
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	requesterId = models.CharField(max_length=100)
+	adresseeId = models.CharField(max_length=100)
+	status = models.CharField(max_length=10, choices=FRIEND_STATUS, default=FRIEND_STATUS[0])
+	class Meta:
+        	unique_together = (("requesterId", "adresseeId"),)
+
 
 class Post(models.Model):
 	CONTENT_TYPES = (
@@ -42,7 +43,7 @@ class Post(models.Model):
 	VISIBILITY = (
 		("public", "Public"),
 		("friends", "Friends Only"),
-		("private", "Private"),
+		("send", "Send to Author")
 	)
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -50,12 +51,20 @@ class Post(models.Model):
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0], null=False)
+	send_to = models.ForeignKey(Author, on_delete=models.CASCADE, related_name="send_to", null=True, blank=True)
 	created_on = models.DateTimeField(auto_now_add=True)
 	#will need to change
 	content = models.TextField(blank=True)
 	images = models.ImageField(null=True,blank=True, upload_to='images/')
 	#class Meta:
 		#abstract = True
+
+	sharedBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shared_by', null=True, blank=True, editable =False)
+	originalPost = models.ForeignKey("Post", on_delete=models.CASCADE, null=True, blank=True, editable =False)
+
+	@property
+	def is_shared_post(self):
+		return self.sharedBy != None
 
 	def get_absolute_url(self):
 		return reverse('viewPost', args=(str(self.author), self.pk))
