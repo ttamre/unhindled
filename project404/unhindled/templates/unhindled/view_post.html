@@ -48,8 +48,6 @@
 <img src="{{post.images.url}}">
 {% endif %}
 
-
-<br><br>
 <hr>
 
 <form method = 'post'>
@@ -62,9 +60,7 @@
   {% endif %}
 </form>
 
-
-
-<div>
+<div class="mt-5">
   {{ post.comment.count}} Comment{{ post.comment.count|pluralize}}
   <br>
   {% for comment in post.comment.all %}
