@@ -1,11 +1,12 @@
 from django.contrib.auth import login
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.views import generic, View
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
-from .models import Post, Author, UserProfile
+from .models import Post, Author, UserProfile, Comment
+from .forms import *
 # Create your views here.
 
 class HomeView(generic.ListView):
@@ -23,9 +24,30 @@ class CreatePostView(generic.CreateView):
     template_name = "unhindled/create_post.html"
     fields = "__all__"
 
-class PostView(generic.DetailView):
-    model = Post
-    template_name = "unhindled/view_post.html"
+
+def view_post(request, user, pk):
+    post = get_object_or_404(Post, ID=pk)
+    comments = Comment.objects.filter(post=post).order_by('-published')
+    if request.method == 'POST':
+        form_comment = FormComment(request.POST or None)
+        if form_comment.is_valid():
+            comment = request.POST.get('comment')
+            comm = Comment.objects.create(post=post, author=request.user, comment=comment)
+            comm.save()
+            return HttpResponseRedirect(post.get_absolute_url())
+    else:
+        form_comment= FormComment()
+    
+    context = {
+        'post': post,
+        'comments': comments,
+        'comment_form': form_comment
+    }
+    return render(request, 'unhindled/view_post.html', context)
+
+# class PostView(generic.DetailView):
+#     model = Post
+#     template_name = "unhindled/view_post.html"
 
 class UpdatePostView(generic.UpdateView):
     model = Post
@@ -49,6 +71,8 @@ class DeletePostView(generic.DeleteView):
         else:
             return super(DeletePostView, self).post(request, *args, **kwargs)
 
+
+
 class ProfileView(View):
     def get(self, request, pk, *args, **kwargs):
         profile = UserProfile.objects.get(pk=pk)
@@ -64,7 +88,7 @@ class ProfileView(View):
 
 class EditProfileView(generic.UpdateView):
     model = UserProfile
-    fields = ['name', 'date_of_birth',  'location', 'more_info', 'photo']
+    fields = ['displayName', 'date_of_birth',  'location', 'more_info', 'profileImage']
     template_name = 'unhindled/edit_profile.html'
     
     def get_success_url(self):

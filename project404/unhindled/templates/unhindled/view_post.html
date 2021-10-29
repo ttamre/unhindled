@@ -10,9 +10,9 @@
 <br>
 <hr>
 <a href="{% url 'index' %}">Home</a>
-{% if user.username == post.author %}
-  <a href="{% url 'updatePost' post.author.displayName post.pk %}">Edit</a>
-  <a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
+{% if user.username == post.author.username %}
+  <a href="{% url 'updatePost' post.author.username post.pk %}">Edit</a>
+  <a href="{% url 'deletePost' post.author.username post.pk %}">Delete</a>
 {% endif %}
 <br>
 <br>
@@ -26,3 +26,33 @@
 {% if post.images %}
 <img src="{{post.images.url}}">
 {% endif %}
+
+
+<br><br>
+<hr>
+
+<form method = 'post'>
+  {% csrf_token %}
+  {{ comment_form.as_p }}
+  {% if request.user.is_authenticated %}
+    <button>Send</button>
+    {% else %}
+    <button type="button" disabled>Send</button>
+  {% endif %}
+</form>
+
+
+
+<div>
+  {{ post.comment.count}} Comment{{ post.comment.count|pluralize}}
+  <br>
+  {% for comment in post.comment.all %}
+  <br>
+    <strong>
+      {{comment.author}} - {{comment.published}}
+    </strong>
+    <p>{{ comment.comment}}</p>
+
+
+  {% endfor %}
+</div>
