@@ -51,13 +51,13 @@
             {% endif %}
           {% endif %}
 
+          <!-- Github Activity -->
           <h3>My Activity</h3>
-          {% if event_list %}
-              <ul>
-              {% for event in event_list %}
-                  <li>{{ event }}</a></li>
+          {% if context %}
+              {% for event in context %}
+                  <ul>{{event.repo}} Issue #{{event.issue}} (<a href={{event.url}}>LINK</a>)</ul>
+                  <br>
               {% endfor %}
-              </ul>
           {% else %}
               <p>No activity to show.</p>
           {% endif %}

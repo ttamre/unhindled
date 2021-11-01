@@ -24,16 +24,16 @@ class StreamView(generic.ListView):
     def get(self, request, *args, **kwargs):
         # events = requests.get(f'https://api.github.com/users/ttamre/events/public').json()
         event_list = [
-            {"repo": "1", "url": 'link to repo 1', "issue": 'issue'},
-            {"repo": "2", "url": 'link to repo 2', "issue": 'issue'},
-            {"repo": "3", "url": 'link to repo 3', "issue": 'issue'}
+            {"repo": "Repo 1", "url": 'link to repo 1', "issue": '9'},
+            {"repo": "Repo 2", "url": 'link to repo 2', "issue": '62'},
+            {"repo": "Repo 3", "url": 'link to repo 3', "issue": '35'}
         ]
         # for event in events:
             # repo = event.get("repo", {}).get("name")
             # url  = event.get("repo", {}).get("url")
             # issue = event.get("payload", {}).get("issue", {}).get("number")
 
-            # context.append({"repo": repo, "url": url, "issue": issue})
+            # event_list.append({"repo": repo, "url": url, "issue": str(issue)})
 
         return render(request, 'unhindled/mystream.html', {"context": event_list})
 
