@@ -18,11 +18,11 @@ Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
 ## Jira Board (for quick access)
 https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1 
 
-## Project Part 1 Stories Complete (20/43)
+## Project Part 1 Stories Complete (20/43) ##19
 PROJ-1 UI - UI is complete for all implemented stories (custom)\
 PROJ-2 Authors can make public posts\
 PROJ-3 Authors can edit public posts\
-PROJ-4 Authors can link to photos in their posts\
+PROJ-4 Authors can link to photos in their posts ## not done\
 PROJ-5 Authors can create image posts\
 PROJ-7 Authors can create posts that are private to one user\
 PROJ-8 Authors can create friend posts\
