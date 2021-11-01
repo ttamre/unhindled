@@ -55,8 +55,7 @@
           <h3>My Activity</h3>
           {% if context %}
               {% for event in context %}
-                  <ul>{{event.repo}} Issue #{{event.issue}} (<a href={{event.url}}>LINK</a>)</ul>
-                  <br>
+                  <ul>{{event.repo}} - {{event.type}} (<a href={{event.url}}>LINK</a>)</ul>
               {% endfor %}
           {% else %}
               <p>No activity to show.</p>

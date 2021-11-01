@@ -5,10 +5,20 @@ from django.views import generic, View
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
+from requests.models import HTTPBasicAuth
 from .models import Post, Author, UserProfile
 
 import requests
-import json
+
+GITHUB_EVENTS = {
+    "CreateEvent": "Created repository",
+    "PushEvent":   "Pushed code",
+    "PullEvent":   "Pulled code",
+    "ForkEvent":   "Forked repo",
+    "MemberEvent": "Managed contributors",
+    "PullRequestEvent": "Pull request",
+    None: "Unknown event"
+}
 # Create your views here.
 
 class HomeView(generic.ListView):
@@ -22,18 +32,26 @@ class StreamView(generic.ListView):
     ordering = ['-created_on']
 
     def get(self, request, *args, **kwargs):
-        # events = requests.get(f'https://api.github.com/users/ttamre/events/public').json()
-        event_list = [
-            {"repo": "Repo 1", "url": 'link to repo 1', "issue": '9'},
-            {"repo": "Repo 2", "url": 'link to repo 2', "issue": '62'},
-            {"repo": "Repo 3", "url": 'link to repo 3', "issue": '35'}
-        ]
-        # for event in events:
-            # repo = event.get("repo", {}).get("name")
-            # url  = event.get("repo", {}).get("url")
-            # issue = event.get("payload", {}).get("issue", {}).get("number")
+        # TODO: User's own github profile, OAuth
 
-            # event_list.append({"repo": repo, "url": url, "issue": str(issue)})
+        # Unauthorized API requests: 60 per hour
+        events = requests.get(f'https://api.github.com/users/ttamre/events/public', auth=HTTPBasicAuth('user','pass')).json()
+        event_list = []
+
+        # Temporary - placeholder data for if we run out of api requests
+        if "message" in events:
+            event_list = [
+                {"repo": "Repo 1", "url": 'link to repo 1', "issue": '9'},
+                {"repo": "Repo 2", "url": 'link to repo 2', "issue": '62'},
+                {"repo": "Repo 3", "url": 'link to repo 3', "issue": '35'}
+            ]
+
+        for event in events:
+            repo = event.get("repo", {}).get("name")
+            url  = event.get("repo", {}).get("url")
+            type_ = GITHUB_EVENTS.get(event.get("type"))
+
+            event_list.append({"repo": repo, "url": url, "type": type_})
 
         return render(request, 'unhindled/mystream.html', {"context": event_list})
 
