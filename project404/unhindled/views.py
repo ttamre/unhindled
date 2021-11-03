@@ -7,11 +7,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from requests.models import HTTPBasicAuth
 from .models import Post, Author, Friendship, UserProfile, Comment
 from .forms import *
 
 import requests
+import json
+import os
+
+CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
+CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
+GITHUB_AUTH = (CLIENT_ID, CLIENT_SECRET)
 
 GITHUB_EVENTS = {
     "CreateEvent": "Created repository",
@@ -36,16 +41,33 @@ class StreamView(generic.ListView):
     template_name = "unhindled/mystream.html"
     ordering = ['-created_on']
 
-    def get(self, request, model=model, *args, **kwargs):
-        events = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=HTTPBasicAuth('user','pass')).json()
+    def get(self, request, *args, **kwargs):
+        response = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=GITHUB_AUTH)
+        events = response.json()
         event_list = []
 
-        for event in events:
-            repo = event.get("repo", {}).get("name")
-            url  = event.get("repo", {}).get("url")
-            type_ = GITHUB_EVENTS.get(event.get("type"))
+        if response.ok:
+            for event in events:
+                repo = event.get("repo", {}).get("name")
+                type_ = GITHUB_EVENTS.get(event.get("type"))
 
-            event_list.append({"repo": repo, "url": url, "type": type_})
+                repo_api = event.get("repo", {}).get("url")
+                repo_resp = requests.get(repo_api, auth=GITHUB_AUTH)
+                
+                # Public repos
+                if repo_resp.ok:
+                    url = repo_resp.json().get("html_url")
+
+                # Private repos - use profile URL instead
+                else:
+                    user_api = event.get("actor", {}).get("url")
+                    user_resp = requests.get(user_api, auth=GITHUB_AUTH)
+                    if user_resp.ok:
+                        url = user_resp.json().get("html_url")
+                    else:
+                        url = None
+
+                event_list.append({"repo": repo, "type": type_, "url": url,})
 
         return render(request, 'unhindled/mystream.html', {"event_list": event_list})
 

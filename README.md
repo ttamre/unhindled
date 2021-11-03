@@ -29,6 +29,7 @@ PROJ-8 Authors can create friend posts\
 ProJ-9 Authors can share other author's public posts\
 PROJ-11 Authors can create plaintext posts\
 PROJ-12 Authors can create CommonMark posts\
+PROJ-16 Authors can view their Github activity on their stream\
 PROJ-17 Authors can post posts to their stream\
 PROJ-18 Authors can delete their public posts\
 PROJ-19 Authors can befriend local authors\
