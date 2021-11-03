@@ -1,3 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>Unhindled</title>
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
+</head>
+<body>
+<main>
+</main>
+</body>
+</html>
 {% load markdown_extras %}
 
 <h1>{{post.title}}</h1>
@@ -10,12 +24,19 @@
 <br>
 <hr>
 <a href="{% url 'index' %}">Home</a>
-{% if post.author.displayName == user.username %}
-  <a href="{% url 'updatePost' post.author.displayName post.pk %}">Edit</a>
-  <a href="{% url 'deletePost' post.author.displayName post.pk %}">Delete</a>
+{% if user.username == post.author.username %}
+  {% if post.is_shared_post %}
+  <a href="{% url 'viewPost' post.author.username post.originalPost.pk %}">View Original</a>
+  {% else %}
+  <a href="{% url 'updatePost' post.author.username post.pk %}">Edit</a>
+  {% endif %}
+  <a href="{% url 'deletePost' post.author.username post.pk %}">Delete</a>
+{% else %}
+  <a href="{% url 'sharePost' post.author.username post.pk %}" onclick="return confirm('Are you sure?');">Share</a>
 {% endif %}
 <br>
 <br>
+{{post.description}}
 {% if post.contentType == "md" %}
 <p>{{post.content | markdown | safe }}</p>
 {% else %}
@@ -26,3 +47,29 @@
 {% if post.images %}
 <img src="{{post.images.url}}">
 {% endif %}
+
+<hr>
+
+<form method = 'post'>
+  {% csrf_token %}
+  {{ comment_form.as_p }}
+  {% if request.user.is_authenticated %}
+    <button>Send</button>
+    {% else %}
+    <button type="button" disabled>Send</button>
+  {% endif %}
+</form>
+
+<div class="mt-5">
+  {{ post.comment.count}} Comment{{ post.comment.count|pluralize}}
+  <br>
+  {% for comment in post.comment.all %}
+  <br>
+    <strong>
+      {{comment.author}} - {{comment.published}}
+    </strong>
+    <p>{{ comment.comment}}</p>
+
+
+  {% endfor %}
+</div>

@@ -1,12 +1,15 @@
 from django.contrib.auth import login
-from django.shortcuts import render
+from django.contrib.auth.models import AnonymousUser, User
+from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.views import generic, View
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from requests.models import HTTPBasicAuth
-from .models import Post, Author, UserProfile
+from .models import Post, Author, Friendship, UserProfile, Comment
+from .forms import *
 
 import requests
 
@@ -15,36 +18,27 @@ GITHUB_EVENTS = {
     "PushEvent":   "Pushed code",
     "PullEvent":   "Pulled code",
     "ForkEvent":   "Forked repo",
-    "MemberEvent": "Managed contributors",
+    "MemberEvent": "Managed organization",
     "PullRequestEvent": "Pull request",
     None: "Unknown event"
 }
-# Create your views here.
 
+
+# Create your views here.
 class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
+        
 
 class StreamView(generic.ListView):
     model = Post
     template_name = "unhindled/mystream.html"
     ordering = ['-created_on']
 
-    def get(self, request, *args, **kwargs):
-        # TODO: User's own github profile, OAuth
-
-        # Unauthorized API requests: 60 per hour
-        events = requests.get(f'https://api.github.com/users/ttamre/events/public', auth=HTTPBasicAuth('user','pass')).json()
+    def get(self, request, model=model, *args, **kwargs):
+        events = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=HTTPBasicAuth('user','pass')).json()
         event_list = []
-
-        # Temporary - placeholder data for if we run out of api requests
-        if "message" in events:
-            event_list = [
-                {"repo": "Repo 1", "url": 'link to repo 1', "issue": '9'},
-                {"repo": "Repo 2", "url": 'link to repo 2', "issue": '62'},
-                {"repo": "Repo 3", "url": 'link to repo 3', "issue": '35'}
-            ]
 
         for event in events:
             repo = event.get("repo", {}).get("name")
@@ -53,21 +47,90 @@ class StreamView(generic.ListView):
 
             event_list.append({"repo": repo, "url": url, "type": type_})
 
-        return render(request, 'unhindled/mystream.html', {"context": event_list})
+        return render(request, 'unhindled/mystream.html', {"event_list": event_list})
+
 
 class AccountView(generic.CreateView):
     model = Author
     template_name = "unhindled/account.html"
     fields = "__all__"
 
+
+class ManageFriendView(generic.ListView):
+    model = Friendship
+    template_name = "unhindled/friends.html"
+    fields = "__all__"
+    
+
+def friendRequest(request):
+    if User.objects.filter(username=request.POST["adressee"]).count() == 1 and Friendship.objects.filter(adresseeId=request.POST["adressee"],requesterId=request.user.username).count() == 0 and Friendship.objects.filter(adresseeId=request.user.username,requesterId=request.POST["adressee"]).count() == 0: 
+    	x = Friendship.objects.create(requesterId=request.user.username, adresseeId=request.POST["adressee"], status="pending")
+    next = request.POST.get('next', '/')
+    return HttpResponseRedirect(next)
+    
+
+def friendRequestAccept(request):
+   friendship = Friendship.objects.get(requesterId=request.POST["follower"],adresseeId=request.user.username)
+   friendship.status="accepted"
+   friendship.save()
+   next = request.POST.get('next', '/')
+   return HttpResponseRedirect(next)
+
+
+def unfriend(request):
+   friendship = Friendship.objects.get(requesterId=request.POST["requester"],adresseeId=request.POST["adressee"])
+   friendship.delete()
+   next = request.POST.get('next', '/')
+   return HttpResponseRedirect(next)
+
+
 class CreatePostView(generic.CreateView):
     model = Post
     template_name = "unhindled/create_post.html"
     fields = "__all__"
 
-class PostView(generic.DetailView):
-    model = Post
-    template_name = "unhindled/view_post.html"
+
+# def SharePost(request, user, post_id):
+#     return HttpResponseRedirect(reverse('index'))
+
+
+class SharePost(generic.View):
+    def get(self, request, user, pk):
+        post_object = get_object_or_404(Post, pk=pk)
+        current_user = request.user
+        if current_user == AnonymousUser:
+            return HttpResponseRedirect(reverse('viewPost', args=(str(current_user ), post_object.ID)))
+
+        if post_object.is_shared_post:
+            post_object = post_object.originalPost
+
+        sharedPost = Post.objects.create(author=post_object.author, contentType=post_object.contentType, 
+        title=post_object.title, description=post_object.description,
+        visibility=post_object.visibility, created_on=post_object.created_on, content=post_object.content,
+        images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
+        return HttpResponseRedirect(reverse('index'))
+  
+
+def view_post(request, user, pk):
+    post = get_object_or_404(Post, ID=pk)
+    comments = Comment.objects.filter(post=post).order_by('-published')
+    if request.method == 'POST':
+        form_comment = FormComment(request.POST or None)
+        if form_comment.is_valid():
+            comment = request.POST.get('comment')
+            comm = Comment.objects.create(post=post, author=request.user, comment=comment)
+            comm.save()
+            return HttpResponseRedirect(post.get_absolute_url())
+    else:
+        form_comment= FormComment()
+    
+    context = {
+        'post': post,
+        'comments': comments,
+        'comment_form': form_comment
+    }
+    return render(request, 'unhindled/view_post.html', context)
+
 
 class UpdatePostView(generic.UpdateView):
     model = Post
@@ -80,6 +143,7 @@ class UpdatePostView(generic.UpdateView):
         else:
             return super(UpdatePostView, self).post(request, *args, **kwargs)
 
+
 class DeletePostView(generic.DeleteView):
     model = Post
     template_name = "unhindled/delete_post.html"
@@ -90,6 +154,7 @@ class DeletePostView(generic.DeleteView):
             return HttpResponseRedirect(self.get_object().get_absolute_url())
         else:
             return super(DeletePostView, self).post(request, *args, **kwargs)
+
 
 class ProfileView(View):
     def get(self, request, pk, *args, **kwargs):
@@ -104,9 +169,10 @@ class ProfileView(View):
         }
         return render(request, 'unhindled/profile.html', context)
 
+
 class EditProfileView(generic.UpdateView):
     model = UserProfile
-    fields = ['name', 'date_of_birth',  'location', 'more_info', 'photo']
+    fields = ['displayName', 'date_of_birth',  'location', 'more_info', 'profileImage']
     template_name = 'unhindled/edit_profile.html'
     
     def get_success_url(self):
