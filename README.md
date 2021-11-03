@@ -13,7 +13,8 @@ Zoey Pu: jpu1
 
 ## Reference
 Legion Script: https://www.youtube.com/watch?v=XBMatmjS5yM&t=1576s \
-Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
+Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE \
+Table CSS: https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy
 
 ## Jira Board (for quick access)
 https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1 
