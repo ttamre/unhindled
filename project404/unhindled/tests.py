@@ -154,7 +154,7 @@ class HTMLTests(TestCase):
 	def test_manage_friends(self):
 		self.client.force_login(self.user)
 		resp = self.client.get(reverse("friends", args=['user']))
-		self.assertContains(resp, '<h1>Manage Friends</h1>')
+		self.assertContains(resp, '<p class="non-white-title">Manage Friends</p>')
 
 class FriendshipTests(TestCase):
    def setUp(self):
