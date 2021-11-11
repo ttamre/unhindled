@@ -21,7 +21,9 @@ Zoey Pu: jpu1
 
 ## Reference
 Legion Script: https://www.youtube.com/watch?v=XBMatmjS5yM&t=1576s \
-Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
+Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE \
+Table CSS: https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy \
+Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE \
 https://learndjango.com/tutorials/django-login-and-logout-tutorial
 
 ## Jira Board (for quick access)
@@ -38,6 +40,7 @@ PROJ-8 Authors can create friend posts\
 ProJ-9 Authors can share other author's public posts\
 PROJ-11 Authors can create plaintext posts\
 PROJ-12 Authors can create CommonMark posts\
+PROJ-16 Authors can view their Github activity on their stream\
 PROJ-17 Authors can post posts to their stream\
 PROJ-18 Authors can delete their public posts\
 PROJ-19 Authors can befriend local authors\

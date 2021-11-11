@@ -128,3 +128,27 @@ button:hover {
 .account-management {
   margin: auto 0 auto auto;
 }
+
+/* https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  padding: 0.5%;
+}
+
+td, th {
+  border: 1px solid #000000;
+  padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2;}
+
+tr:hover {background-color: #ddd;}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background-color: #2B7A78;
+  color: white;
+}
