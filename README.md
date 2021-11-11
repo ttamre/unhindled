@@ -1,4 +1,4 @@
-# CMPUT404Project
+# CMPUT404 Project
 
 Create user:
 1. python manage.py createsuperuser
