@@ -1,33 +1,41 @@
 # CMPUT404 Project
 
-Create user:
-1. python manage.py createsuperuser
-2. login with credentials
 
-Postgres:
+## Quick Links
+* [JIRA](https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1)
+* [Heroku](https://dashboard.heroku.com/apps/unhindled)
+* [Project Requirements](https://github.com/abramhindle/CMPUT404-project-socialdistribution/blob/master/project.org)
 
-create DB command: CREATE DATABASE unhindled;
 
-https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+## Commands
+**Create user**
+```bash
+python3 manage.py createsuperuser
+# create credentials, then log in
+```
+**Create Postgres DB**
+```
+CREATE DATABASE unhindled;
+```
 
-https://www.section.io/engineering-education/django-app-using-postgresql-database/
 
-## Team Member
-Ismaeel Mohiuddin: ismaeel\
-Tem Tamre: ttamre\
-Thomas Pham: tpham3\
-Joshua Smith: jds1\
-Zoey Pu: jpu1
+## Team Members
+* Ismaeel Mohiuddin: ismaeel
+* Tem Tamre: ttamre
+* Thomas Pham: tpham3
+* Joshua Smith: jds1
+* Zoey Pu: jpu1
+
 
 ## Reference
-Legion Script: https://www.youtube.com/watch?v=XBMatmjS5yM&t=1576s \
-Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE \
-Table CSS: https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy \
-Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE \
-https://learndjango.com/tutorials/django-login-and-logout-tutorial
+* Legion Script: https://www.youtube.com/watch?v=XBMatmjS5yM&t=1576s
+* Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
+* Table CSS: https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy
+* Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
+* Will Vincent https://learndjango.com/tutorials/django-login-and-logout-tutorial
+* Richard Yen https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+* Adeyemi Atoyegbe https://www.section.io/engineering-education/django-app-using-postgresql-database/
 
-## Jira Board (for quick access)
-https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1 
 
 ## Project Part 1 Stories Complete (20/43) 
 PROJ-1 UI - UI is complete for all implemented stories (custom)\
@@ -37,7 +45,7 @@ PROJ-4 Authors can link to photos in their posts\
 PROJ-5 Authors can create image posts\
 PROJ-7 Authors can create posts that are private to one user\
 PROJ-8 Authors can create friend posts\
-ProJ-9 Authors can share other author's public posts\
+PROJ-9 Authors can share other author's public posts\
 PROJ-11 Authors can create plaintext posts\
 PROJ-12 Authors can create CommonMark posts\
 PROJ-16 Authors can view their Github activity on their stream\
