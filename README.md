@@ -4,6 +4,9 @@ Create user:
 1. python manage.py createsuperuser
 2. login with credentials
 
+Postgres: https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+https://www.section.io/engineering-education/django-app-using-postgresql-database/
+
 ## Team Member
 Ismaeel Mohiuddin: ismaeel\
 Tem Tamre: ttamre\
@@ -14,6 +17,7 @@ Zoey Pu: jpu1
 ## Reference
 Legion Script: https://www.youtube.com/watch?v=XBMatmjS5yM&t=1576s \
 Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
+https://learndjango.com/tutorials/django-login-and-logout-tutorial
 
 ## Jira Board (for quick access)
 https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1 
