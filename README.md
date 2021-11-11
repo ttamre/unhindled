@@ -6,9 +6,7 @@ Create user:
 
 Postgres:
 
-Setup: create DB
-
-CREATE DATABASE unhindled;
+create DB command: CREATE DATABASE unhindled;
 
 https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
 
