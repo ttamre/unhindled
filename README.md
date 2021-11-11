@@ -4,7 +4,13 @@ Create user:
 1. python manage.py createsuperuser
 2. login with credentials
 
-Postgres: https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+Postgres:
+
+Setup: create DB and create user
+CREATE DATABASE unhindled;
+
+https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+
 https://www.section.io/engineering-education/django-app-using-postgresql-database/
 
 ## Team Member
