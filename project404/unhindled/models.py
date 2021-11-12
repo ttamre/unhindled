@@ -42,6 +42,7 @@ class Post(models.Model):
 	)
 	VISIBILITY = (
 		('public', 'Public'),
+		('unlisted', 'Unlisted'),
 		('friends', 'Friends Only'),
 		('send', 'Send to Author')
 	)
