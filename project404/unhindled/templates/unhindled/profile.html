@@ -71,11 +71,13 @@
         <div>
             {% if posts %}
                 {% for post in posts %}
+                    {% if post.visibility != "unlisted" %}
                         <li>
                             <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                             {{ post.author }} <br>
                             {{ post.content }}
                         </li>
+                    {% endif %}
                 {% endfor %}
             {% else %}
                 <p>No Posts to show.</p>
