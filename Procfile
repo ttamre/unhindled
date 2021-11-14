@@ -1,1 +1,1 @@
-web: gunicorn unhindled.wsgi
+web: gunicorn unhindled:app
