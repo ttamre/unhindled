@@ -6,18 +6,9 @@
 <title>Unhindled</title>
 </head>
 </html>
-<div class="login-banner">
-	<div class="user-info">
-			<p class="white-title">Unhindled</p>
-			<a class="header-link" href="{% url 'index' %}">Home</a>
-			<a class="header-link" href="{% url 'mystream' %}">My Stream</a>
-			<a class="header-link" href="{% url 'createPost' %}">Create Post</a>
-			<div class="account-management">
-				<a class="white-text mr-2" href="{% url 'profile' user.profile.pk %}">Profile</a>
-					<a class="white-text mr-2" href="{% url 'logout' %}">Log Out</a>
-			</div>
-	</div>
-</div>
+{% #header user=user %}
+{% /header %}
+<main>
 <p class="non-white-title">Manage Friends</p>
 
 <form action="/friend_request" method="POST">
@@ -27,8 +18,8 @@
 	<input type="hidden" name="next" value="{{ request.path }}">
     	<input type="submit" value="OK">
 </form>
-<ul>
 {% if object_list %}
+	<ul>
 	{% for friendship in object_list %}
 		{% if friendship.adresseeId == user.username %}
 			{% if friendship.status == "pending" %} 
@@ -82,8 +73,9 @@
 				</li>
 			{% endif %}
 	        {% endif %}
+	</ul>
 	{% endfor %}
 {% else %}
 	<p>No Friends to show.</p>
 {% endif %}
-</ul>
+</main>

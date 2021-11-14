@@ -11,6 +11,18 @@
   margin-right: .5rem;
 }
 
+.mr-3 {
+  margin-right: .75rem;
+}
+
+.mr-5-half {
+  margin-right: 2rem;
+}
+
+.ml-1 {
+  margin-left: .25rem;
+}
+
 .ml-2 {
   margin-left: .5rem;
 }
@@ -37,9 +49,16 @@
 }
 
 html {
-  margin: 0 36px;
   background-color: #DEF2F1;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  margin: 0 36px;
+}
+
+body {
+  margin: 0;
 }
 
 button {
@@ -60,12 +79,21 @@ button:hover {
   background-color: #2B7A78;
 }
 
+/* Header */
 .white-title {
-  margin: .5rem;
+  margin: .5rem 2rem;
   font-size: 2rem;
   color: #FEFFFF;
   text-transform: uppercase;
   font-weight: 900;
+}
+
+a.white-title {
+  text-decoration: none;
+}
+
+a.white-title:hover {
+  color: #17252A;
 }
 
 .non-white-title {
@@ -75,14 +103,50 @@ button:hover {
   font-weight: 900;
 }
 
-.header-link {
-  margin: auto 0 auto .75rem;
+.white-text {
+  font-weight: bold;
   color: #FEFFFF;
 }
 
-.white-text {
-  color: #FEFFFF;
+a.white-text {
+  text-decoration: none;
 }
+
+a.white-text:hover {
+  color: #17252A;
+}
+
+.pfp {
+  border-radius: 50%;
+}
+
+.dropdown {
+  margin-top: 6px;
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  top: 2.875rem;
+  left: -7.5rem;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
 
 /* Login Page */
 .login-page {
@@ -100,11 +164,6 @@ button:hover {
 .login-banner {
   height: 3.25rem;
   background-color: #2B7A78;
-}
-
-.login-text {
-  margin: auto .5rem auto auto;
-  color: #FEFFFF;
 }
 
 /* Posts */
@@ -125,7 +184,7 @@ button:hover {
   border-radius: 10px;
 }
 
-.account-management {
+.link-navigation {
   margin: auto 0 auto auto;
 }
 
