@@ -7,3 +7,5 @@ sqlparse==0.4.2
 django-crispy-forms
 slippers
 psycopg2-binary
+gunicorn
+django-on-heroku
