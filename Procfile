@@ -1,1 +1,1 @@
-web: gunicorn unhindled:app
+web: gunicorn project404.wsgi
