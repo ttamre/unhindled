@@ -1,0 +1,213 @@
+/* General */
+.flex {
+  display: flex;
+}
+
+.mr-0 {
+  margin-right: 0;
+}
+
+.mr-2 {
+  margin-right: .5rem;
+}
+
+.mr-3 {
+  margin-right: .75rem;
+}
+
+.mr-5-half {
+  margin-right: 2rem;
+}
+
+.ml-1 {
+  margin-left: .25rem;
+}
+
+.ml-2 {
+  margin-left: .5rem;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
+
+.mt-3 {
+  margin-top: .75rem;
+}
+
+.mt-5 {
+  margin-top: 1.5rem;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.m-auto {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+html {
+  background-color: #DEF2F1;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  margin: 0 36px;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  /* source: https://www.w3schools.com/css/css3_buttons.asp */
+  border-radius: 2rem;
+  background-color: #3AAFA9;
+  border: none;
+  color: #FEFFFF;
+  padding: 12px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+}
+
+button:hover {
+  cursor: pointer;
+  background-color: #2B7A78;
+}
+
+/* Header */
+.white-title {
+  margin: .5rem 2rem;
+  font-size: 2rem;
+  color: #FEFFFF;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+a.white-title {
+  text-decoration: none;
+}
+
+a.white-title:hover {
+  color: #17252A;
+}
+
+.non-white-title {
+  margin: 2rem 0 1rem;
+  font-size: 2rem;
+  color: #17252A;
+  font-weight: 900;
+}
+
+.white-text {
+  font-weight: bold;
+  color: #FEFFFF;
+}
+
+a.white-text {
+  text-decoration: none;
+}
+
+a.white-text:hover {
+  color: #17252A;
+}
+
+.pfp {
+  border-radius: 50%;
+}
+
+.dropdown {
+  margin-top: 6px;
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  top: 2.875rem;
+  left: -7.5rem;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+/* Login Page */
+.login-page {
+  margin-top: 12rem;
+  text-align: center;
+}
+
+/* Home Page */
+.public-banner {
+  height: 3.25rem;
+  display: flex;
+  background-color: #2B7A78;
+}
+
+.login-banner {
+  height: 3.25rem;
+  background-color: #2B7A78;
+}
+
+/* Posts */
+.image-post {
+  max-width: 800px;
+  max-height: 480px;
+}
+
+/* 'Components' Page */
+.user-info {
+  display: flex;
+}
+
+.post {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #17252A;
+  border-radius: 10px;
+}
+
+.link-navigation {
+  margin: auto 0 auto auto;
+}
+
+/* https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  padding: 0.5%;
+}
+
+td, th {
+  border: 1px solid #000000;
+  padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2;}
+
+tr:hover {background-color: #ddd;}
+
+th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background-color: #2B7A78;
+  color: white;
+}
