@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html>
 <head>
 {% load static %}
@@ -20,67 +20,39 @@
 </div>
 <p class="non-white-title">Manage Friends</p>
 
-<form action="/friend_request" method="POST">
+<form action="/follow" method="POST">
 	{% csrf_token %}
-	<label for="adressee">Friends Username: </label>
-	<input id="adressee" type="text" name="adressee" value="">
+	<label for="author">Friends Username: </label>
+	<input id="author" type="text" name="author" value="">
 	<input type="hidden" name="next" value="{{ request.path }}">
     	<input type="submit" value="OK">
 </form>
 <ul>
 {% if object_list %}
-	{% for friendship in object_list %}
-		{% if friendship.adresseeId == user.username %}
-			{% if friendship.status == "pending" %} 
-				<li>
-					Follower: {{ friendship.requesterId }}
-					<form action="/friend_request_accept" method="POST">
-						{% csrf_token %}
-						<input type="hidden" name="follower" value="{{ friendship.requesterId }}">
-						<input type="hidden" name="next" value="{{ request.path }}">
-						<input type="submit" value="Accept Friend Request">
-						
-					</form>
-				</li>
-			{% endif %}
-			{% if friendship.status == "accepted" %} 
-				<li>
-					Friend: {{ friendship.requesterId }} 
-					<form action="/unfriend" method="POST">
-						{% csrf_token %}
-						<input type="hidden" name="requester" value="{{ friendship.requesterId }}">
-						<input type="hidden" name="adressee" value="{{ friendship.adresseeId }}">
-						<input type="hidden" name="next" value="{{ request.path }}">
-						<input type="submit" value="Unfriend">
-					</form>
-				</li>
-			{% endif %}
+	{% for follow in object_list %}
+		{% if follow.author == user.username %}
+			<li>
+				Follower: {{ follow.follower }}
+				<form action="/friend_request_accept" method="POST">
+					{% csrf_token %}
+					<input type="hidden" name="follower" value="{{ follow.requesterId }}">
+					<input type="hidden" name="next" value="{{ request.path }}">
+					<input type="submit" value="Accept Friend Request">
+					
+				</form>
+			</li>
 	        {% endif %}
-	        {% if friendship.requesterId == user.username %}
-	        	{% if friendship.status == "pending" %} 
-				<li>
-					Following: {{ friendship.adresseeId }} 
-					<form action="/unfriend" method="POST">
-						{% csrf_token %}
-						<input type="hidden" name="requester" value="{{ friendship.requesterId }}">
-						<input type="hidden" name="adressee" value="{{ friendship.adresseeId }}">
-						<input type="hidden" name="next" value="{{ request.path }}">
-						<input type="submit" value="Unfollow">
-					</form>
-				</li>
-			{% endif %}
-			{% if friendship.status == "accepted" %} 
-				<li>
-					Friend: {{ friendship.adresseeId }} 
-					<form action="/unfriend" method="POST">
-						{% csrf_token %}
-						<input type="hidden" name="requester" value="{{ friendship.requesterId }}">
-						<input type="hidden" name="adressee" value="{{ friendship.adresseeId }}">
-						<input type="hidden" name="next" value="{{ request.path }}">
-						<input type="submit" value="Unfriend">
-					</form>
-				</li>
-			{% endif %}
+	        {% if follow.follower == user.username %}
+			<li>
+				Following: {{ follow.author }} 
+				<form action="/unfollow" method="POST">
+					{% csrf_token %}
+					<input type="hidden" name="follower" value="{{ follow.follower  }}">
+					<input type="hidden" name="author" value="{{ follow.author }}">
+					<input type="hidden" name="next" value="{{ request.path }}">
+					<input type="submit" value="Unfollow">
+				</form>
+			</li>
 	        {% endif %}
 	{% endfor %}
 {% else %}

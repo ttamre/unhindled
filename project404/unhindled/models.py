@@ -22,18 +22,18 @@ class Author(models.Model):
 		return reverse('viewPost', args=(str(self.author), self.pk))
 
 #maybe not best implementation
-class Friendship(models.Model):
-	FRIEND_STATUS = (
-		("pending", "Pending"),
-		("accepted", "Accepted"),
-	)
+class Follower(models.Model):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	requesterId = models.CharField(max_length=100)
-	adresseeId = models.CharField(max_length=100)
-	status = models.CharField(max_length=10, choices=FRIEND_STATUS, default=FRIEND_STATUS[0][0])
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	follower = models.ForeignKey(User, on_delete=models.CASCADE)
 	class Meta:
-        	unique_together = (("requesterId", "adresseeId"),)
-
+        	unique_together = (("author", "follower"),)
+class FriendRequest(models.Model):
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	follower = models.ForeignKey(User, on_delete=models.CASCADE)
+	class Meta:
+        	unique_together = (("author", "follower"),)	
 
 class Post(models.Model):
 	CONTENT_TYPES = (
