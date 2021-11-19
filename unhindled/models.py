@@ -22,17 +22,16 @@ class Author(models.Model):
 		return reverse('viewPost', args=(str(self.author), self.pk))
 
 #maybe not best implementation
-<<<<<<< HEAD:project404/unhindled/models.py
 class Follower(models.Model):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(User, on_delete=models.CASCADE)
-	follower = models.ForeignKey(User, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author")
+	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
 	class Meta:
         	unique_together = (("author", "follower"),)
-class FriendRequest(models.Model):
+class FollowRequest(models.Model):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(User, on_delete=models.CASCADE)
-	follower = models.ForeignKey(User, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestauthor")
+	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestfollower")
 	class Meta:
         	unique_together = (("author", "follower"),)	
 

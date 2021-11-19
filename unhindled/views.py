@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Post, Author, Friendship, UserProfile, Comment
+from .models import Post, Author, Follower, FollowRequest, UserProfile, Comment
 from .forms import *
 
 import requests
@@ -78,26 +78,27 @@ class AccountView(generic.CreateView):
 
 
 class ManageFriendView(generic.ListView):
-    model = Friendship
+    model = Follower
     template_name = "unhindled/friends.html"
     fields = "__all__"
     
 def follow(request):
     if User.objects.filter(username=request.POST["author"]).count() == 1 and \
-       Follower.objects.filter(author=request.POST["author"],follower=request.user.username).count() == 0 : 
-    	x = Friendship.objects.create(follower=request.user.username, author=request.POST["author"])
-    next = request.POST.get('next', '/')
-    return HttpResponseRedirect(next)
-#delete   
-def friendRequestAccept(request):
-    friendship = Friendship.objects.get(requesterId=request.POST["follower"],adresseeId=request.user.username)
-    friendship.status="accepted"
-    friendship.save()
+       Follower.objects.filter(author=request.POST["author"],follower=request.user.username).count() == 0 :
+        Follower.objects.create(follower=request.user.username, author=request.POST["author"])
+        if Follower.objects.filter(author=request.user.username,follower=request.POST["author"]).count() == 0:
+            FriendRequest.objects.create(author=request.user.username, follower=request.POST["author"])
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
 
+def deleteFollowRequest(request):
+    followRequest = FollowRequest.objects.get(author=request.POST["author"],follower=request.user.username)
+    follow.delete()
+    next = request.POST.get('next', '/')
+    return HttpResponseRedirect(next)    
+
 def unfollow(request):
-    follow = Follower.objects.get(author=request.POST["author"],follower=request.POST["follower"])
+    follow = Follower.objects.get(author=request.POST["author"],follower=request.user.username)
     follow.delete()
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)

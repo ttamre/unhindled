@@ -18,26 +18,14 @@
 	<input type="hidden" name="next" value="{{ request.path }}">
     	<input type="submit" value="OK">
 </form>
+{% /follow_requests %}
 {% if object_list %}
 	{% for follow in object_list %}
-		{% if follow.author == user.username %}
-			<li>
-				Follower: {{ follow.follower }}
-				<form action="/friend_request_accept" method="POST">
-					{% csrf_token %}
-					<input type="hidden" name="follower" value="{{ follow.requesterId }}">
-					<input type="hidden" name="next" value="{{ request.path }}">
-					<input type="submit" value="Accept Friend Request">
-					
-				</form>
-			</li>
-	        {% endif %}
 	        {% if follow.follower == user.username %}
 			<li>
 				Following: {{ follow.author }} 
 				<form action="/unfollow" method="POST">
 					{% csrf_token %}
-					<input type="hidden" name="follower" value="{{ follow.follower  }}">
 					<input type="hidden" name="author" value="{{ follow.author }}">
 					<input type="hidden" name="next" value="{{ request.path }}">
 					<input type="submit" value="Unfollow">
@@ -50,3 +38,6 @@
 	<p>No Friends to show.</p>
 {% endif %}
 </main>
+		
+			
+	        
