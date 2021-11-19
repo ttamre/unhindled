@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from .models import Post, Author, Follower, FollowRequest, UserProfile, Comment
 from .forms import *
-
+from .serializers import *
 import requests
 import json
 import os
@@ -203,3 +203,19 @@ class EditProfileView(generic.UpdateView):
     def test_func(self):
         profile = self.get_object()
         return self.request.user == profile.user
+
+
+
+#endpoint views 
+class AuthorViewset (CreateModelMixin, RetrieveModelMixin):
+    serializer_class = AuthorSerializer
+    queryset = Author.objects.all()
+    
+class FollowerListViewset (ListModelMixin):
+    serializer_class = AuthorSerializer
+    queryset = Author.objects.all()
+    
+class FollowerViewset (RetrieveModelMixin,UpdateModelMixin, DestroyModelMixin):
+    serializer_class = FollowerSerializer
+    queryset = Follower.objects.all()
+    
