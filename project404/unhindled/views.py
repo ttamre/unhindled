@@ -10,6 +10,10 @@ from django.db.models import Q
 from .models import Post, Author, Friendship, UserProfile, Comment
 from .forms import *
 
+from rest_framework import viewsets
+
+from .serializers import PostSerializer, UserSerializer
+
 import requests
 import json
 import os
@@ -35,6 +39,17 @@ class HomeView(generic.ListView):
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
         
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all().order_by('created_on')
+    serializer_class = PostSerializer
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 class StreamView(generic.ListView):
     model = Post
