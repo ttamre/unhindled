@@ -36,6 +36,22 @@ GITHUB_EVENTS = {
     None: "Unknown event"
 }
 
+def paginationGetter(page, size):
+    try:
+        size = int(size)
+        if size <= 0:
+            size = 5
+    except:
+        size = 5
+
+    try:
+        page = int(page)
+        if page <=0:
+            page = 1
+    except:
+        page = 1
+
+    return page, size
 
 # Create your views here.
 class HomeView(generic.ListView):
@@ -51,7 +67,21 @@ class PostViewSet(viewsets.ViewSet):
         user = User.objects.get(username=username)
         queryset = Post.objects.filter(author=user).order_by('created_on')
         serializer = PostSerializer(queryset, many=True)
-        return Response(serializer.data)
+
+        page = request.GET.get("page",1)
+        size = request.GET.get("size",5)
+
+        page, size = paginationGetter(page, size)
+
+        postData = serializer.data[((page-1)*size):page*size]
+
+        data = {}
+        data["type"] = "posts"
+        data["page"] = page
+        data["size"] = (len(serializer.data) // 5) + 1
+        data["items"] = postData
+
+        return Response(data)
 
     def retrieve(self, request, username, post_ID):
         user = User.objects.get(username=username)
@@ -71,9 +101,18 @@ class UserViewSet(viewsets.ViewSet):
     def list(self, request):
         queryset = User.objects.all()
         serializer = UserSerializer(queryset, many=True)
+
+        page = request.GET.get("page",1)
+        size = request.GET.get("size",5)
+        page, size = paginationGetter(page, size)
+
+        userData = serializer.data[((page-1)*size):page*size]
+
         data = {}
-        data["type"] = "author"
-        data["items"] = serializer.data
+        data["type"] = "authors"
+        data["page"] = page
+        data["size"] = (len(serializer.data) // 5) + 1
+        data["items"] = userData
         return Response(data)
 
     def retrieve(self, request, pk=None):
@@ -95,15 +134,10 @@ class CommentViewSet(viewsets.ViewSet):
         comments = Comment.objects.filter(post=post)
         serializer = CommentSerializer(comments, many=True)
         page = request.GET.get("page",1)
+        size = request.GET.get("size",5)
+        page, size = paginationGetter(page, size)
 
-        try:
-            page = int(page)
-            if page <=0:
-                page = 1
-            commentData = serializer.data[((page-1)*5):page*5]
-        except:
-            page = 1
-            commentData = serializer.data[0:5]
+        commentData = serializer.data[((page-1)*size):page*size]
 
         host = "https://unhindled.herokuapp.com/"
         data = {}
