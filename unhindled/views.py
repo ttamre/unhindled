@@ -144,7 +144,7 @@ class CommentViewSet(viewsets.ViewSet):
         data["type"] = "comments"
         data["page"] = page
         data["size"] = (len(serializer.data) // 5) + 1
-        data["post"] = host + "/" + post.author.username + "/articles/" + str(post.ID) + "/comments"
+        data["post"] = host + post.author.username + "/articles/" + str(post.ID) + "/comments"
         data["comments"] = commentData
         return Response(data)
 
