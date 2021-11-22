@@ -7,16 +7,20 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Post, Author, Friendship, UserProfile, Comment
+from requests.models import Response as MyResponse
+from rest_framework.response import Response
+from .models import Post, Friendship, UserProfile, Comment
 from .forms import *
 
 from rest_framework import viewsets
 
-from .serializers import PostSerializer, UserSerializer
+from .serializers import CommentSerializer, PostSerializer, UserSerializer
 
 import requests
 import json
 import os
+
+from unhindled import serializers
 
 CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
@@ -39,16 +43,83 @@ class HomeView(generic.ListView):
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(viewsets.ViewSet):
     queryset = Post.objects.all().order_by('created_on')
     serializer_class = PostSerializer
 
-class UserViewSet(viewsets.ModelViewSet):
+    def list(self, request, username):
+        user = User.objects.get(username=username)
+        queryset = Post.objects.filter(author=user).order_by('created_on')
+        serializer = PostSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, username, post_ID):
+        user = User.objects.get(username=username)
+        queryset = Post.objects.get(ID=post_ID)
+        serializer = PostSerializer(queryset)
+        return Response(serializer.data)
+
+
+
+class UserViewSet(viewsets.ViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def list(self, request):
+        queryset = User.objects.all()
+        serializer = UserSerializer(queryset, many=True)
+        data = {}
+        data["type"] = "author"
+        data["items"] = serializer.data
+        return Response(data)
+
+    def retrieve(self, request, pk=None):
+        queryset = UserProfile.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = UserSerializer(user.user)
+        return Response(serializer.data)
+
+class CommentViewSet(viewsets.ViewSet):
+    """
+    API endpoint that allows comments to be viewed or edited.
+    """
+    queryset = Post.objects.all().order_by('created_on')
+    serializer_class = CommentSerializer
+
+    def list(self, request, username, post_ID):
+        user = User.objects.get(username=username)
+        post = Post.objects.get(ID=post_ID)
+        comments = Comment.objects.filter(post=post)
+        serializer = CommentSerializer(comments, many=True)
+        page = request.GET.get("page",1)
+
+        try:
+            page = int(page)
+            if page <=0:
+                page = 1
+            commentData = serializer.data[((page-1)*5):page*5]
+        except:
+            page = 1
+            commentData = serializer.data[0:5]
+
+        host = "https://unhindled.herokuapp.com/"
+        data = {}
+        data["type"] = "comments"
+        data["page"] = page
+        data["size"] = (len(serializer.data) // 5) + 1
+        data["post"] = host + "/" + post.author.username + "/articles/" + str(post.ID) + "/comments"
+        data["comments"] = commentData
+        return Response(data)
+
+    def retrieve(self, request, username, post_ID, comment_ID):
+        user = User.objects.get(username=username)
+        post = Post.objects.get(ID=post_ID)
+        comments = Comment.objects.get(id=comment_ID)
+        serializer = CommentSerializer(comments)
+        return Response(serializer.data)
 
 class StreamView(generic.ListView):
     model = Post
@@ -87,7 +158,7 @@ class StreamView(generic.ListView):
 
 
 class AccountView(generic.CreateView):
-    model = Author
+    model = User
     template_name = "unhindled/account.html"
     fields = "__all__"
 

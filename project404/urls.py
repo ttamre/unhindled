@@ -22,7 +22,7 @@ from rest_framework import routers
 from unhindled import views
 
 router = routers.DefaultRouter()
-router.register(r'user', views.UserViewSet)
+router.register(r'authors', views.UserViewSet)
 router.register(r'posts', views.PostViewSet)
 
 urlpatterns = [
@@ -30,6 +30,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('service/', include(router.urls)),
+    path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list'})),
+    path('service/author/<str:username>/posts/<str:post_ID>', views.PostViewSet.as_view({'get':'retrieve'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list'})),
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

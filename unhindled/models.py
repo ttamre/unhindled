@@ -7,20 +7,6 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
-# Create your models here.
-class Author(models.Model):
-	ID = models.CharField(max_length=100, default=uuid.uuid4, primary_key=True)
-	displayName =  models.CharField(max_length=100)
-	host = models.CharField(max_length=100, blank = True)
-	profileUrl = models.CharField(max_length=100, blank = True)
-	githubUrl = models.CharField(max_length=100, blank = True)
-
-	def __str__(self):
-		return self.displayName
-	def get_absolute_url(self):
-		return reverse('viewPost', args=(str(self.author), self.pk))
-
 #maybe not best implementation
 class Friendship(models.Model):
 	FRIEND_STATUS = (
@@ -32,7 +18,7 @@ class Friendship(models.Model):
 	adresseeId = models.CharField(max_length=100)
 	status = models.CharField(max_length=10, choices=FRIEND_STATUS, default=FRIEND_STATUS[0][0])
 	class Meta:
-        	unique_together = (('requesterId', 'adresseeId'),)
+			unique_together = (('requesterId', 'adresseeId'),)
 
 
 class Post(models.Model):
@@ -82,8 +68,8 @@ class Comment(models.Model):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment')
-	comment = models.TextField(blank=True)
-	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[0],null=False)
+	comment = models.TextField(blank=True, max_length=500)
+	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[0][0],null=False)
 	published = models.DateTimeField(auto_now_add=True)
 	
 	def __str__(self):
@@ -91,19 +77,20 @@ class Comment(models.Model):
 
 	
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
-    displayName = models.CharField(max_length=20, blank=True, null=True)
-    date_of_birth = models.DateField(null=True, blank=True)
-    location = models.CharField(max_length=100, blank=True, null=True)
-    more_info = models.TextField(max_length=500, blank=True)
-    profileImage = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png', blank=True)
+	user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
+	displayName = models.CharField(max_length=20, blank=True, null=True)
+	date_of_birth = models.DateField(null=True, blank=True)
+	location = models.CharField(max_length=100, default="", blank=True, null=True)
+	more_info = models.TextField(max_length=500, default="", blank=True)
+	github = models.CharField(max_length=100, default="", blank=True, null=True)
+	profileImage = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png', blank=True)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
 	if created:
-		UserProfile.objects.create(user = instance)
+		userProfile = UserProfile(user=instance, displayName=instance.username)
+		userProfile.save()
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
 	instance.profile.save()
-
