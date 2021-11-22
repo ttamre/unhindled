@@ -1,65 +1,62 @@
-<!DOCTYPE html>
-<html>
-    <head>
-    <meta charset="utf-8">
-    <title>Unhindled</title>
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
-    </head>
-    <body>
-      {% #header user=user %}
-      {% /header %}
-      <main>
-        <div>
-          {% if user.is_authenticated %}
-            <p class="non-white-title">My Stream</p>
-            {% if object_list %}
-              {% for post in object_list %}
-                <!-- change this to ID when author and user are matched -->
-                {% if post.author.username == user.username %}
-                  <div class="post">
-                      <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                      By: {{ post.author }} <br>
-                      {{ post.description }}
-                  </div>
-                {% endif %}
-              {% endfor %}
-              <h3>Sent to me</h3>
-              {% for post in object_list %}
-                {% if post.send_to.username == user.username and post.visibility == "send" %}
-                  <div class="post">
-                      <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                      By: {{ post.author }} <br>
-                      {{ post.description }}
-                  </div>
-                {% endif %}
-              {% endfor %}
-            {% else %}
-                <p>No Posts to show.</p>
-            {% endif %}
-          {% endif %}
+{% extends 'base.html' %}
 
-          <!-- Github Activity -->
-          <h3>Github Activity</h3>
-          {% if event_list %}
-              <table>
-              <tr>
-                <th>Repository</th>
-                <th>Activity</th>
-                <th>Link to repo</th>
-              </tr>
-              {% for event in event_list %}
-                  <tr>
-                    <td>{{event.repo}}</td>
-                    <td>{{event.type}}</td>
-                    <td><a href={{event.url}}>Link</a></td>
-                  </tr>
-              {% endfor %}
-              </table>
-          {% else %}
-              <p>No activity to show.</p>
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+{% #header user=user %}
+{% /header %}
+
+<main>
+  <div>
+    {% if user.is_authenticated %}
+      <p class="non-white-title">My Stream</p>
+      {% if object_list %}
+        {% for post in object_list %}
+          <!-- change this to ID when author and user are matched -->
+          {% if post.author.username == user.username %}
+            <div class="post">
+                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                By: {{ post.author }} <br>
+                {{ post.description }}
+            </div>
           {% endif %}
-        </div>
-    </main>
-  </body>
-</html>
+        {% endfor %}
+        <h3>Sent to me</h3>
+        {% for post in object_list %}
+          {% if post.send_to.username == user.username and post.visibility == "send" %}
+            <div class="post">
+                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                By: {{ post.author }} <br>
+                {{ post.description }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+          <p>No Posts to show.</p>
+      {% endif %}
+    {% endif %}
+
+    <!-- Github Activity -->
+    <p class="non-white-title mt-4 mb-2">Github Activity</p>
+    {% if event_list %}
+        <table>
+        <tr>
+          <th>Repository</th>
+          <th>Activity</th>
+          <th>Link to repo</th>
+        </tr>
+        {% for event in event_list %}
+            <tr>
+              <td>{{event.repo}}</td>
+              <td>{{event.type}}</td>
+              <td><a href={{event.url}}>Link</a></td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+        <p>No activity to show.</p>
+    {% endif %}
+  </div>
+</main>
+{% endblock %}

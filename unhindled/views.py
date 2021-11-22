@@ -7,6 +7,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
 from .models import Post, Author, Friendship, UserProfile, Comment
 from .forms import *
 
@@ -28,12 +30,16 @@ GITHUB_EVENTS = {
     None: "Unknown event"
 }
 
-
 # Create your views here.
 class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
+
+class SignUpView(generic.CreateView):
+    form_class = CreateUserForm
+    success_url = reverse_lazy('login')
+    template_name = 'registration/signup.html'
 
 class StreamView(generic.ListView):
     model = Post
