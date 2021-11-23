@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
-from .models import Post, Friendship, UserProfile, Comment
+from .models import Like, Post, Friendship, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .models import Post, Friendship, UserProfile, Comment
@@ -259,6 +259,40 @@ class SharePost(generic.View):
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
         return HttpResponseRedirect(reverse('index'))
   
+def likeObject(request, user, id, obj_type):
+    author = User.objects.get(username=user)
+    if obj_type == "comment":
+        comment = Comment.objects.get(ID = id)
+        existingLike = Like.objects.filter(comment=comment,author=author)
+        if (len(existingLike) == 0):
+            like = Like(comment=comment,author=author)
+            like.save()
+        post = comment.post
+    elif obj_type == "post":
+        post = Post.objects.get(ID = id)
+        existingLike = Like.objects.filter(post=post,author=author)
+        if (len(existingLike) == 0):
+            like = Like(post=post,author=author)
+            like.save()
+
+    return HttpResponseRedirect(post.get_absolute_url())
+
+def unlikeObject(request, user, id, obj_type):
+    author = User.objects.get(username=user)
+    if obj_type == "comment":
+        comment = Comment.objects.get(ID = id)
+        existingLike = Like.objects.filter(comment=comment,author=author)
+        if (len(existingLike) >= 1):
+            existingLike.delete()
+        post = comment.post
+    elif obj_type == "post":
+        post = Post.objects.get(ID = id)
+        existingLike = Like.objects.filter(post=post,author=author)
+        if (len(existingLike) >= 1):
+            existingLike.delete()
+
+    return HttpResponseRedirect(post.get_absolute_url())
+
 
 def view_post(request, user, pk):
     post = get_object_or_404(Post, ID=pk)
