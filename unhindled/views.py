@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
-from .models import Post, Author, Friendship, UserProfile, Comment
+from .models import Post, Friendship, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .models import Post, Friendship, UserProfile, Comment
@@ -253,7 +253,7 @@ class SharePost(generic.View):
         if post_object.is_shared_post:
             post_object = post_object.originalPost
 
-        sharedPost = Post.objects.create(author=post_object.author, contentType=post_object.contentType, 
+        sharedPost = Post.objects.create(author=post_object.author, contentType=post_object.contentType,
         title=post_object.title, description=post_object.description,
         visibility=post_object.visibility, created_on=post_object.created_on, content=post_object.content,
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
