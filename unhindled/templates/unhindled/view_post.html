@@ -55,7 +55,7 @@
 {% else %}
   <a href="{% url 'likeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
 {% endif %}
-<p>{% like_count post.ID %} likes</p>
+<p>{% like_count_post post.ID %} likes</p>
 
 <hr>
 
@@ -83,7 +83,7 @@
     {% else %}
     <a href="{% url 'likeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
     {% endif %}
-    <p>{% like_count comment.ID %} likes</p>
+    <p>{% like_count_comment comment.ID %} likes</p>
     <hr>
   {% endfor %}
 </div>

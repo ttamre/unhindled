@@ -18,6 +18,6 @@ def post_text(post, author):
         return "Like"
 
 @register.simple_tag
-def like_count(post):
+def like_count_post(post):
     likes = Like.objects.filter(post=post)
     return len(likes)

@@ -12,12 +12,12 @@ def comment_liked(comment, author):
 @register.simple_tag
 def comment_text(comment, author):
     likes = Like.objects.filter(comment=comment, author=author)
-    if len(likes) == 1:
+    if len(likes) >= 1:
         return "Unlike"
     else:
         return "Like"
 
 @register.simple_tag
-def like_count(comment):
+def like_count_comment(comment):
     likes = Like.objects.filter(comment=comment)
     return len(likes)
