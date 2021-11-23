@@ -3,9 +3,11 @@
     <head>
     <meta charset="utf-8">
     <title>Unhindled</title>
+    
     {% load static %}
     {% load friend_check %}
     <link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     {% #header user=user %}
     {% /header %}
@@ -45,6 +47,12 @@
                                         {% endif %}
                                         By: {{ post.author }} <br>
                                         {{ post.description }}
+                                    </div>
+                                    <div>
+                                        <form method = "POST">
+                                            {% csrf_token %}
+                                            <button type="submit" ,style="font-size:24px"><i class="fa fa-thumbs-up"></i></button>
+                                        </form>
                                     </div>
                                 {% endif %}
                             {% endfor %}

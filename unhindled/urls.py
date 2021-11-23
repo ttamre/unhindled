@@ -16,4 +16,5 @@ urlpatterns = [
     path('<str:user>/articles/<str:pk>/edit', views.UpdatePostView.as_view(), name='updatePost'),
     path('<str:user>/articles/<str:pk>/delete', views.DeletePostView.as_view(), name='deletePost'),
     path('<str:user>/articles/<str:pk>/share', views.SharePost.as_view(), name='sharePost'),
+    
 ]

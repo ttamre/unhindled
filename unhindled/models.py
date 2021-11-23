@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 #maybe not best implementation
 class Friendship(models.Model):
 	FRIEND_STATUS = (
@@ -32,6 +33,12 @@ class Post(models.Model):
 		('friends', 'Friends Only'),
 		('send', 'Send to Author')
 	)
+	
+	LIKE_UNLIKE = {
+		('Like', 'Like'),
+		('Unlike', 'Unlike'),
+	}
+
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
@@ -48,6 +55,7 @@ class Post(models.Model):
 
 	sharedBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shared_by', null=True, blank=True, editable =False)
 	originalPost = models.ForeignKey('Post', on_delete=models.CASCADE, null=True, blank=True, editable =False)
+	likes = models.ManyToManyField(User, related_name="like_post", blank=True)
 
 	@property
 	def is_shared_post(self):
@@ -59,19 +67,25 @@ class Post(models.Model):
 	def clean(self):
 		if not (self.images or self.content):
 			raise ValidationError('Invalid Value')
+
 	
 class Comment(models.Model):
 	CONTENT_TYPES = (
 		('md', 'text/markdown'),
 		('txt','text/plain'),
 	)
+	LIKE_UNLIKE = (
+		('Like', 'Like'),
+		('Unlike', 'Unlike'),
+	)
+
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment')
 	comment = models.TextField(blank=True, max_length=500)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[0][0],null=False)
 	published = models.DateTimeField(auto_now_add=True)
-	
+	likes = models.ManyToManyField(User, related_name="like_comment", blank=True)
 	def __str__(self):
 		return self.comment
 
@@ -94,3 +108,12 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
 	instance.profile.save()
+
+class Like(models.Model):
+	context = models.URLField(blank=True, null=True)
+	summary = models.CharField(max_length=20, default="", blank=True)
+	type = models.CharField(max_length=20, default="", blank=True)
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	object = models.URLField()
+
+

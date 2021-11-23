@@ -91,6 +91,7 @@ class PostViewSet(viewsets.ViewSet):
 
 
 
+
 class UserViewSet(viewsets.ViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -323,3 +324,4 @@ class EditProfileView(generic.UpdateView):
     def test_func(self):
         profile = self.get_object()
         return self.request.user == profile.user
+
