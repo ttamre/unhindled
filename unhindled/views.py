@@ -9,15 +9,17 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
-from .models import Post, Friendship, UserProfile, Comment
+from .models import Like, Post, Friendship, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .models import Post, Friendship, UserProfile, Comment
 from .forms import *
+from rest_framework.request import Request
+from rest_framework.test import APIRequestFactory
 
 from rest_framework import viewsets
 
-from .serializers import CommentSerializer, PostSerializer, UserSerializer
+from .serializers import CommentSerializer, LikeSerializer, PostSerializer, UserSerializer
 
 import requests
 import json
@@ -163,6 +165,65 @@ class CommentViewSet(viewsets.ViewSet):
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
+class LikeViewSet(viewsets.ViewSet):
+    """
+    API endpoint that allows comments to be viewed or edited.
+    """
+
+    def commentList(self, request, username, post_ID, comment_ID):
+        factory = APIRequestFactory()
+        request = factory.get('/')
+
+        serializer_context = {
+            'request': Request(request),
+        }
+        comment = Comment.objects.get(ID=comment_ID)
+        likes = Like.objects.filter(comment=comment)
+        serializer = LikeSerializer(likes, many=True, context=serializer_context)
+
+        likeData = serializer.data
+        data = {}
+        data["type"] = "likes"
+        data["items"] = likeData
+        return Response(data)
+
+    def postList(self, request, username, post_ID):
+        factory = APIRequestFactory()
+        request = factory.get('/')
+
+        serializer_context = {
+            'request': Request(request),
+        }
+        post = Post.objects.get(ID=post_ID)
+        likes = Like.objects.filter(post=post)
+        serializer = LikeSerializer(likes, many=True, context=serializer_context)
+
+        likeData = serializer.data
+        data = {}
+        data["type"] = "likes"
+        data["items"] = likeData
+        return Response(data)
+
+    def authorList(self, request, username):
+        factory = APIRequestFactory()
+        request = factory.get('/')
+
+        serializer_context = {
+            'request': Request(request),
+        }
+
+        author = User.objects.get(username=username)
+        likes = Like.objects.filter(author=author)
+        serializer = LikeSerializer(likes, many=True, context=serializer_context)
+
+        likeData = serializer.data
+        for like in likeData:
+            del like["author"]
+        data = {}
+        data["type"] = "liked"
+        data["items"] = likeData
+        return Response(data)
+
 class StreamView(generic.ListView):
     model = Post
     template_name = "unhindled/mystream.html"
@@ -259,6 +320,40 @@ class SharePost(generic.View):
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
         return HttpResponseRedirect(reverse('index'))
   
+def likeObject(request, user, id, obj_type):
+    author = User.objects.get(username=user)
+    if obj_type == "comment":
+        comment = Comment.objects.get(ID = id)
+        existingLike = Like.objects.filter(comment=comment,author=author)
+        if (len(existingLike) == 0):
+            like = Like(comment=comment,author=author)
+            like.save()
+        post = comment.post
+    elif obj_type == "post":
+        post = Post.objects.get(ID = id)
+        existingLike = Like.objects.filter(post=post,author=author)
+        if (len(existingLike) == 0):
+            like = Like(post=post,author=author)
+            like.save()
+
+    return HttpResponseRedirect(post.get_absolute_url())
+
+def unlikeObject(request, user, id, obj_type):
+    author = User.objects.get(username=user)
+    if obj_type == "comment":
+        comment = Comment.objects.get(ID = id)
+        existingLike = Like.objects.filter(comment=comment,author=author)
+        if (len(existingLike) >= 1):
+            existingLike.delete()
+        post = comment.post
+    elif obj_type == "post":
+        post = Post.objects.get(ID = id)
+        existingLike = Like.objects.filter(post=post,author=author)
+        if (len(existingLike) >= 1):
+            existingLike.delete()
+
+    return HttpResponseRedirect(post.get_absolute_url())
+
 
 def view_post(request, user, pk):
     post = get_object_or_404(Post, ID=pk)

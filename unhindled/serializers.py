@@ -1,7 +1,8 @@
+from django.db.models import fields
 from django.db.models.fields import Field
 from rest_framework import serializers
 
-from .models import Comment, Post, UserProfile
+from .models import Comment, Like, Post, UserProfile
 from django.contrib.auth.models import User
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
@@ -57,3 +58,28 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
         data = super().to_representation(obj)
         data["type"] = "comment"
         return data
+
+class LikeSerializer(serializers.HyperlinkedModelSerializer):
+    author = UserSerializer()
+    comment = CommentSerializer()
+    host = "https://unhindled.herokuapp.com/"
+    class Meta:
+        model = Like
+        fields = ('author', 'comment', 'post', 'ID')
+        depth = 1
+
+    def to_representation(self, obj):
+        data = super().to_representation(obj)
+        data["type"] = "Like"
+        if data["post"] is not None:
+            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.post.ID)
+            data["summary"] = str(obj.author.username) + " likes your post"
+            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.post.ID)
+        elif data["comment"] is not None:
+            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.ID) + "/comments/" + str(obj.comment.ID)
+            data["summary"] = str(obj.author.username) + " likes your comment"
+            data["comment"] = str(obj.comment.ID)
+            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.ID)
+        
+        return data
+        

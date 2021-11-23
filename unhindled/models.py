@@ -20,7 +20,6 @@ class Friendship(models.Model):
 	class Meta:
 			unique_together = (('requesterId', 'adresseeId'),)
 
-
 class Post(models.Model):
 	CONTENT_TYPES = (
 		('md', 'text/markdown'),
@@ -59,7 +58,7 @@ class Post(models.Model):
 	def clean(self):
 		if not (self.images or self.content):
 			raise ValidationError('Invalid Value')
-	
+
 class Comment(models.Model):
 	CONTENT_TYPES = (
 		('md', 'text/markdown'),
@@ -75,7 +74,12 @@ class Comment(models.Model):
 	def __str__(self):
 		return self.comment
 
-	
+class Like(models.Model):
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
+	author = models.ForeignKey(User, on_delete=models.CASCADE)
+
 class UserProfile(models.Model):
 	user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
 	displayName = models.CharField(max_length=20, blank=True, null=True)

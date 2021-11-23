@@ -30,9 +30,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('service/', include(router.urls)),
+    path('service/author/<str:username>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
     path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list'})),
     path('service/author/<str:username>/posts/<str:post_ID>', views.PostViewSet.as_view({'get':'retrieve'})),
     path('service/author/<str:username>/posts/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/likes', views.LikeViewSet.as_view({'get':'postList'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/comments/<str:comment_ID>/likes', views.LikeViewSet.as_view({'get':'commentList'})),
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
