@@ -19,8 +19,9 @@
     </div>
   {% else %}
     <div class="public-banner">
-        <p class="white-title">Unhindled</p>
+        <a class="white-title" href="{% url 'index' %}">Unhindled</a>
         <div class="link-navigation">
+          <a class="white-text mr-3" href="{% url 'signup' %}">Sign Up</a>
           <a class="white-text mr-5-half" href="{% url 'login' %}">Log In</a>
         </div>
     </div>

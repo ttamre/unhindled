@@ -3,47 +3,11 @@
   display: flex;
 }
 
-.mr-0 {
-  margin-right: 0;
-}
-
-.mr-2 {
-  margin-right: .5rem;
-}
-
-.mr-3 {
-  margin-right: .75rem;
-}
-
 .mr-5-half {
   margin-right: 2rem;
 }
 
-.ml-1 {
-  margin-left: .25rem;
-}
-
-.ml-2 {
-  margin-left: .5rem;
-}
-
-.mt-0 {
-  margin-top: 0;
-}
-
-.mt-3 {
-  margin-top: .75rem;
-}
-
-.mt-5 {
-  margin-top: 1.5rem;
-}
-
-.mb-0 {
-  margin-bottom: 0;
-}
-
-.m-auto {
+.my-auto {
   margin-top: auto;
   margin-bottom: auto;
 }
@@ -81,7 +45,7 @@ button:hover {
 
 /* Header */
 .white-title {
-  margin: .5rem 2rem;
+  margin: 0 2rem;
   font-size: 2rem;
   color: #FEFFFF;
   text-transform: uppercase;
@@ -127,6 +91,7 @@ a.white-text:hover {
 }
 
 .dropdown-content {
+  padding: 0;
   display: none;
   top: 2.875rem;
   left: -7.5rem;
@@ -150,8 +115,7 @@ a.white-text:hover {
 
 /* Login Page */
 .login-page {
-  margin-top: 12rem;
-  text-align: center;
+  margin: auto;
 }
 
 /* Home Page */
