@@ -16,6 +16,7 @@ from .models import Post, Friendship, UserProfile, Comment
 from .forms import *
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
+from rest_framework import status
 
 from rest_framework import viewsets
 
@@ -24,6 +25,7 @@ from .serializers import CommentSerializer, LikeSerializer, PostSerializer, User
 import requests
 import json
 import os
+import datetime
 
 from unhindled import serializers
 
@@ -99,6 +101,58 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
+    def createPost(self, request, username):
+        user = User.objects.get(username=username)
+        postData = request.POST
+        author = user
+        contentType = 'txt'
+        for types in Post.CONTENT_TYPES:
+            if types[1] == postData["contentType"] or types[0] == postData["contentType"]:
+                contentType = types[0]
+
+        
+        title = postData.get("title",None)
+        description = postData.get("description",None)
+
+        visibility = 'public'
+        for types in Post.VISIBILITY:
+            if types[1].lower() == postData["contentType"].lower():
+                visibility = types[0]
+
+        send_to = None
+        if ("sent_to" in postData.keys()):
+            if (postData["sent_to"] is not None) and postData["sent_to"] != "":
+                try:
+                    send_to = User.objects.get(username=username)
+                except:
+                    send_to = User.objects.get(pk=postData["sent_to"])
+
+        created_on = datetime.datetime.now()
+        if ("published") in postData.keys():
+            if (postData["published"] is not None) and postData["published"] != "":
+                created_on = datetime.datetime(postData["published"])
+        #will need to change
+        content = postData.get("content",None)
+        images = postData.get("images",None)
+
+        try:
+            newPost = Post(author=author,title=title,description=description,visibility=visibility,send_to=send_to,created_on=created_on,
+                            content=content,contentType=contentType,images=images)
+
+            newPost.save()
+            serializer = PostSerializer(newPost)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        except:
+            serializer = PostSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+
+    def updatePost(self, request, username, post_ID):
+        return
 
 
 class UserViewSet(viewsets.ViewSet):
