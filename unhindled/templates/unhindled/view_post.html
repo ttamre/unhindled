@@ -50,10 +50,12 @@
 <img src="{{post.images.url}}">
 {% endif %}
 
+{% if user.is_authenticated %}
 {% if post|post_liked:user %}
   <a href="{% url 'unlikeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
 {% else %}
   <a href="{% url 'likeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
+{% endif %}
 {% endif %}
 <p>{% like_count_post post.ID %} likes</p>
 
@@ -78,10 +80,12 @@
       {{comment.author}} - {{comment.published}}
     </strong>
     <p>{{ comment.comment}}</p>
+    {% if user.is_authenticated %}
     {% if comment|comment_liked:user %}
     <a href="{% url 'unlikeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
     {% else %}
     <a href="{% url 'likeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
+    {% endif %}
     {% endif %}
     <p>{% like_count_comment comment.ID %} likes</p>
     <hr>
