@@ -148,7 +148,7 @@ a.white-text:hover {
 .comment-box {
   width: 100%;
   min-height: 80px;
-  border: 2px solid #17252A;
+  border: 1px solid #17252A;
   padding: 8px;
   border-radius: 5px;
 }

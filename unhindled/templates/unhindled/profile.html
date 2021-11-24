@@ -57,23 +57,20 @@
 
         </div>
         <p class="non-white-title is-size-6">Posts: </p>
-        <div class="comment-box">
-            {% if posts %}
-                {% for post in posts %}
-                    {% if post.visibility != "unlisted" %}
-                        <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                        <p>{{ post.created_on }}</p>
-                        <p>{{ post.description }}</p>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                <p>No Posts to show.</p>
-            {% endif %}
-
-
-        </div>
+        {% if posts %}
+            {% for post in posts %}
+            <div class="comment-box mt-3">
+                {% if post.visibility != "unlisted" %}
+                    <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                    <p>{{ post.created_on }}</p>
+                    <p>{{ post.description }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No Posts to show.</p>
+        {% endif %}
     </div>
-
 </div>
 </main>
 {% endblock content %}
