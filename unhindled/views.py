@@ -25,7 +25,7 @@ from .serializers import CommentSerializer, LikeSerializer, PostSerializer, User
 import requests
 import json
 import os
-import datetime
+import datetime, math
 
 from unhindled import serializers
 
@@ -90,7 +90,7 @@ class PostViewSet(viewsets.ViewSet):
         data = {}
         data["type"] = "posts"
         data["page"] = page
-        data["size"] = (len(serializer.data) // 5) + 1
+        data["size"] = math.ceil(len(serializer.data) / size)
         data["items"] = postData
 
         return Response(data)
@@ -101,7 +101,7 @@ class PostViewSet(viewsets.ViewSet):
             queryset = Post.objects.get(ID=post_ID)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
-            
+
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
@@ -170,7 +170,11 @@ class PostViewSet(viewsets.ViewSet):
     def updatePost(self, request, username, post_ID):
         loggedInUser = request.user
         user = User.objects.get(username=username)
-        postToEdit = Post.objects.get(ID=post_ID)
+        try:
+            postToEdit = Post.objects.get(ID=post_ID)
+        except:
+            return Response({}, status.HTTP_404_NOT_FOUND)
+            
         if user != loggedInUser:
             return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -217,6 +221,20 @@ class PostViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def deletePost(self, request, username, post_ID):
+        loggedInUser = request.user
+        user = User.objects.get(username=username)
+        try:
+            postToDelete = Post.objects.get(ID=post_ID)
+        except:
+            return Response({}, status.HTTP_404_NOT_FOUND)
+
+        serializer = PostSerializer(postToDelete)
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        postToDelete.delete()
+        return Response({"deleted_post": serializer.data}, status=status.HTTP_202_ACCEPTED)
 
 class UserViewSet(viewsets.ViewSet):
     """
@@ -238,7 +256,7 @@ class UserViewSet(viewsets.ViewSet):
         data = {}
         data["type"] = "authors"
         data["page"] = page
-        data["size"] = (len(serializer.data) // 5) + 1
+        data["size"] = math.ceil(len(serializer.data) / size)
         data["items"] = userData
         return Response(data)
 
@@ -270,7 +288,7 @@ class CommentViewSet(viewsets.ViewSet):
         data = {}
         data["type"] = "comments"
         data["page"] = page
-        data["size"] = (len(serializer.data) // 5) + 1
+        data["size"] = math.ceil(len(serializer.data) / size)
         data["post"] = host + post.author.username + "/articles/" + str(post.ID) + "/comments"
         data["comments"] = commentData
         return Response(data)

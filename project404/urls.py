@@ -32,7 +32,7 @@ urlpatterns = [
     path('service/', include(router.urls)),
     path('service/author/<str:username>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
     path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list', 'post':'createPost'})),
-    path('service/author/<str:username>/posts/<str:post_ID>', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost'})),
+    path('service/author/<str:username>/posts/<str:post_ID>', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),
     path('service/author/<str:username>/posts/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list'})),
     path('service/author/<str:username>/posts/<str:post_ID>/likes', views.LikeViewSet.as_view({'get':'postList'})),
     path('service/author/<str:username>/posts/<str:post_ID>/comments/<str:comment_ID>/likes', views.LikeViewSet.as_view({'get':'commentList'})),
