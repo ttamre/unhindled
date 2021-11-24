@@ -1,5 +1,5 @@
 from django import template
-from . .models import Friendship
+from . .models import Follower
 
 register = template.Library()
  
@@ -8,12 +8,8 @@ def friend_check(author, user):
     #user is the author
     if author == user:
     	return True
-    #user is friends with the author or follows them
-    for friendship in Friendship.objects.filter(requesterId=user):
-        if friendship.adresseeId == author:
-            return True
-    #user is friends with the author, not the author follows the user
-    for friendship in Friendship.objects.filter(adresseeId=user):
-        if friendship.requesterId == author and friendship.status == "accepted":
+    #user is follows the author
+    for follow in Follower.objects.filter(follower=user):
+        if follow.author == author:
             return True
     return False

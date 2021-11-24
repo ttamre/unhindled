@@ -1,9 +1,10 @@
 from django.db.models import fields
 from django.db.models.fields import Field
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from .models import Post, Follower, FollowRequest, UserProfile, Comment, Like
 
-from .models import Comment, Like, Post, UserProfile
-from django.contrib.auth.models import User
+User = get_user_model()
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 
@@ -60,6 +61,39 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
         data["type"] = "comment"
         return data
 
+#for URL: ://service/author/{AUTHOR_ID}/followers
+class FollowerListSerializer(serializers.HyperlinkedModelSerializer):
+    follower = UserSerializer()
+    host = "https://unhindled.herokuapp.com/"
+    class Meta:
+        model = Follower
+        fields = ( 'ID', 'follower' )
+        depth = 1
+    def to_representation(self, obj):
+    	data = super().to_representation(obj)
+    	data["id"] = self.host + "author/" + obj.follower.username
+    	data["url"] = self.host + "author/" + obj.follower.username
+    	data["host"] = self.host 
+    	data["type"] = "author" 
+    	return data
+#for URL: ://service/author/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}                  
+class FollowerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follower
+        fields = '__all__'
+#
+#for URL: ://service/author/{AUTHOR_ID}/friend_request/{FOREIGN_AUTHOR_ID}
+class FollowRequestSerializer(serializers.HyperlinkedModelSerializer):
+    follower = UserSerializer()#UserProfile.objects.get(follower)
+    author = UserSerializer()#UserProfile.objects.get(author)
+    class Meta:
+        model = FollowRequest
+    def to_representation(self, obj):
+    	data["object"] = obj.author
+    	data["actor"] = obj.follower
+    	data["type"] = "follow" 
+    	return data
+
 class LikeSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
     comment = CommentSerializer()
@@ -84,4 +118,4 @@ class LikeSerializer(serializers.HyperlinkedModelSerializer):
             data["post"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.ID)
         
         return data
-        
+

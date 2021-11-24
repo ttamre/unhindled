@@ -1,16 +1,16 @@
 from django.urls import path, include
 from . import views
-
 urlpatterns = [
+    #internal
     path('', views.HomeView.as_view(), name='index'),
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('post/', views.CreatePostView.as_view(), name='createPost'),
     path('<str:pk>/mystream/', views.StreamView.as_view(), name='mystream'),
     path('account', views.AccountView.as_view(), name='account'),
-    path('<str:pk>/friends', views.ManageFriendView.as_view(), name='friends'),
-    path('friend_request', views.friendRequest),
-    path('friend_request_accept', views.friendRequestAccept),
-    path('unfriend', views.unfriend),
+    path('<str:user>/friends', views.ManageFriendView.as_view(), name='friends'),
+    path('follow', views.follow),
+    path('deleteFollowRequest', views.deleteFollowRequest),
+    path('unfollow', views.unfollow),
     path('<str:pk>/profile/', views.ProfileView.as_view(), name='profile'),
     path('<str:pk>/profile/edit', views.EditProfileView.as_view(), name='editProfile'),
     path('<str:user>/articles/<str:pk>', views.view_post, name='viewPost'),

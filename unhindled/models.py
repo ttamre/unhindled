@@ -9,23 +9,27 @@ from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 
-#maybe not best implementation
-class Friendship(models.Model):
-	FRIEND_STATUS = (
-		('pending', 'Pending'),
-		('accepted', 'Accepted'),
-	)
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	requesterId = models.CharField(max_length=100)
-	adresseeId = models.CharField(max_length=100)
-	status = models.CharField(max_length=10, choices=FRIEND_STATUS, default=FRIEND_STATUS[0][0])
-	class Meta:
-			unique_together = (('requesterId', 'adresseeId'),)
-
 class User(AbstractUser):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	username = models.CharField(max_length=100, unique=True)
 	password = models.CharField(max_length=100)
+	
+#maybe not best implementation
+class Follower(models.Model):
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author")
+	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
+	class Meta:
+        	unique_together = (("author", "follower"),)
+        	
+class FollowRequest(models.Model):
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestauthor")
+	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestfollower")
+	class Meta:
+        	unique_together = (("author", "follower"),)	
+
+
 
 class Post(models.Model):
 	CONTENT_TYPES = (
