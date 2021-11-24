@@ -22,7 +22,6 @@ from rest_framework import routers
 from unhindled import views
 
 router = routers.DefaultRouter()
-router.register(r'authors', views.UserViewSet)
 router.register(r'posts', views.PostViewSet)
 
 urlpatterns = [
@@ -30,9 +29,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('service/', include(router.urls)),
+    path('service/authors/', views.UserViewSet.as_view({'get':'list'}) ),
+    path('service/author/<str:id>/', views.UserViewSet.as_view({'get': 'retrieve', 'post':'authorUpdate'}) ),
     path('service/author/<str:username>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
     path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list', 'post':'createPost'})),
-    path('service/author/<str:username>/posts/<str:post_ID>', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),
     path('service/author/<str:username>/posts/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list'})),
     path('service/author/<str:username>/posts/<str:post_ID>/likes', views.LikeViewSet.as_view({'get':'postList'})),
     path('service/author/<str:username>/posts/<str:post_ID>/comments/<str:comment_ID>/likes', views.LikeViewSet.as_view({'get':'commentList'})),

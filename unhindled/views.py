@@ -260,11 +260,68 @@ class UserViewSet(viewsets.ViewSet):
         data["items"] = userData
         return Response(data)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, id):
         queryset = UserProfile.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
-        serializer = UserSerializer(user.user)
+        try:
+            user = User.objects.get(username=id)
+        except:
+            try:
+                user = User.objects.get(pk=int(id))
+            except:
+                return Response({"Error": "User not found"}, status.HTTP_404_NOT_FOUND)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
+
+    def authorUpdate(self, request, id):
+        try:
+            user = User.objects.get(username=id)
+        except:
+            try:
+                user = User.objects.get(pk=int(id))
+            except:
+                return Response({"Error": "User not found"}, status.HTTP_404_NOT_FOUND)
+
+        loggedInUser = request.user
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        userProfile = UserProfile.objects.get(user=user)
+        
+        updateData = request.POST
+
+        if "username" in updateData.keys() and updateData["username"] != "":
+            otherUser = User.objects.filter(username=updateData["username"])
+            if len(otherUser) > 0:
+                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            user.username = updateData["username"]
+        if "first_name" in updateData.keys() and updateData["first_name"] != "":
+            user.first_name = updateData["first_name"]
+        if "last_name" in updateData.keys() and updateData["last_name"] != "":
+            user.last_name = updateData["last_name"]
+        if "email" in updateData.keys() and updateData["email"] != "":
+            user.email = updateData["email"]
+        if "displayName" in updateData.keys() and updateData["displayName"] != "":
+            userProfile.displayName = updateData["displayName"]
+        if "github" in updateData.keys() and updateData["github"] != "":
+            userProfile.github = updateData["github"]
+        if "profileImage" in updateData.keys() and updateData["profileImage"] != "":
+            userProfile.profileImage = updateData["profileImage"]
+
+        try:
+            user.save()
+            userProfile.save()
+            serializer = UserSerializer(user)
+            data = {}
+            data["UpdatedUser"] = serializer.data
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+
+        except:
+            errors = {}
+            errors["Error"] = "Invalid post format" 
+            errors["ReceivedData"] = updateData
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        
 
 class CommentViewSet(viewsets.ViewSet):
     """
