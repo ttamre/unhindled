@@ -40,6 +40,8 @@ CREATE DATABASE unhindled;
 * W3 School: https://www.w3schools.com/howto/howto_css_dropdown.asp
 * Geeksforgeeks: https://www.geeksforgeeks.org/basic-authentication-django-rest-framework/
 * Django REST Framework: https://www.django-rest-framework.org/tutorial/2-requests-and-responses/
+# Checking array elements safely https://stackoverflow.com/questions/28263773/safe-way-to-check-if-array-element-exists
+
 
 ## Project Part 1 Stories Complete (20/43) 
 PROJ-1 UI - UI is complete for all implemented stories (custom)\

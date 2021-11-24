@@ -706,20 +706,20 @@ class StreamView(generic.ListView):
         #         repo_api = event.get("repo", {}).get("url")
         #         repo_resp = requests.get(repo_api, auth=GITHUB_AUTH)
                 
-        #         # Public repos
-        #         if repo_resp.ok:
-        #             url = repo_resp.json().get("html_url")
+                # # Public repos
+                # if repo_resp.ok:
+                #     url = repo_resp.json().get("html_url")
 
-        #         # Private repos - use profile URL instead
-        #         else:
-        #             user_api = event.get("actor", {}).get("url")
-        #             user_resp = requests.get(user_api, auth=GITHUB_AUTH)
-        #             if user_resp.ok:
-        #                 url = user_resp.json().get("html_url")
-        #             else:
-        #                 url = None
+                # # Private repos - use profile URL instead
+                # else:
+                #     user_api = event.get("actor", {}).get("url")
+                #     user_resp = requests.get(user_api, auth=GITHUB_AUTH)
+                #     if user_resp.ok:
+                #         url = user_resp.json().get("html_url")
+                #     else:
+                #         url = None
 
-        #         event_list.append({"repo": repo, "type": type_, "url": url,})
+                # event_list.append({"repo": repo, "type": type_, "url": url,})
 
         headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{request.user}/events/public'}
         return render(request, 'unhindled/mystream.html', {"headers": headers})
