@@ -97,11 +97,20 @@ class PostViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, username, post_ID):
         user = User.objects.get(username=username)
-        queryset = Post.objects.get(ID=post_ID)
+        try:
+            queryset = Post.objects.get(ID=post_ID)
+        except:
+            return Response({}, status.HTTP_404_NOT_FOUND)
+            
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
-    def createPost(self, request, username):
+    def createPost(self, request, username,post_ID=None):
+        if post_ID != None:
+            post = Post.objects.filter(ID=post_ID)
+            if len(post) > 0:
+                return Response({"Error":"Post ID already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
         loggedInUser = request.user
         user = User.objects.get(username=username)
 
@@ -143,6 +152,8 @@ class PostViewSet(viewsets.ViewSet):
         try:
             newPost = Post(author=author,title=title,description=description,visibility=visibility,send_to=send_to,created_on=created_on,
                             content=content,contentType=contentType,images=images)
+            if post_ID != None:
+                newPost.ID = post_ID
 
             newPost.save()
             serializer = PostSerializer(newPost)
