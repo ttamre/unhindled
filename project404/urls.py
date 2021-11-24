@@ -39,5 +39,7 @@ urlpatterns = [
     path('service/author/<str:username>/posts/<str:post_ID>/likes', views.LikeViewSet.as_view({'get':'postList', 'post':'likePost'})),
     path('service/author/<str:username>/posts/<str:post_ID>/comments/<str:comment_ID>/likes', views.LikeViewSet.as_view({'get':'commentList', 'post':'likeComment'})),
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('foreign_posts', views.get_foreign_posts),
+    path('foreign_authors', views.get_foreign_authors),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -22,6 +22,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework import viewsets
 
 from .serializers import CommentSerializer, LikeSerializer, PostSerializer, UserSerializer
@@ -32,6 +33,7 @@ import os
 import datetime, math
 
 from unhindled import serializers
+from .connect import get_list_foreign_posts, get_list_foreign_authors
 
 CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
@@ -722,3 +724,27 @@ class EditProfileView(generic.UpdateView):
     def test_func(self):
         profile = self.get_object()
         return self.request.user == profile.user
+
+
+
+
+@api_view(['GET'])
+# @authentication_classes([CustomAuthentication])
+def get_foreign_posts(request):
+    if request.method == "GET":
+        foreign_posts = get_list_foreign_posts()
+        print(foreign_posts)
+        return Response({"foreign posts": foreign_posts})
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['GET'])
+# @authentication_classes([CustomAuthentication])
+def get_foreign_authors(request):
+    if request.method == "GET":
+        foreign_authors = get_list_foreign_authors()
+        print(foreign_authors)
+        return Response({"foreign authors": foreign_authors})
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
