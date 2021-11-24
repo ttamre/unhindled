@@ -1,18 +1,16 @@
 from django.db.models.fields import Field
 from rest_framework import serializers
 
-from .models import Post
-from django.contrib.auth.models import User
+from .models import Post, Friendship, User, UserProfile, Comment
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-
     class Meta:
         model = User
         fields = ('email', 'first_name', 'last_name', 'password', 'is_superuser')
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
-    host = "httls://127.0.0.1:8000"
+    host = "https://127.0.0.1:8000"
     class Meta:
         model = Post
         fields = ('ID', 'author', 'contentType', 'title', 'description','visibility', 'created_on')

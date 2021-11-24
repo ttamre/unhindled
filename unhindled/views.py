@@ -581,12 +581,10 @@ def unfriend(request):
    next = request.POST.get('next', '/')
    return HttpResponseRedirect(next)
 
-
 class CreatePostView(generic.CreateView):
     model = Post
     template_name = "unhindled/create_post.html"
     fields = "__all__"
-
 
 # def SharePost(request, user, post_id):
 #     return HttpResponseRedirect(reverse('index'))

@@ -43,11 +43,11 @@
     {% endif %}
   {% endif %}
   {% if post.is_shared_post %}
-  <a href="{% url 'viewPost' post.author.username post.originalPost.pk %}">View Original</a>
+    <a href="{% url 'viewPost' post.author.username post.originalPost.pk %}">View Original</a>
   {% else %}
-  <a href="{% url 'updatePost' post.author.username post.pk %}">Edit</a>
+    <a href="{% url 'updatePost' post.author.username post.pk %}">Edit</a>
   {% endif %}
-  <a href="{% url 'deletePost' post.author.username post.pk %}">Delete</a>
+    <a href="{% url 'deletePost' post.author.username post.pk %}">Delete</a>
 {% else %}
   <a href="{% url 'sharePost' post.author.username post.pk %}" onclick="return confirm('Are you sure?');">Share</a>
 {% endif %}

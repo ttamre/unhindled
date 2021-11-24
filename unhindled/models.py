@@ -4,7 +4,6 @@ from django.db.models.fields import EmailField
 from django.urls import reverse
 from datetime import datetime, date
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
