@@ -24,7 +24,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         userProfile = UserProfile.objects.get(user=obj)
         profileData = UserProfileSerializer(userProfile)
         data.update(profileData.data)
-        data["profileImage"] = self.host[:-1] + data["profileImage"]
+        if (data["profileImage"] is None) == False:
+            data["profileImage"] = self.host[:-1] + str(data["profileImage"])
         data["url"] = self.host + "profile/" + str(userProfile.pk)
         data["host"] = self.host + "profile/" + str(userProfile.pk)
         data["id"] = self.host + "profile/" + str(userProfile.pk)
