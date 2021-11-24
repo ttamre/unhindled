@@ -105,6 +105,11 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
+    def allPosts(self, request):
+        posts = Post.objects.filter(visibility='public').order_by('created_on')
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
     def createPost(self, request, username,post_ID=None):
         if post_ID != None:
             post = Post.objects.filter(ID=post_ID)
