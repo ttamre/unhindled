@@ -14,10 +14,14 @@ from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .models import Post, Friendship, UserProfile, Comment
 from .forms import *
+
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 from rest_framework import status
-
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework import viewsets
 
 from .serializers import CommentSerializer, LikeSerializer, PostSerializer, UserSerializer
@@ -72,6 +76,8 @@ class SignUpView(generic.CreateView):
     template_name = 'registration/signup.html'
 
 class PostViewSet(viewsets.ViewSet):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('created_on')
     serializer_class = PostSerializer
 
@@ -245,6 +251,8 @@ class UserViewSet(viewsets.ViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -326,12 +334,12 @@ class UserViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = updateData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-        
-
 class CommentViewSet(viewsets.ViewSet):
     """
     API endpoint that allows comments to be viewed or edited.
     """
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('created_on')
     serializer_class = CommentSerializer
 
@@ -397,6 +405,8 @@ class LikeViewSet(viewsets.ViewSet):
     """
     API endpoint that allows comments to be viewed or edited.
     """
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def commentList(self, request, username, post_ID, comment_ID):
         factory = APIRequestFactory()
