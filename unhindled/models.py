@@ -1,11 +1,14 @@
 import uuid
 from django.db import models
+from django.db.models.fields import EmailField
 from django.urls import reverse
 from datetime import datetime, date
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth import get_user_model
 
 #maybe not best implementation
 class Friendship(models.Model):
@@ -19,6 +22,11 @@ class Friendship(models.Model):
 	status = models.CharField(max_length=10, choices=FRIEND_STATUS, default=FRIEND_STATUS[0][0])
 	class Meta:
 			unique_together = (('requesterId', 'adresseeId'),)
+
+class User(AbstractUser):
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	username = models.CharField(max_length=100, unique=True)
+	password = models.CharField(max_length=100)
 
 class Post(models.Model):
 	CONTENT_TYPES = (
@@ -47,6 +55,11 @@ class Post(models.Model):
 
 	sharedBy = models.ForeignKey(User, on_delete=models.CASCADE, related_name='shared_by', null=True, blank=True, editable =False)
 	originalPost = models.ForeignKey('Post', on_delete=models.CASCADE, null=True, blank=True, editable =False)
+
+	def create_post(sender, instance, created, **kwargs):
+		if created:
+			post = Post(user=instance, author=instance.displayName)
+			post.save()
 
 	@property
 	def is_shared_post(self):
@@ -83,6 +96,7 @@ class Like(models.Model):
 class UserProfile(models.Model):
 	user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
 	displayName = models.CharField(max_length=20, blank=True, null=True)
+	email = models.EmailField(max_length=254, blank=True, null=True)
 	date_of_birth = models.DateField(null=True, blank=True)
 	location = models.CharField(max_length=100, default="", blank=True, null=True)
 	more_info = models.TextField(max_length=500, default="", blank=True)

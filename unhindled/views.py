@@ -99,8 +99,6 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
-
-
 class UserViewSet(viewsets.ViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -416,7 +414,7 @@ class ProfileView(View):
 
 class EditProfileView(generic.UpdateView):
     model = UserProfile
-    fields = ['displayName', 'date_of_birth',  'location', 'more_info', 'profileImage']
+    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
     template_name = 'unhindled/edit_profile.html'
     
     def get_success_url(self):

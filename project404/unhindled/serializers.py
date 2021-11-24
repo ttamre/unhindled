@@ -1,7 +1,7 @@
 from django.db.models.fields import Field
 from rest_framework import serializers
 
-from .models import Post, Author
+from .models import Post
 from django.contrib.auth.models import User
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

@@ -1,32 +1,52 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
+{% extends 'base.html' %}
 
-<title>Unhindled</title>
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
-</head>
-<body>
-<main>
-</main>
-</body>
-</html>
+{% block title %}Home{% endblock %}
+{% block content %}
+{% #header user=user %}
+{% /header %}
+{% load crispy_forms_tags %}
+
 {% load markdown_extras %}
 {% load comment_like %}
 {% load post_like %}
 
-<h1>{{post.title}}</h1>
-<small>Author: {{post.author}}</small>
+<main>
+<p class="non-white-title is-size-4 mb-2">{{post.title}}</p>
+<small>Author: <a href="{% url 'profile' post.author.pk %}">{{post.author}}</a></small>
 <br>
 {% load tz %}
 {% localtime on %}
 <small>Created: {{post.created_on}}</small>
 {% endlocaltime %}
 <br>
-<hr>
-<a href="{% url 'index' %}">Home</a>
+<small>Description: {{post.description}}</small>
+
+<div class="post-box">
+  {% if post.contentType == "md" %}
+    <p>{{post.content | markdown | safe }}</p>
+  {% else %}
+    <p>{{post.content}}</p>
+  {% endif %}
+</div>
+{% if post.images %}
+<img src="{{post.images.url}}">
+{% endif %}
+
+<!-- get this logic to work -->
+{% if like_count_post == 1 %}
+  <p class="mb-3 has-text-weight-bold">{% like_count_post post.ID %} like</p>
+{% else %}
+  <p class="mb-3 has-text-weight-bold">{% like_count_post post.ID %} likes</p>
+{% endif %}
+
 {% if user.username == post.author.username %}
+  {% if user.is_authenticated %}
+    {% if post|post_liked:user %}
+      <a href="{% url 'unlikeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
+    {% else %}
+      <a href="{% url 'likeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
+    {% endif %}
+  {% endif %}
   {% if post.is_shared_post %}
   <a href="{% url 'viewPost' post.author.username post.originalPost.pk %}">View Original</a>
   {% else %}
@@ -36,58 +56,37 @@
 {% else %}
   <a href="{% url 'sharePost' post.author.username post.pk %}" onclick="return confirm('Are you sure?');">Share</a>
 {% endif %}
-<br>
-<br>
-{{post.description}}
-{% if post.contentType == "md" %}
-<p>{{post.content | markdown | safe }}</p>
-{% else %}
-<p>{{post.content}}</p>
-{% endif %}
-<br>
-<br>
-{% if post.images %}
-<img src="{{post.images.url}}">
-{% endif %}
 
-{% if user.is_authenticated %}
-{% if post|post_liked:user %}
-  <a href="{% url 'unlikeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
-{% else %}
-  <a href="{% url 'likeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
-{% endif %}
-{% endif %}
-<p>{% like_count_post post.ID %} likes</p>
+<br>
+<div class="mt-2">
+  <form method = 'post'>
+    {% csrf_token %}
+    {{ comment_form|crispy }}
+    {% if request.user.is_authenticated %}
+      <button class="mt-5">Send</button>
+      {% else %}
+      <button type="button" disabled>Send</button>
+    {% endif %}
+  </form>
+</div>
 
-<hr>
-
-<form method = 'post'>
-  {% csrf_token %}
-  {{ comment_form.as_p }}
-  {% if request.user.is_authenticated %}
-    <button>Send</button>
-    {% else %}
-    <button type="button" disabled>Send</button>
-  {% endif %}
-</form>
-
-<div class="mt-5">
-  {{ post.comment.count}} Comment{{ post.comment.count|pluralize}}
+<div class="mt-5 mb-6">
+  <p class="mt-3">{{ post.comment.count}} Comment{{ post.comment.count|pluralize}}</p>
   <br>
   {% for comment in post.comment.all %}
-  <br>
-    <strong>
-      {{comment.author}} - {{comment.published}}
-    </strong>
+  <div class="comment-box mb-3">
+    <strong><a href="{% url 'profile' comment.author.pk %}">{{comment.author}}</a> - {{comment.published}}</strong>
     <p>{{ comment.comment}}</p>
+    <p>{% like_count_comment comment.ID %} likes -
     {% if user.is_authenticated %}
-    {% if comment|comment_liked:user %}
-    <a href="{% url 'unlikeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
-    {% else %}
-    <a href="{% url 'likeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
-    {% endif %}
-    {% endif %}
-    <p>{% like_count_comment comment.ID %} likes</p>
-    <hr>
+      {% if comment|comment_liked:user %}
+      <a href="{% url 'unlikeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
+      {% else %}
+      <a href="{% url 'likeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
+      {% endif %}
+    {% endif %}</p>
+  </div>
   {% endfor %}
 </div>
+</main>
+{% endblock content %}

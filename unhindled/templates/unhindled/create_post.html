@@ -9,11 +9,11 @@
 {% /header %}
 
 <main>
-    <p class="non-white-title mt-4 mb-2">Create Post</p>
+    <p class="non-white-title">Create Post</p>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form|crispy }}
-        <button class="mt-5">Post</button>
+        <button class="mt-5 mb-5">Post</button>
         <!-- this is custom form but doesn't work 100% -->
         <!-- <div class="mt-3">
             <label for="{{ form.author.id_for_label }}">Title: </label>
