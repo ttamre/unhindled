@@ -37,6 +37,7 @@ CREATE DATABASE unhindled;
 * Adeyemi Atoyegbe https://www.section.io/engineering-education/django-app-using-postgresql-database/
 * Mitchel Cabuloy https://mitchel.me/slippers/docs/getting-started/
 * W3 School https://www.w3schools.com/howto/howto_css_dropdown.asp
+# Checking array elements safely https://stackoverflow.com/questions/28263773/safe-way-to-check-if-array-element-exists
 
 ## Project Part 1 Stories Complete (20/43) 
 PROJ-1 UI - UI is complete for all implemented stories (custom)\
