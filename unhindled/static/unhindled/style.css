@@ -61,7 +61,7 @@ a.white-title:hover {
 }
 
 .non-white-title {
-  margin: 2rem 0 1rem;
+  margin: 1rem 0;
   font-size: 2rem;
   color: #17252A;
   font-weight: 900;
@@ -134,6 +134,23 @@ a.white-text:hover {
 .image-post {
   max-width: 800px;
   max-height: 480px;
+}
+
+.post-box {
+  width: 100%;
+  min-height: 160px;
+  border: 2px solid #17252A;
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 5px;
+}
+
+.comment-box {
+  width: 100%;
+  min-height: 80px;
+  border: 1px solid #17252A;
+  padding: 8px;
+  border-radius: 5px;
 }
 
 /* 'Components' Page */

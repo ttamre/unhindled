@@ -11,19 +11,19 @@
 <main>
 <div>
     {% if user.is_authenticated %}
-        <p class="non-white-title mt-4 mb-2">Home</p>
+        <p class="non-white-title">Home</p>
         {% if object_list %}
             {% for post in object_list %}
                 {% if post.visibility == "friends" and post.author.username|friend_check:user.username  or post.visibility == "public" %}
                     <div class="post">
                         {% if post.is_shared_post %}
                             <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                            Shared by: {{ post.sharedBy.username }} <br>
+                            Shared by: <a href="{% url 'profile' post.sharedBy.username.pk %}">{{ post.sharedBy.username }}</a> <br>
                         {% else %}
                             <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                         {% endif %}
-                        Author: {{ post.author }} <br>
-                        {{ post.description }}
+                        <p class="mt-3"><b>Author: </b><a href="{% url 'profile' post.author.pk %}">{{post.author}}</a><br></p>
+                        <b>Description:</b> {{ post.description }}
                     </div>
                 {% endif %}
             {% endfor %}
@@ -36,18 +36,18 @@
                     {% if post.visibility == "public" %}
                         <div class="post">
                             {% if post.is_shared_post %}
-                                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                                Shared by: {{ post.sharedBy.username }} <br>
+                                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a><br>
+                                Shared by: <a href="{% url 'profile' post.sharedBy.username.pk %}">{{ post.sharedBy.username }}</a> <br>
                             {% else %}
                                 <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
                             {% endif %}
-                            By: {{ post.author }} <br>
-                            {{ post.description }}
+                            <p class="mt-3"><b>Author: </b><a href="{% url 'profile' post.author.pk %}">{{post.author}}</a><br></p>
+                            <b>Description:</b> {{ post.description }}
                         </div>
                     {% endif %}
                 {% endfor %}
             {% else %}
-                <p class="non-white-title mt-4 mb-2">Home</p>
+                <p class="non-white-title">Home</p>
                 <p>No Posts to show.</p>
             {% endif %}
     {% endif %}

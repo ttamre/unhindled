@@ -581,12 +581,10 @@ def unfriend(request):
    next = request.POST.get('next', '/')
    return HttpResponseRedirect(next)
 
-
 class CreatePostView(generic.CreateView):
     model = Post
     template_name = "unhindled/create_post.html"
     fields = "__all__"
-
 
 # def SharePost(request, user, post_id):
 #     return HttpResponseRedirect(reverse('index'))
@@ -704,7 +702,7 @@ class ProfileView(View):
 
 class EditProfileView(generic.UpdateView):
     model = UserProfile
-    fields = ['displayName', 'date_of_birth',  'location', 'more_info', 'profileImage']
+    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
     template_name = 'unhindled/edit_profile.html'
     
     def get_success_url(self):

@@ -7,7 +7,7 @@
 <main>
   {% if not user.is_authenticated %}
     <div class="login-page">
-      <p class="non-white-title">Login</p>
+      <p class="non-white-title">Log In</p>
       <form method="post">
         {% csrf_token %}
         {{ form | crispy }}

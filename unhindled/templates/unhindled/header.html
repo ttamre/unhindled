@@ -4,14 +4,14 @@
         <div class="user-info">
             <a class="white-title" href="{% url 'index' %}">Unhindled</a>
             <div class="link-navigation">
-              <a class="white-text mr-3" href="{% url 'mystream' %}">My Stream</a>
+              <a class="white-text mr-3" href="{% url 'mystream' user.pk %}">My Stream</a>
               <a class="white-text mr-3" href="{% url 'createPost' %}">Create Post</a>
             </div>
             <div class="dropdown ml-2 mr-5-half">
               <img class="pfp" src="{{ user.profile.profileImage.url }}" width="40px" height="40px" />
               <div class="dropdown-content">
-                <a class="white-text" href="{% url 'profile' user.profile.pk %}">Profile</a>
-                <a class="white-text" href="{% url 'friends' user.username %}">Manage Friends</a>
+                <a class="white-text" href="{% url 'profile' user.pk %}">Profile</a>
+                <a class="white-text" href="{% url 'friends' user.pk %}">Manage Friends</a>
                 <a class="white-text" href="{% url 'logout' %}">Log Out</a>
               </div>
             </div>
