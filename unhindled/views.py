@@ -362,6 +362,37 @@ class CommentViewSet(viewsets.ViewSet):
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
+    def postComment(self, request, username, post_ID):
+        loggedInUser = request.user
+        try:
+            post = Post.objects.get(ID=post_ID)
+        except:
+            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+
+        if loggedInUser.is_authenticated:
+            commentData = request.POST
+            if ("comment" not in commentData.keys()) or ("contentType" not in commentData.keys()):
+                return Response({"error": "missing comment text or contentType"}, status.HTTP_400_BAD_REQUEST)
+
+            if commentData["contentType"] not in ["md", "txt"]:
+                return Response({"error": "comment only supports md and txt"}, status.HTTP_400_BAD_REQUEST)
+
+            try:
+                newComment = Comment(post=post,author=loggedInUser,
+                    comment=commentData["comment"],contentType=commentData["contentType"])
+
+                newComment.save()
+
+                serializer = CommentSerializer(newComment)
+                return Response({"NewComment": serializer.data}, status.HTTP_201_CREATED)
+
+            except:
+                return Response({"error": "Could not save comment"}, status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
 class LikeViewSet(viewsets.ViewSet):
     """
     API endpoint that allows comments to be viewed or edited.
