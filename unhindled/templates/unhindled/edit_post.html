@@ -1,8 +1,20 @@
-<h1>Edit Post</h1>
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+{% #header user=user %}
+{% /header %}
+
+{% load crispy_forms_tags %}
+
+<p class="non-white-title">Edit Post</p>
 
 <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form|crispy }}
     <input type="submit" value="Confirm" />
     <input type="submit" name="Cancel" value="Cancel" /> 
 </form>
+{% endblock %}

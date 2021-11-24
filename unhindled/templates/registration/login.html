@@ -1,25 +1,21 @@
-<!DOCTYPE html>
-<html>
-    <head>
-    <meta charset="utf-8">
-    <title>Unhindled</title>
-    {% load static %}
-    <link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
-    </head>
-    <body>
-      {% if not user.is_authenticated %}
-        <main>
-          <div class="login-page">
-            <p class="non-white-title">Login</p>
-            <form method="post">
-              {% csrf_token %}
-              {{ form.as_p }}
-              <button type="submit">Log In</button>
-            </form>
-          </div>
-        </main>
-      {% else %}
-        <meta http-equiv="refresh" content="time; URL=/" />
-      {% endif %}
-    </body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+{% load crispy_forms_tags %}
+<main>
+  {% if not user.is_authenticated %}
+    <div class="login-page">
+      <p class="non-white-title">Log In</p>
+      <form method="post">
+        {% csrf_token %}
+        {{ form | crispy }}
+        <button class="mt-5" type="submit">Log In</button>
+      </form>
+    </div>
+  {% else %}
+    <meta http-equiv="refresh" content="time; URL=/" />
+  {% endif %}
+</main>
+{% endblock %}

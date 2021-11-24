@@ -22,7 +22,6 @@ from rest_framework import routers
 from unhindled import views
 
 router = routers.DefaultRouter()
-router.register(r'authors', views.UserViewSet)
 router.register(r'posts', views.PostViewSet)
 
 follower_actions = {
@@ -36,9 +35,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('service/', include(router.urls)),
-    path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list'})),
-    path('service/author/<str:username>/posts/<str:post_ID>', views.PostViewSet.as_view({'get':'retrieve'})),
-    path('service/author/<str:username>/posts/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list'})),
+    path('service/allposts/', views.PostViewSet.as_view({'get':'allPosts'})),
+    path('service/authors/', views.UserViewSet.as_view({'get':'list'}) ),
+    path('service/author/<str:id>/', views.UserViewSet.as_view({'get': 'retrieve', 'post':'authorUpdate'}) ),
+    path('service/author/<str:username>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
+    path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list', 'post':'createPost'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list', 'post':'postComment'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/likes', views.LikeViewSet.as_view({'get':'postList', 'post':'likePost'})),
+    path('service/author/<str:username>/posts/<str:post_ID>/comments/<str:comment_ID>/likes', views.LikeViewSet.as_view({'get':'commentList', 'post':'likeComment'})),
     path('service/author/<str:author>/followers', views.FollowerListViewset.as_view({'get':'list'})), 
     path('service/author/<str:author>/followers/<str:follower>', views.FollowerViewset.as_view(actions=follower_actions)),
     path('service/author/<str:author>/friend_request/<str:follower>', views.FriendRequestViewset.as_view({'post':'create'})),

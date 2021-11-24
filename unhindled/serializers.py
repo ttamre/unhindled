@@ -1,8 +1,8 @@
+from django.db.models import fields
 from django.db.models.fields import Field
 from rest_framework import serializers
-
 from django.contrib.auth.models import User
-from .models import Post, Follower, FollowRequest, UserProfile, Comment
+from .models import Post, Follower, FollowRequest, UserProfile, Comment, Like
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 
@@ -23,7 +23,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         userProfile = UserProfile.objects.get(user=obj)
         profileData = UserProfileSerializer(userProfile)
         data.update(profileData.data)
-        data["profileImage"] = self.host[:-1] + data["profileImage"]
+        if (data["profileImage"] is None) == False:
+            data["profileImage"] = self.host[:-1] + str(data["profileImage"])
         data["url"] = self.host + "profile/" + str(userProfile.pk)
         data["host"] = self.host + "profile/" + str(userProfile.pk)
         data["id"] = self.host + "profile/" + str(userProfile.pk)
@@ -36,7 +37,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = Post
-        fields = ('ID', 'author', 'contentType', 'title', 'description','visibility', 'created_on')
+        fields = ('ID', 'author','content', 'contentType', 'title', 'description','visibility', 'created_on')
         depth = 1
 
     def to_representation(self, obj):
@@ -90,4 +91,29 @@ class FollowRequestSerializer(serializers.HyperlinkedModelSerializer):
     	data["actor"] = obj.follower
     	data["type"] = "follow" 
     	return data
+
+class LikeSerializer(serializers.HyperlinkedModelSerializer):
+    author = UserSerializer()
+    comment = CommentSerializer()
+    host = "https://unhindled.herokuapp.com/"
+    post = PostSerializer()
+    class Meta:
+        model = Like
+        fields = ('author', 'comment', 'post', 'ID')
+        depth = 1
+
+    def to_representation(self, obj):
+        data = super().to_representation(obj)
+        data["type"] = "Like"
+        if data["post"] is not None:
+            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.post.ID)
+            data["summary"] = str(obj.author.username) + " likes your post"
+            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.post.ID)
+        elif data["comment"] is not None:
+            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.ID) + "/comments/" + str(obj.comment.ID)
+            data["summary"] = str(obj.author.username) + " likes your comment"
+            data["comment"] = str(obj.comment.ID)
+            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.ID)
+        
+        return data
 

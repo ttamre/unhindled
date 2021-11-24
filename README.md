@@ -32,11 +32,13 @@ CREATE DATABASE unhindled;
 * Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
 * Table CSS: https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy
 * Abhishek Verma: https://www.youtube.com/watch?v=An4hW4TjKhE
-* Will Vincent https://learndjango.com/tutorials/django-login-and-logout-tutorial
-* Richard Yen https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
-* Adeyemi Atoyegbe https://www.section.io/engineering-education/django-app-using-postgresql-database/
-* Mitchel Cabuloy https://mitchel.me/slippers/docs/getting-started/
-* W3 School https://www.w3schools.com/howto/howto_css_dropdown.asp
+* Will Vincent: https://learndjango.com/tutorials/django-login-and-logout-tutorial
+* Will Vincent: https://learndjango.com/tutorials/django-signup-tutorial
+* Richard Yen: https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+* Adeyemi Atoyegbe: https://www.section.io/engineering-education/django-app-using-postgresql-database/
+* Mitchel Cabuloy: https://mitchel.me/slippers/docs/getting-started/
+* W3 School: https://www.w3schools.com/howto/howto_css_dropdown.asp
+* Geeksforgeeks: https://www.geeksforgeeks.org/basic-authentication-django-rest-framework/
 
 ## Project Part 1 Stories Complete (20/43) 
 PROJ-1 UI - UI is complete for all implemented stories (custom)\
