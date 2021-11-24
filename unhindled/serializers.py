@@ -63,6 +63,7 @@ class LikeSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
     comment = CommentSerializer()
     host = "https://unhindled.herokuapp.com/"
+    post = PostSerializer()
     class Meta:
         model = Like
         fields = ('author', 'comment', 'post', 'ID')

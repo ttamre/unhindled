@@ -452,6 +452,66 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
+    def likePost(self, request, username, post_ID):
+        loggedInUser = request.user
+        try:
+            post = Post.objects.get(ID=post_ID)
+        except:
+            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+
+        if loggedInUser.is_authenticated:
+            try:
+                existingLike = Like.objects.filter(post=post,author=loggedInUser)
+                if len(existingLike) > 0:
+                    serializer = LikeSerializer(existingLike,many=True)
+                    data = {}
+                    data["unlikedPost"] = serializer.data
+                    existingLike.delete()
+                    
+                    return Response(data, status.HTTP_202_ACCEPTED)
+
+                newLike = Like(post=post,author=loggedInUser)
+                newLike.save()
+
+                serializer = LikeSerializer(newLike)
+                return Response({"likedPost": serializer.data}, status.HTTP_201_CREATED)
+
+            except:
+                return Response({"error": "Could not like/unlike post"}, status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def likeComment(self, request, username, post_ID, comment_ID):
+        loggedInUser = request.user
+        try:
+            comment = Comment.objects.get(ID=comment_ID)
+        except:
+            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+
+        if loggedInUser.is_authenticated:
+            try:
+                existingLike = Like.objects.filter(comment=comment,author=loggedInUser)
+                if len(existingLike) > 0:
+                    serializer = LikeSerializer(existingLike, many=True)
+                    data = {}
+                    data["unlikedComment"] = serializer.data
+                    existingLike.delete()
+                    
+                    return Response(data, status.HTTP_202_ACCEPTED)
+
+                newLike = Like(comment=comment,author=loggedInUser)
+                newLike.save()
+
+                serializer = LikeSerializer(newLike)
+                return Response({"likedComment": serializer.data}, status.HTTP_201_CREATED)
+
+            except:
+                return Response({"error": "Could not like/unlike comment"}, status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+
 class StreamView(generic.ListView):
     model = Post
     template_name = "unhindled/mystream.html"
