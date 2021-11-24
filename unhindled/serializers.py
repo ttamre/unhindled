@@ -24,7 +24,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         userProfile = UserProfile.objects.get(user=obj)
         profileData = UserProfileSerializer(userProfile)
         data.update(profileData.data)
-        data["profileImage"] = self.host[:-1] + data["profileImage"]
+        if (data["profileImage"] is None) == False:
+            data["profileImage"] = self.host[:-1] + str(data["profileImage"])
         data["url"] = self.host + "profile/" + str(userProfile.pk)
         data["host"] = self.host + "profile/" + str(userProfile.pk)
         data["id"] = self.host + "profile/" + str(userProfile.pk)
@@ -37,7 +38,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = Post
-        fields = ('ID', 'author', 'contentType', 'title', 'description','visibility', 'created_on')
+        fields = ('ID', 'author','content', 'contentType', 'title', 'description','visibility', 'created_on')
         depth = 1
 
     def to_representation(self, obj):
@@ -63,6 +64,7 @@ class LikeSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
     comment = CommentSerializer()
     host = "https://unhindled.herokuapp.com/"
+    post = PostSerializer()
     class Meta:
         model = Like
         fields = ('author', 'comment', 'post', 'ID')

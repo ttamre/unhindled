@@ -16,6 +16,7 @@ from .models import Post, Friendship, UserProfile, Comment
 from .forms import *
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
+from rest_framework import status
 
 from rest_framework import viewsets
 
@@ -24,6 +25,7 @@ from .serializers import CommentSerializer, LikeSerializer, PostSerializer, User
 import requests
 import json
 import os
+import datetime, math
 
 from unhindled import serializers
 
@@ -88,16 +90,156 @@ class PostViewSet(viewsets.ViewSet):
         data = {}
         data["type"] = "posts"
         data["page"] = page
-        data["size"] = (len(serializer.data) // 5) + 1
+        data["size"] = math.ceil(len(serializer.data) / size)
         data["items"] = postData
 
         return Response(data)
 
     def retrieve(self, request, username, post_ID):
         user = User.objects.get(username=username)
-        queryset = Post.objects.get(ID=post_ID)
+        try:
+            queryset = Post.objects.get(ID=post_ID)
+        except:
+            return Response({}, status.HTTP_404_NOT_FOUND)
+
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
+
+    def allPosts(self, request):
+        posts = Post.objects.filter(visibility='public').order_by('created_on')
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
+
+    def createPost(self, request, username,post_ID=None):
+        if post_ID != None:
+            post = Post.objects.filter(ID=post_ID)
+            if len(post) > 0:
+                return Response({"Error":"Post ID already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+        loggedInUser = request.user
+        user = User.objects.get(username=username)
+
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        postData = request.POST
+        author = user
+        contentType = 'txt'
+        for types in Post.CONTENT_TYPES:
+            if types[1] == postData["contentType"] or types[0] == postData["contentType"]:
+                contentType = types[0]
+
+        
+        title = postData.get("title",None)
+        description = postData.get("description",None)
+
+        visibility = 'public'
+        for types in Post.VISIBILITY:
+            if types[1].lower() == postData["visibility"].lower():
+                visibility = types[0]
+
+        send_to = None
+        if ("sent_to" in postData.keys()):
+            if (postData["sent_to"] is not None) and postData["sent_to"] != "":
+                try:
+                    send_to = User.objects.get(username=username)
+                except:
+                    send_to = User.objects.get(pk=postData["sent_to"])
+
+        created_on = datetime.datetime.now()
+        if ("published") in postData.keys():
+            if (postData["published"] is not None) and postData["published"] != "":
+                created_on = datetime.datetime(postData["published"])
+        #will need to change
+        content = postData.get("content",None)
+        images = postData.get("images",None)
+
+        try:
+            newPost = Post(author=author,title=title,description=description,visibility=visibility,send_to=send_to,created_on=created_on,
+                            content=content,contentType=contentType,images=images)
+            if post_ID != None:
+                newPost.ID = post_ID
+
+            newPost.save()
+            serializer = PostSerializer(newPost)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except:
+            serializer = PostSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
+
+    def updatePost(self, request, username, post_ID):
+        loggedInUser = request.user
+        user = User.objects.get(username=username)
+        try:
+            postToEdit = Post.objects.get(ID=post_ID)
+        except:
+            return Response({}, status.HTTP_404_NOT_FOUND)
+            
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        postData = request.POST
+        warning = {}
+        if "contentType" in postData.keys():
+            if postData["contentType"] != "":
+                for types in Post.CONTENT_TYPES:
+                    if types[1] == postData["contentType"] or types[0] == postData["contentType"]:
+                        postToEdit.contentType = types[0]
+        if "title" in postData.keys() and postData["title"] != "":
+            if postData["contentType"] != "":
+                postToEdit.title = postData["title"]
+        if "description" in postData.keys() and postData["description"] != "":
+            postToEdit.description = postData["description"]
+        if "content" in postData.keys() and postData["content"] != "":
+            postToEdit.content = postData["content"]
+        if "visibility" in postData.keys() and postData["visibility"] != "":
+            for types in Post.VISIBILITY:
+                if types[1].lower() == postData["visibility"].lower():
+                    if types[0] != "send":
+                        postToEdit.visibility = types[0]
+                    else:
+                        warning["visibility"] =  "Post can't be converted to a Inbox post, please delete the post and repost with changed visibility"
+        if "send_to" in postData.keys() and postData["send_to"] != "":
+            warning["send_to"] =  "Post can't change receiver. Please delete post and resend"
+        if "created_on" in postData.keys() and postData["created_on"] != "":
+            warning["created_on"] = "Published date can't be changed"
+        if "images" in postData.keys() and postData["images"] != "":
+            postToEdit.images = postData["images"]
+    
+        try:
+            postToEdit.save()
+            serializer = PostSerializer(postToEdit)
+            data = {}
+            data["UpdatedPost"] = serializer.data
+            if len(warning.keys()) > 0:
+                data["Warnings"] = warning
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+
+        except:
+            errors = {}
+            errors["Error"] = "Invalid post format" 
+            errors["ReceivedData"] = postData
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def deletePost(self, request, username, post_ID):
+        loggedInUser = request.user
+        user = User.objects.get(username=username)
+        try:
+            postToDelete = Post.objects.get(ID=post_ID)
+        except:
+            return Response({}, status.HTTP_404_NOT_FOUND)
+
+        serializer = PostSerializer(postToDelete)
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        postToDelete.delete()
+        return Response({"deleted_post": serializer.data}, status=status.HTTP_202_ACCEPTED)
 
 class UserViewSet(viewsets.ViewSet):
     """
@@ -119,15 +261,72 @@ class UserViewSet(viewsets.ViewSet):
         data = {}
         data["type"] = "authors"
         data["page"] = page
-        data["size"] = (len(serializer.data) // 5) + 1
+        data["size"] = math.ceil(len(serializer.data) / size)
         data["items"] = userData
         return Response(data)
 
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request, id):
         queryset = UserProfile.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
-        serializer = UserSerializer(user.user)
+        try:
+            user = User.objects.get(username=id)
+        except:
+            try:
+                user = User.objects.get(pk=int(id))
+            except:
+                return Response({"Error": "User not found"}, status.HTTP_404_NOT_FOUND)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
+
+    def authorUpdate(self, request, id):
+        try:
+            user = User.objects.get(username=id)
+        except:
+            try:
+                user = User.objects.get(pk=int(id))
+            except:
+                return Response({"Error": "User not found"}, status.HTTP_404_NOT_FOUND)
+
+        loggedInUser = request.user
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        userProfile = UserProfile.objects.get(user=user)
+        
+        updateData = request.POST
+
+        if "username" in updateData.keys() and updateData["username"] != "":
+            otherUser = User.objects.filter(username=updateData["username"])
+            if len(otherUser) > 0:
+                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            user.username = updateData["username"]
+        if "first_name" in updateData.keys() and updateData["first_name"] != "":
+            user.first_name = updateData["first_name"]
+        if "last_name" in updateData.keys() and updateData["last_name"] != "":
+            user.last_name = updateData["last_name"]
+        if "email" in updateData.keys() and updateData["email"] != "":
+            user.email = updateData["email"]
+        if "displayName" in updateData.keys() and updateData["displayName"] != "":
+            userProfile.displayName = updateData["displayName"]
+        if "github" in updateData.keys() and updateData["github"] != "":
+            userProfile.github = updateData["github"]
+        if "profileImage" in updateData.keys() and updateData["profileImage"] != "":
+            userProfile.profileImage = updateData["profileImage"]
+
+        try:
+            user.save()
+            userProfile.save()
+            serializer = UserSerializer(user)
+            data = {}
+            data["UpdatedUser"] = serializer.data
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+
+        except:
+            errors = {}
+            errors["Error"] = "Invalid post format" 
+            errors["ReceivedData"] = updateData
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        
 
 class CommentViewSet(viewsets.ViewSet):
     """
@@ -151,7 +350,7 @@ class CommentViewSet(viewsets.ViewSet):
         data = {}
         data["type"] = "comments"
         data["page"] = page
-        data["size"] = (len(serializer.data) // 5) + 1
+        data["size"] = math.ceil(len(serializer.data) / size)
         data["post"] = host + post.author.username + "/articles/" + str(post.ID) + "/comments"
         data["comments"] = commentData
         return Response(data)
@@ -162,6 +361,37 @@ class CommentViewSet(viewsets.ViewSet):
         comments = Comment.objects.get(id=comment_ID)
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
+
+    def postComment(self, request, username, post_ID):
+        loggedInUser = request.user
+        try:
+            post = Post.objects.get(ID=post_ID)
+        except:
+            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+
+        if loggedInUser.is_authenticated:
+            commentData = request.POST
+            if ("comment" not in commentData.keys()) or ("contentType" not in commentData.keys()):
+                return Response({"error": "missing comment text or contentType"}, status.HTTP_400_BAD_REQUEST)
+
+            if commentData["contentType"] not in ["md", "txt"]:
+                return Response({"error": "comment only supports md and txt"}, status.HTTP_400_BAD_REQUEST)
+
+            try:
+                newComment = Comment(post=post,author=loggedInUser,
+                    comment=commentData["comment"],contentType=commentData["contentType"])
+
+                newComment.save()
+
+                serializer = CommentSerializer(newComment)
+                return Response({"NewComment": serializer.data}, status.HTTP_201_CREATED)
+
+            except:
+                return Response({"error": "Could not save comment"}, status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class LikeViewSet(viewsets.ViewSet):
     """
@@ -221,6 +451,66 @@ class LikeViewSet(viewsets.ViewSet):
         data["type"] = "liked"
         data["items"] = likeData
         return Response(data)
+
+    def likePost(self, request, username, post_ID):
+        loggedInUser = request.user
+        try:
+            post = Post.objects.get(ID=post_ID)
+        except:
+            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+
+        if loggedInUser.is_authenticated:
+            try:
+                existingLike = Like.objects.filter(post=post,author=loggedInUser)
+                if len(existingLike) > 0:
+                    serializer = LikeSerializer(existingLike,many=True)
+                    data = {}
+                    data["unlikedPost"] = serializer.data
+                    existingLike.delete()
+                    
+                    return Response(data, status.HTTP_202_ACCEPTED)
+
+                newLike = Like(post=post,author=loggedInUser)
+                newLike.save()
+
+                serializer = LikeSerializer(newLike)
+                return Response({"likedPost": serializer.data}, status.HTTP_201_CREATED)
+
+            except:
+                return Response({"error": "Could not like/unlike post"}, status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    def likeComment(self, request, username, post_ID, comment_ID):
+        loggedInUser = request.user
+        try:
+            comment = Comment.objects.get(ID=comment_ID)
+        except:
+            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+
+        if loggedInUser.is_authenticated:
+            try:
+                existingLike = Like.objects.filter(comment=comment,author=loggedInUser)
+                if len(existingLike) > 0:
+                    serializer = LikeSerializer(existingLike, many=True)
+                    data = {}
+                    data["unlikedComment"] = serializer.data
+                    existingLike.delete()
+                    
+                    return Response(data, status.HTTP_202_ACCEPTED)
+
+                newLike = Like(comment=comment,author=loggedInUser)
+                newLike.save()
+
+                serializer = LikeSerializer(newLike)
+                return Response({"likedComment": serializer.data}, status.HTTP_201_CREATED)
+
+            except:
+                return Response({"error": "Could not like/unlike comment"}, status.HTTP_400_BAD_REQUEST)
+            
+        else:
+            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class StreamView(generic.ListView):
     model = Post
