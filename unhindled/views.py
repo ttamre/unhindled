@@ -41,34 +41,36 @@ class StreamView(generic.ListView):
     ordering = ['-created_on']
 
     def get(self, request, *args, **kwargs):
-        response = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=GITHUB_AUTH)
-        events = response.json()
-        event_list = []
+        # response = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=GITHUB_AUTH)
+        # events = response.json()
+        # event_list = []
 
-        if response.ok:
-            for event in events:
-                repo = event.get("repo", {}).get("name")
-                type_ = GITHUB_EVENTS.get(event.get("type"))
+        # if response.ok:
+        #     for event in events:
+        #         repo = event.get("repo", {}).get("name")
+        #         type_ = GITHUB_EVENTS.get(event.get("type"))
 
-                repo_api = event.get("repo", {}).get("url")
-                repo_resp = requests.get(repo_api, auth=GITHUB_AUTH)
+        #         repo_api = event.get("repo", {}).get("url")
+        #         repo_resp = requests.get(repo_api, auth=GITHUB_AUTH)
                 
-                # Public repos
-                if repo_resp.ok:
-                    url = repo_resp.json().get("html_url")
+        #         # Public repos
+        #         if repo_resp.ok:
+        #             url = repo_resp.json().get("html_url")
 
-                # Private repos - use profile URL instead
-                else:
-                    user_api = event.get("actor", {}).get("url")
-                    user_resp = requests.get(user_api, auth=GITHUB_AUTH)
-                    if user_resp.ok:
-                        url = user_resp.json().get("html_url")
-                    else:
-                        url = None
+        #         # Private repos - use profile URL instead
+        #         else:
+        #             user_api = event.get("actor", {}).get("url")
+        #             user_resp = requests.get(user_api, auth=GITHUB_AUTH)
+        #             if user_resp.ok:
+        #                 url = user_resp.json().get("html_url")
+        #             else:
+        #                 url = None
 
-                event_list.append({"repo": repo, "type": type_, "url": url,})
+        #         event_list.append({"repo": repo, "type": type_, "url": url,})
 
-        return render(request, 'unhindled/mystream.html', {"event_list": event_list})
+        headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{request.user}/events/public'}
+        return render(request, 'unhindled/mystream.html', {"headers": headers})
+        # return render(request, 'unhindled/mystream.html', {"event_list": event_list})
 
 
 class AccountView(generic.CreateView):
