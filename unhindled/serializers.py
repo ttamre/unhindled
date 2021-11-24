@@ -1,8 +1,10 @@
 from django.db.models import fields
 from django.db.models.fields import Field
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import Post, Follower, FollowRequest, UserProfile, Comment, Like
+
+User = get_user_model()
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 

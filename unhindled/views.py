@@ -1,5 +1,4 @@
 from django.contrib.auth import login
-from django.contrib.auth.models import AnonymousUser, User
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.views import generic, View
@@ -9,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
+from django.contrib.auth import get_user_model
 from .models import Like, Post, Follower, FollowRequest, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
@@ -29,7 +29,7 @@ import json
 import os
 import datetime, math
 
-from unhindled import serializers
+User = get_user_model()
 
 CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
@@ -399,31 +399,41 @@ class CommentViewSet(viewsets.ViewSet):
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class FollowerListViewset (viewsets.ViewSet):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     def list(self, request, author):
-        authorObj = get_object_or_404(User, id=author)
+        authorObj = get_object_or_404(User, username=author)
         user = Follower.objects.filter(author=authorObj)
         serializer = FollowerListSerializer(user, many=True)
         return Response(serializer.data)
     
 class FollowerViewset (viewsets.ViewSet):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     def retrieve(self, request, author, follower):
-        follow = get_object_or_404(Follower, author=author, follower=follower)
+        authorObj = get_object_or_404(User, username=author)
+        followerObj = get_object_or_404(User, username=follower)
+        follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
     def update(self, request, author, follower):
-        authorObj = get_object_or_404(User, id=author)
-        followerObj = get_object_or_404(User, id=follower)
+        authorObj = get_object_or_404(User, username=author)
+        followerObj = get_object_or_404(User, username=follower)
         Follower.objects.create(author=authorObj, follower=followerObj)
         follow = get_object_or_404(Follower, author=author, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
     def destroy(self, request, author, follower):
-    	follow = get_object_or_404(Follower, author=author, follower=follower)
-    	serializer = FollowerSerializer(follow)
-    	follow.delete()
-    	return Response(serializer.data)
+        authorObj = get_object_or_404(User, username=author)
+        followerObj = get_object_or_404(User, username=follower)
+        follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
+        serializer = FollowerSerializer(follow)
+        follow.delete()
+        return Response(serializer.data)
 
 class FriendRequestViewset (viewsets.ViewSet):
+    authentication_classes = [BasicAuthentication]
+    permission_classes = [IsAuthenticated]
     def create(self, request, author, follower):
         authorObj = get_object_or_404(User, id=author)
         followerObj = get_object_or_404(User, id=follower)
