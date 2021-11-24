@@ -21,3 +21,11 @@ def post_text(post, author):
 def like_count_post(post):
     likes = Like.objects.filter(post=post)
     return len(likes)
+
+@register.simple_tag
+def singular_like(post):
+    likes = Like.objects.filter(post=post)
+    if len(likes) == 1:
+        return "like"
+    else:
+        return "likes"
