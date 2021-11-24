@@ -9,6 +9,11 @@ from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 
+class User(AbstractUser):
+	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	username = models.CharField(max_length=100, unique=True)
+	password = models.CharField(max_length=100)
+	
 #maybe not best implementation
 class Follower(models.Model):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -24,10 +29,7 @@ class FollowRequest(models.Model):
 	class Meta:
         	unique_together = (("author", "follower"),)	
 
-class User(AbstractUser):
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	username = models.CharField(max_length=100, unique=True)
-	password = models.CharField(max_length=100)
+
 
 class Post(models.Model):
 	CONTENT_TYPES = (

@@ -552,7 +552,6 @@ class LikeViewSet(viewsets.ViewSet):
             
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
->>>>>>> main
 
 class StreamView(generic.ListView):
     model = Post
