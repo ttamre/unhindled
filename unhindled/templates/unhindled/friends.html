@@ -18,10 +18,9 @@
 	<input type="hidden" name="next" value="{{ request.path }}">
     	<input type="submit" value="OK">
 </form>
-{% /follow_requests %}
 {% if object_list %}
 	{% for follow in object_list %}
-	        {% if follow.follower == user.username %}
+	        {% if follow.follower.username == user.username %}
 			<li>
 				Following: {{ follow.author }} 
 				<form action="/unfollow" method="POST">
@@ -35,7 +34,7 @@
 	</ul>
 	{% endfor %}
 {% else %}
-	<p>No Friends to show.</p>
+	<p>You are not following anyone.</p>
 {% endif %}
 </main>
 		

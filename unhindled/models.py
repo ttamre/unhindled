@@ -13,18 +13,14 @@ class Follower(models.Model):
 	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author")
 	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
 	class Meta:
-<<<<<<< HEAD
         	unique_together = (("author", "follower"),)
+        	
 class FollowRequest(models.Model):
 	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestauthor")
 	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestfollower")
 	class Meta:
         	unique_together = (("author", "follower"),)	
-=======
-			unique_together = (('requesterId', 'adresseeId'),)
-
->>>>>>> main
 
 class Post(models.Model):
 	CONTENT_TYPES = (

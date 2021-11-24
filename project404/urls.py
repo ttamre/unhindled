@@ -25,6 +25,12 @@ router = routers.DefaultRouter()
 router.register(r'authors', views.UserViewSet)
 router.register(r'posts', views.PostViewSet)
 
+follower_actions = {
+    "get": "retrieve",
+    "delete": "destroy",
+    "put": "update",
+}
+
 urlpatterns = [
     path('', include('unhindled.urls')),
     path('admin/', admin.site.urls),
@@ -33,6 +39,9 @@ urlpatterns = [
     path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list'})),
     path('service/author/<str:username>/posts/<str:post_ID>', views.PostViewSet.as_view({'get':'retrieve'})),
     path('service/author/<str:username>/posts/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list'})),
+    path('service/author/<str:author>/followers', views.FollowerListViewset.as_view({'get':'list'})), 
+    path('service/author/<str:author>/followers/<str:follower>', views.FollowerViewset.as_view(actions=follower_actions)),
+    path('service/author/<str:author>/friend_request/<str:follower>', views.FriendRequestViewset.as_view({'post':'create'})),
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -2,7 +2,7 @@ from django.db.models.fields import Field
 from rest_framework import serializers
 
 from django.contrib.auth.models import User
-from .models import Post, Author, Follower, FollowRequest, UserProfile, Comment
+from .models import Post, Follower, FollowRequest, UserProfile, Comment
 
 class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
 
@@ -59,27 +59,35 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
         return data
 
 #for URL: ://service/author/{AUTHOR_ID}/followers
-#TODO add github to UserProfile
-#TODO figure out host
-#maybe can be combined by AuthorSerializer
-class FollowerListSerializer(ModelSerializer):
-    id = "http://127.0.0.1:5454/" + "author/" + author
-    url = "http://127.0.0.1:5454/" + "author/" + author
-    host = "http://127.0.0.1:5454/"
-    type = "author"
-    class Meta:
-        model = UserProfile
-        fields = ( 'displayName', 'profileImage', 'github', )
-#for URL: ://service/author/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}                  
-class FollowerSerializer(ModelSerializer):
+class FollowerListSerializer(serializers.HyperlinkedModelSerializer):
+    follower = UserSerializer()
+    host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = Follower
-
-
-class FollowRequestSerializer(ModelSerializer):
-    type = "Follow"
-    summary = UserProfile.objects.get(author).displayName + " wants " + UserProfile.objects.get(follower).displayName + " to follow them."
-    actor = UserProfile.objects.get(follower)
-    object = UserProfile.objects.get(author)
+        fields = ( 'ID', 'follower' )
+        depth = 1
+    def to_representation(self, obj):
+    	data = super().to_representation(obj)
+    	data["id"] = self.host + "author/" + obj.follower.username
+    	data["url"] = self.host + "author/" + obj.follower.username
+    	data["host"] = self.host 
+    	data["type"] = "author" 
+    	return data
+#for URL: ://service/author/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}                  
+class FollowerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Follower
+        fields = '__all__'
+#
+#for URL: ://service/author/{AUTHOR_ID}/friend_request/{FOREIGN_AUTHOR_ID}
+class FollowRequestSerializer(serializers.HyperlinkedModelSerializer):
+    follower = UserSerializer()#UserProfile.objects.get(follower)
+    author = UserSerializer()#UserProfile.objects.get(author)
     class Meta:
         model = FollowRequest
+    def to_representation(self, obj):
+    	data["object"] = obj.author
+    	data["actor"] = obj.follower
+    	data["type"] = "follow" 
+    	return data
+

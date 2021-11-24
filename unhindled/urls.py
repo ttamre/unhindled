@@ -1,10 +1,5 @@
 from django.urls import path, include
 from . import views
-router = DefaultRouter()
-router.register(author, AuthorViewset, base_name='author')
-router.register(followerList, FollowerListViewset, base_name='followerList')
-router.register(follower, FollowerViewset, base_name='follower')
-FollowerListViewset
 urlpatterns = [
     #internal
     path('', views.HomeView.as_view(), name='index'),
@@ -21,7 +16,4 @@ urlpatterns = [
     path('<str:user>/articles/<str:pk>/edit', views.UpdatePostView.as_view(), name='updatePost'),
     path('<str:user>/articles/<str:pk>/delete', views.DeletePostView.as_view(), name='deletePost'),
     path('<str:user>/articles/<str:pk>/share', views.SharePost.as_view(), name='sharePost'),
-    
-    #external
-    re_path('^', include(router.urls)),
 ]

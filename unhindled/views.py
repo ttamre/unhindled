@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from .models import Post, Author, Follower, FollowRequest, Friendship, UserProfile, Comment
+from .models import Post, Follower, FollowRequest, UserProfile, Comment
 from .serializers import *
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
@@ -153,6 +153,44 @@ class CommentViewSet(viewsets.ViewSet):
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
+
+
+
+    
+class FollowerListViewset (viewsets.ViewSet):
+    def list(self, request, author):
+        authorObj = get_object_or_404(User, id=author)
+        user = Follower.objects.filter(author=authorObj)
+        serializer = FollowerListSerializer(user, many=True)
+        return Response(serializer.data)
+    
+class FollowerViewset (viewsets.ViewSet):
+    def retrieve(self, request, author, follower):
+        follow = get_object_or_404(Follower, author=author, follower=follower)
+        serializer = FollowerSerializer(follow)
+        return Response(serializer.data)
+    def update(self, request, author, follower):
+        authorObj = get_object_or_404(User, id=author)
+        followerObj = get_object_or_404(User, id=follower)
+        Follower.objects.create(author=authorObj, follower=followerObj)
+        follow = get_object_or_404(Follower, author=author, follower=follower)
+        serializer = FollowerSerializer(follow)
+        return Response(serializer.data)
+    def destroy(self, request, author, follower):
+    	follow = get_object_or_404(Follower, author=author, follower=follower)
+    	serializer = FollowerSerializer(follow)
+    	follow.delete()
+    	return Response(serializer.data)
+
+class FriendRequestViewset (viewsets.ViewSet):
+    def create(self, request, author, follower):
+        authorObj = get_object_or_404(User, id=author)
+        followerObj = get_object_or_404(User, id=follower)
+        FollowRequest.objects.create(author=authorObj, follower=followerObj)
+        followRequest = get_object_or_404(Follower, author=author, follower=follower)
+        serializer = FollowerRequestSerializer(followRequest)
+        return Response(serializer.data)
+
 class StreamView(generic.ListView):
     model = Post
     template_name = "unhindled/mystream.html"
@@ -201,11 +239,12 @@ class ManageFriendView(generic.ListView):
     fields = "__all__"
     
 def follow(request):
-    if User.objects.filter(username=request.POST["author"]).count() == 1 and \
-       Follower.objects.filter(author=request.POST["author"],follower=request.user.username).count() == 0 :
-        Follower.objects.create(follower=request.user.username, author=request.POST["author"])
-        if Follower.objects.filter(author=request.user.username,follower=request.POST["author"]).count() == 0:
-            FriendRequest.objects.create(author=request.user.username, follower=request.POST["author"])
+    if User.objects.filter(username=request.POST["author"]).count() == 1:
+       author = User.objects.get(username=request.POST["author"])
+       if Follower.objects.filter(author=author,follower=request.user).count() == 0 :
+           Follower.objects.create(follower=request.user, author=author)
+           if Follower.objects.filter(author=request.user,follower=author).count() == 0 and FollowRequest.objects.filter(author=request.user,follower=author).count() == 0:
+                FollowRequest.objects.create(author=request.user, follower=author)
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
 
@@ -216,7 +255,8 @@ def deleteFollowRequest(request):
     return HttpResponseRedirect(next)    
 
 def unfollow(request):
-    follow = Follower.objects.get(author=request.POST["author"],follower=request.user.username)
+    author = User.objects.get(username=request.POST["author"])
+    follow = Follower.objects.get(author=author,follower=request.user)
     follow.delete()
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
@@ -323,17 +363,3 @@ class EditProfileView(generic.UpdateView):
         return self.request.user == profile.user
 
 
-
-#endpoint views 
-class AuthorViewset (CreateModelMixin, RetrieveModelMixin):
-    serializer_class = AuthorSerializer
-    queryset = Author.objects.all()
-    
-class FollowerListViewset (ListModelMixin):
-    serializer_class = AuthorSerializer
-    queryset = Author.objects.all()
-    
-class FollowerViewset (RetrieveModelMixin,UpdateModelMixin, DestroyModelMixin):
-    serializer_class = FollowerSerializer
-    queryset = Follower.objects.all()
-    
