@@ -102,7 +102,12 @@ class PostViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def createPost(self, request, username):
+        loggedInUser = request.user
         user = User.objects.get(username=username)
+
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
         postData = request.POST
         author = user
         contentType = 'txt'
@@ -116,7 +121,7 @@ class PostViewSet(viewsets.ViewSet):
 
         visibility = 'public'
         for types in Post.VISIBILITY:
-            if types[1].lower() == postData["contentType"].lower():
+            if types[1].lower() == postData["visibility"].lower():
                 visibility = types[0]
 
         send_to = None
@@ -142,7 +147,7 @@ class PostViewSet(viewsets.ViewSet):
             newPost.save()
             serializer = PostSerializer(newPost)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
+
         except:
             serializer = PostSerializer(data=request.data)
             if serializer.is_valid():
@@ -152,7 +157,54 @@ class PostViewSet(viewsets.ViewSet):
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
     def updatePost(self, request, username, post_ID):
-        return
+        loggedInUser = request.user
+        user = User.objects.get(username=username)
+        postToEdit = Post.objects.get(ID=post_ID)
+        if user != loggedInUser:
+            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        postData = request.POST
+        warning = {}
+        if "contentType" in postData.keys():
+            if postData["contentType"] != "":
+                for types in Post.CONTENT_TYPES:
+                    if types[1] == postData["contentType"] or types[0] == postData["contentType"]:
+                        postToEdit.contentType = types[0]
+        if "title" in postData.keys() and postData["title"] != "":
+            if postData["contentType"] != "":
+                postToEdit.title = postData["title"]
+        if "description" in postData.keys() and postData["description"] != "":
+            postToEdit.description = postData["description"]
+        if "content" in postData.keys() and postData["content"] != "":
+            postToEdit.content = postData["content"]
+        if "visibility" in postData.keys() and postData["visibility"] != "":
+            for types in Post.VISIBILITY:
+                if types[1].lower() == postData["visibility"].lower():
+                    if types[0] != "send":
+                        postToEdit.visibility = types[0]
+                    else:
+                        warning["visibility"] =  "Post can't be converted to a Inbox post, please delete the post and repost with changed visibility"
+        if "send_to" in postData.keys() and postData["send_to"] != "":
+            warning["send_to"] =  "Post can't change receiver. Please delete post and resend"
+        if "created_on" in postData.keys() and postData["created_on"] != "":
+            warning["created_on"] = "Published date can't be changed"
+        if "images" in postData.keys() and postData["images"] != "":
+            postToEdit.images = postData["images"]
+    
+        try:
+            postToEdit.save()
+            serializer = PostSerializer(postToEdit)
+            data = {}
+            data["UpdatedPost"] = serializer.data
+            if len(warning.keys()) > 0:
+                data["Warnings"] = warning
+            return Response(data, status=status.HTTP_202_ACCEPTED)
+
+        except:
+            errors = {}
+            errors["Error"] = "Invalid post format" 
+            errors["ReceivedData"] = postData
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ViewSet):
