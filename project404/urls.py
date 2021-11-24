@@ -48,5 +48,7 @@ urlpatterns = [
     path('service/author/<str:author>/followers/<str:follower>', views.FollowerViewset.as_view(actions=follower_actions)),
     path('service/author/<str:author>/friend_request/<str:follower>', views.FriendRequestViewset.as_view({'post':'create'})),
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('foreign_posts', views.get_foreign_posts),
+    path('foreign_authors', views.get_foreign_authors),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
