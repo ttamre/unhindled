@@ -1,5 +1,10 @@
 import requests
 
+def test():
+    test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
+    # test = requests.get('http://127.0.0.1:8000/service/allposts', auth=('q','q'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t = test.json()
+    return t
 
 def get_list_foreign_posts():
     # foreign posts from team 3

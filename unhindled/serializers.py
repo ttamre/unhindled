@@ -89,10 +89,11 @@ class FollowRequestSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = FollowRequest
     def to_representation(self, obj):
-    	data["object"] = obj.author
-    	data["actor"] = obj.follower
-    	data["type"] = "follow" 
-    	return data
+        data = super().to_representation(obj)
+        data["object"] = obj.author
+        data["actor"] = obj.follower
+        data["type"] = "follow"
+        return data
 
 class LikeSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()

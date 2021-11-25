@@ -30,7 +30,6 @@ class FollowRequest(models.Model):
         	unique_together = (("author", "follower"),)	
 
 
-
 class Post(models.Model):
 	CONTENT_TYPES = (
 		('md', 'text/markdown'),

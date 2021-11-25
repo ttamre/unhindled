@@ -13,6 +13,7 @@ from .models import Like, Post, Follower, FollowRequest, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .forms import *
+from .connect import *
 from rest_framework import viewsets
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
@@ -24,18 +25,21 @@ from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework import viewsets
 from .serializers import *
+from rest_framework import serializers
 
 import requests
 import json
 import os
 import datetime, math
+import sys
+import socket
 
+from django.core import serializers as core_serializers
 
 from unhindled import serializers
 from .connect import get_list_foreign_posts, get_list_foreign_authors
 
 User = get_user_model()
-
 
 CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
@@ -73,6 +77,11 @@ class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
     ordering = ['-created_on']
+
+    def get_context_data(self, **kwargs):
+        context = super(HomeView, self).get_context_data(**kwargs)
+        context['foreign_posts'] = test()
+        return context
 
 class SignUpView(generic.CreateView):
     form_class = CreateUserForm
@@ -232,7 +241,7 @@ class PostViewSet(viewsets.ViewSet):
 
         except:
             errors = {}
-            errors["Error"] = "Invalid post format" 
+            errors["Error"] = "Invalid post format"
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -653,7 +662,7 @@ class SharePost(generic.View):
     def get(self, request, user, pk):
         post_object = get_object_or_404(Post, pk=pk)
         current_user = request.user
-        if current_user == AnonymousUser:
+        if current_user == User:
             return HttpResponseRedirect(reverse('viewPost', args=(str(current_user ), post_object.ID)))
 
         if post_object.is_shared_post:
