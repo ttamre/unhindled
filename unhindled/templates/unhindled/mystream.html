@@ -44,16 +44,26 @@
 
             <!-- Github Activity -->
             <h3>Github Activity</h3>
+            <table id="github_table">
+                <tr>
+                    <th>Repository</th>
+                    <th>Activity</th>
+                    <th>Link to repo</th>
+                </tr>
+            </table>
 
             <!-- safely loading request headers from python -->
             {{ headers|json_script:"headers" }}
 
             <script>
                 function fillTable() {
-                    var eventList = getGithubActivity();
-                    var table = document.getElementById("github_table")
+                    var events = getGithubActivity();
+                    console.log(events);
 
-                    for (event in eventList) {
+                    var table = document.getElementById("github_table")
+                    for (let i = 0; i < events.length; i++) {
+                        let event = events[i];
+
                         const repo = document.createElement('td')
                         repo.appendChild(document.createTextNode(event['repo']));
 
@@ -71,10 +81,12 @@
                     }
                 }
 
-                function getRepoLink(link, auth, backup=null) {
+                function getURL(endpoint, auth, backup=null) {
+                    var url;
+
                     var request = new XMLHttpRequest();
-                    request.setRequestHeader('Authorization', auth)
-                    request.open("GET", link, false);
+                    request.open("GET", endpoint);
+                    request.setRequestHeader('Authorization', auth);
 
                     request.onreadystatechange = function () {
                         if (request.readyState == 4) {
@@ -82,24 +94,31 @@
                                 if (request.status == 200) {
                                     // Successful request: Public repo (we can get the link)
                                     var data = JSON.parse(request.responseText);
-                                    return data?.['html_url'];
+                                    // TODO make this url actually set the variable
+                                    var url = data?.['html_url'];
+                                    console.log(url);
                                 }
                             }
                             catch(e) {
-                                // Unsuccessful request: Private repo (get the user's profile link instead)
-                                if (backup) { getRepoLink(backup, auth); }
-                            }
-                            finally {
-                                alert('Error: ' + e.name)
-                                return ""
+                                if (backup) {
+                                    // Unsuccessful request: Private repo (get the user's profile link instead)
+                                    console.log('Private repo');
+                                    return getURL(backup, auth);
+                                } else {
+                                    // Unsuccessful request: Error
+                                    console.log("Error fetching url");
+                                }
                             }
                         }
                     }
+                    request.send();
+                    return url;
                 }
 
                 function getGithubActivity() {
                     GITHUB_EVENTS = {
-                        "CreateEvent": "Created repository",
+                        "CreateEvent": "Created repo/branch",
+                        "DeleteEvent": "Deleted repo/branch",
                         "PushEvent":   "Pushed code",
                         "PullEvent":   "Pulled code",
                         "ForkEvent":   "Forked repo",
@@ -108,61 +127,48 @@
                         "unknown": "Unknown event",
                         null: "Unknown event"
                     }
+                    
+                    var events = [];
 
                     // Get request headers
                     const headers = JSON.parse(document.getElementById('headers').textContent);
 
                     // AJAX request to get Github activiy data
                     var activityRequest = new XMLHttpRequest();
-                    activityRequest.open('GET', headers['uri'], false);
+                    activityRequest.open('GET', headers['uri']);
 
                     activityRequest.onreadystatechange = function () {
                         if (activityRequest.readyState == 4) {
                             try {
                                 if (activityRequest.status == 200) {
-                                    var events = JSON.parse(activityRequest.responseText);
-                                    var eventList = [];
-
-                                    for (event in events) {
+                                    var activityResponse = JSON.parse(activityRequest.responseText);
+                                    for (let i = 0; i < activityResponse.length; i++) {
+                                        let event = activityResponse[i]
                                         var repo = event?.['repo']?.['name']
                                         var type = GITHUB_EVENTS[event?.['type']]
 
                                         var repo_api = event?.['repo']?.['url']
                                         var user_api = event?.['actor']?.['url']
-                                        var url = getRepoLink(repo_api, headers['auth'], user_api);
+                                        var url = getURL(repo_api, headers['auth'], user_api);
 
-                                        event_list.push({"repo": repo, "type": type, "url": url,});
+                                        events.push({"repo": repo, "type": type, "url": url});
                                     }
-
-                                    return eventList;
                                 }
                             }
                             catch (e) {
-                                alert('Error: ' + e.name);
+                                console.log('Error: ' + e.name);
+                                console.log(e);
                             }
                         }
                     };
 
                     activityRequest.send();
+                    console.log("Events sent: " + events);
+                    return events;
                 }
 
             fillTable();
             </script>
-
-            <table id="github_table">
-                <tr>
-                    <th>Repository</th>
-                    <th>Activity</th>
-                    <th>Link to repo</th>
-                </tr>
-
-                <!-- tr>
-                <td id="table_repo"></td>
-                <td id="table_activity"></td>
-                <td id="table_link"><a href=""></a></td>
-              </tr-->
-
-            </table>
         </div>
     </main>
 </body>
