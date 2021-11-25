@@ -95,7 +95,7 @@
                                     // Successful request: Public repo (we can get the link)
                                     var data = JSON.parse(request.responseText);
                                     // TODO make this url actually set the variable
-                                    var url = data?.['html_url'];
+                                    url = data?.['html_url'];
                                     console.log(url);
                                 }
                             }
