@@ -9,7 +9,7 @@ def get_foreign_posts_list():
         pass
     else:
         js_req_3 = t3_req.json()['items']
-        post_list = post_list + js_req_3 
+        post_list.append(js_req_3) 
         
     #foreign posts from team 5
     t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -17,7 +17,7 @@ def get_foreign_posts_list():
         pass
     else:
         js_req_5 = t5_req.json()
-        post_list = post_list + js_req_5
+        post_list.append(js_req_5)
 
     return post_list
 
@@ -32,7 +32,7 @@ def get_foreign_authors_list():
         pass
     else:
         js_req_3 = t3_req.json()['items']
-        author_list = author_list + js_req_3 
+        author_list.append(js_req_3)
     
     # foreign authors from team 5
     t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/authors/', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -40,6 +40,7 @@ def get_foreign_authors_list():
         pass
     else:
         js_req_5 = t5_req.json()['items']
-        author_list = author_list + js_req_5 
+        author_list.append(js_req_5)
 
     return author_list
+
