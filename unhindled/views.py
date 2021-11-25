@@ -32,7 +32,7 @@ import datetime, math
 
 
 from unhindled import serializers
-from .connect import get_list_foreign_posts, get_list_foreign_authors
+from .connect import get_foreign_posts_list, get_foreign_authors_list
 
 User = get_user_model()
 
@@ -778,7 +778,7 @@ class EditProfileView(generic.UpdateView):
 # @authentication_classes([CustomAuthentication])
 def get_foreign_posts(request):
     if request.method == "GET":
-        foreign_posts = get_list_foreign_posts()
+        foreign_posts = get_foreign_posts_list()
         print(foreign_posts)
         return Response({"foreign posts": foreign_posts})
     else:
@@ -789,7 +789,7 @@ def get_foreign_posts(request):
 # @authentication_classes([CustomAuthentication])
 def get_foreign_authors(request):
     if request.method == "GET":
-        foreign_authors = get_list_foreign_authors()
+        foreign_authors = get_foreign_authors_list()
         print(foreign_authors)
         return Response({"foreign authors": foreign_authors})
     else:
