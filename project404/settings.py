@@ -9,9 +9,10 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+from django.conf import settings
 import django_on_heroku
-
 from pathlib import Path
+from drf_yasg import openapi
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     'slippers',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -111,6 +113,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REDOC_SETTINGS   = {'LAZY_RENDERING': False}
+SWAGGER_SETTINGS = {'DEFAULT_INFO': openapi.Info(
+    title="Unhindled API",
+    default_version='v1',
+    description="Documentation for the Unhindled API",
+    contact=openapi.Contact(email="ttamre@ualberta.ca"),
+    license=openapi.License(name="GNU GPLv3 License"),
+   )}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
