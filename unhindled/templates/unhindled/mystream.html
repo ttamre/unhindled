@@ -57,11 +57,14 @@
 
             <script>
                 function fillTable() {
+                    // BUG: events has 30 items but events.length = 0
                     var events = getGithubActivity();
+                    console.log("fillTable() - Events: " + Object.keys(events).length);
                     console.log(events);
 
+
                     var table = document.getElementById("github_table")
-                    for (let i = 0; i < events.length; i++) {
+                    for (let i = 0; i < Object.keys(events).length; i++) {
                         let event = events[i];
 
                         const repo = document.createElement('td')
@@ -78,41 +81,39 @@
                         row.appendChild(activity);
                         row.appendChild(link);
                         table.appendChild(row);
+                        console.log("fillTable() - row:");
+                        console.log(row);
                     }
                 }
-
-                function getURL(endpoint, auth, backup=null) {
+                
+                function getURL(endpoint, auth, callback, backup=null) {
                     var url;
-
                     var request = new XMLHttpRequest();
                     request.open("GET", endpoint);
                     request.setRequestHeader('Authorization', auth);
 
                     request.onreadystatechange = function () {
-                        if (request.readyState == 4) {
+                        if (request.readyState == 4 && request.status == 200) {
                             try {
-                                if (request.status == 200) {
-                                    // Successful request: Public repo (we can get the link)
-                                    var data = JSON.parse(request.responseText);
-                                    // TODO make this url actually set the variable
-                                    url = data?.['html_url'];
-                                    console.log(url);
-                                }
+                                // Successful request: Public repo (we can get the link)
+                                var data = JSON.parse(request.responseText);
+                                url = data?.['html_url'];
+                                callback(url);
                             }
                             catch(e) {
                                 if (backup) {
                                     // Unsuccessful request: Private repo (get the user's profile link instead)
-                                    console.log('Private repo');
-                                    return getURL(backup, auth);
+                                    console.log('getURL() - Private repo (sending profile link)');
+                                    return getURL(backup, auth, function(url) {return url;});
                                 } else {
                                     // Unsuccessful request: Error
-                                    console.log("Error fetching url");
+                                    console.log("getURL() - Error: " + e);
                                 }
                             }
                         }
                     }
                     request.send();
-                    return url;
+                    return 
                 }
 
                 function getGithubActivity() {
@@ -138,32 +139,32 @@
                     activityRequest.open('GET', headers['uri']);
 
                     activityRequest.onreadystatechange = function () {
-                        if (activityRequest.readyState == 4) {
+                        if (activityRequest.readyState == 4 && activityRequest.status == 200) {
                             try {
-                                if (activityRequest.status == 200) {
-                                    var activityResponse = JSON.parse(activityRequest.responseText);
-                                    for (let i = 0; i < activityResponse.length; i++) {
-                                        let event = activityResponse[i]
-                                        var repo = event?.['repo']?.['name']
-                                        var type = GITHUB_EVENTS[event?.['type']]
+                                var activityResponse = JSON.parse(activityRequest.responseText);
+                                for (let i = 0; i < activityResponse.length; i++) {
+                                    let event = activityResponse[i]
+                                    var repo = event?.['repo']?.['name']
+                                    var type = GITHUB_EVENTS[event?.['type']]
 
-                                        var repo_api = event?.['repo']?.['url']
-                                        var user_api = event?.['actor']?.['url']
-                                        var url = getURL(repo_api, headers['auth'], user_api);
-
+                                    var repo_api = event?.['repo']?.['url']
+                                    var user_api = event?.['actor']?.['url']
+                                    var url;
+                                    function callback(url) {
                                         events.push({"repo": repo, "type": type, "url": url});
                                     }
+                                    getURL(repo_api, headers['auth'], callback, user_api);
+
+                                    
                                 }
                             }
                             catch (e) {
-                                console.log('Error: ' + e.name);
-                                console.log(e);
+                                console.log('getGithubActivity() - Error: ' + e);
                             }
                         }
                     };
 
                     activityRequest.send();
-                    console.log("Events sent: " + events);
                     return events;
                 }
 
