@@ -40,7 +40,7 @@ from itertools import chain
 from django.core import serializers as core_serializers
 
 from unhindled import serializers
-from .connect import get_foreign_posts_list, get_foreign_authors_list,test_authors
+from .connect import get_foreign_posts_list
 
 User = get_user_model()
 
@@ -779,12 +779,22 @@ class DeletePostView(generic.DeleteView):
 
 class ProfileView(View):
     def get(self, request, id, *args, **kwargs):
-        profile = UserProfile.objects.get(pk=id)
+        
         try:
-            user = profile.user
+            #profile = UserProfile.objects.get(pk=id)
+            profile = get_object_or_404(UserProfile, id=id)
         except:
-            user = get_our_authors(id)
-        user_post = Post.objects.filter(author=user).order_by('-published')
+            profile = get_json_authors(id)
+
+        if type(profile) is dict:
+            user = profile.author
+            user_post = []
+            print('hello')
+        
+        else:
+            profile = UserProfile.objects.get(pk=id)
+            user = profile.user
+            user_post = Post.objects.filter(author=user).order_by('-published')
         
         context = {
             'user': user,
@@ -829,12 +839,3 @@ def get_foreign_authors(request):
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
-@api_view(['GET'])
-# @authentication_classes([CustomAuthentication])
-def get_our_authors(request):
-    if request.method == "GET":
-        our_authors = test_authors()
-        print(our_authors)
-        return Response({"Our own authors": our_authors})
-    else:
-        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

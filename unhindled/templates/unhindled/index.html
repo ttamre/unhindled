@@ -48,8 +48,7 @@
         {% if object_list %}
             {% for post in object_list %}
                 {% if post.visibility == "PUBLIC" %}
-                    <div class="post">
-                        <div class="is-flex">
+                    <div class="is-flex">
                             <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
                             <small>
                                 &nbsp;• {% load tz %}
