@@ -50,23 +50,24 @@
         {% if object_list %}
             {% for post in object_list %}
                 {% if post.visibility == "PUBLIC" %}
+                <div class="post">
                     <div class="is-flex">
-                            <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
-                            <small>
-                                &nbsp;• {% load tz %}
-                                {% localtime on %}
-                                <small>Created: {{post.published}}</small>
-                                {% endlocaltime %}
-                            </small>
-                        </div>
-                        {% if post.is_shared_post %}
-                            <p class="is-size-5 has-text-weight-bold"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">{{ post.title }}</a></p>
-                            Shared by: <a href="/author/{% valid_url_profile post.sharedBy.id %}">{{ post.sharedBy }}</a>
-                        {% else %}
-                        <a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">{{ post.title }}</a> <br>
-                        {% endif %}
-                        <p>{{ post.description }}</p>
+                        <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
+                        <small>
+                            &nbsp;• {% load tz %}
+                            {% localtime on %}
+                            <small>Created: {{post.published}}</small>
+                            {% endlocaltime %}
+                        </small>
                     </div>
+                    {% if post.is_shared_post %}
+                        <p class="is-size-5 has-text-weight-bold"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">{{ post.title }}</a></p>
+                        Shared by: <a href="/author/{% valid_url_profile post.sharedBy.id %}">{{ post.sharedBy }}</a>
+                    {% else %}
+                    <a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">{{ post.title }}</a> <br>
+                    {% endif %}
+                    <p>{{ post.description }}</p>
+                </div>
                 {% endif %}
             {% endfor %}
         {% else %}
