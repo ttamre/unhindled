@@ -710,7 +710,11 @@ def unlikeObject(request, user, id, obj_type):
 
 
 def view_post(request, user, pk):
-    post = get_object_or_404(Post, ID=pk)
+    if get_object_or_404(Post, ID=pk) == 404:
+        post = test()
+    else:
+        post = get_object_or_404(Post, ID=pk)
+    print(post)
     comments = Comment.objects.filter(post=post).order_by('-published')
     if request.method == 'POST':
         form_comment = FormComment(request.POST or None)
@@ -721,7 +725,7 @@ def view_post(request, user, pk):
             return HttpResponseRedirect(post.get_absolute_url())
     else:
         form_comment= FormComment()
-    
+
     context = {
         'post': post,
         'comments': comments,
