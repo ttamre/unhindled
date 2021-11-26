@@ -5,15 +5,18 @@
 {% #header user=user %}
 {% /header %}
 
+{% load image_helper %}
+
 <main>
 <div class="container my-5">
     <div >
         <div >
-            <img class="my-3 pfp mr-3" src="{{ profile.profileImage.url }}" width="100" height="100" >
+            <img class="my-3 pfp mr-3" src="{% image_exists profile.profileImage.url %}" width="100" height="100" >
             <br>
             <span>
                 {% if user.id == profile.user.id %}
-                    <a href="{% url 'editProfile' profile.pk %}">EDIT PROFILE</a>
+                <!-- add back in once we figure out getting users -->
+                    <!-- <a href="{ url 'editProfile' profile.pk }">EDIT PROFILE</a> -->
                 {% endif %}
             </span>
 

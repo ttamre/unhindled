@@ -39,7 +39,6 @@ def get_json_authors(id):
             split = ''
         if split == id:
             found_authors = authors
-
     return found_authors
     
 
@@ -86,7 +85,7 @@ def get_foreign_authors_list():
     if t3_req.status_code == 500:
         pass
     else:
-        js_req_3 = t3_req.json()
+        js_req_3 = t3_req.json()['items']
         for authors in js_req_3:
             author_list.append(authors)
        
@@ -106,7 +105,7 @@ def get_foreign_authors_list():
     if t14_req.status_code == 500:
         pass
     else:
-        js_req_14 = t14_req.json()
+        js_req_14 = t14_req.json()['items']
         for authors in js_req_14:
             author_list.append(authors)
 

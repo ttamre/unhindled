@@ -29,7 +29,7 @@ from rest_framework import viewsets
 from .serializers import *
 from rest_framework import serializers
 
-import requests
+import requests, uuid
 import json
 import os
 import datetime, math
@@ -779,18 +779,15 @@ class DeletePostView(generic.DeleteView):
 
 class ProfileView(View):
     def get(self, request, id, *args, **kwargs):
-        
         try:
-            #profile = UserProfile.objects.get(pk=id)
-            profile = get_object_or_404(UserProfile, id=id)
+            profile = UserProfile.objects.get(pk=id)
         except:
             profile = get_json_authors(id)
 
         if type(profile) is dict:
-            user = profile.author
+            user = profile['displayName']
             user_post = []
-            print('hello')
-        
+
         else:
             profile = UserProfile.objects.get(pk=id)
             user = profile.user
