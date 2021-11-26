@@ -16,7 +16,7 @@ class PostTests(TestCase):
 		self.posts_to_delete = []
 		self.new_post = Post.objects.create(author=self.user, contentType=Post.CONTENT_TYPES[0], 
 		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], created_on=datetime.datetime.now(), content="TEST POST 1",
+		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
 		self.new_post.save()
 
@@ -33,7 +33,7 @@ class PostTests(TestCase):
 		totalID = len(existing_ID_query)
 		response = self.client.post("/post/",data={"author":self.user.pk, "contentType":"md", 
 		"title":"Test Title", "description":"This is a test Post",
-		"visibility":"public", "created_on":datetime.datetime.now(), "content":"TEST POST 2",
+		"visibility":"public", "published":datetime.datetime.now(), "content":"TEST POST 2",
 		"images":"", "originalPost":"", "sharedBy":""})
 		id_to_delete = ""
 		
@@ -78,7 +78,7 @@ class PostTests(TestCase):
 	def test_restrictions(self):
 		other_post = Post.objects.create(author=self.other_user, contentType=Post.CONTENT_TYPES[0], 
 		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], created_on=datetime.datetime.now(), content="TEST POST 1",
+		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
 		other_post.save()
 
@@ -178,7 +178,7 @@ class CommentTests(TestCase):
         login = self.client.login(username='testuser', password='12345')
         self.new_post = Post.objects.create(author=self.user, 
 		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], created_on=datetime.datetime.now(), content="TEST POST 1",
+		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
         self.new_post.save()
         

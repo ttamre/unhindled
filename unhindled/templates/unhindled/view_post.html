@@ -7,16 +7,17 @@
 {% load crispy_forms_tags %}
 
 {% load markdown_extras %}
+{% load url_check %}
 {% load comment_like %}
 {% load post_like %}
 
 <main>
 <p class="non-white-title is-size-4 mb-2">{{post.title}}</p>
-<small>Author: <a href="{% url 'profile' post.author.pk %}">{{post.author}}</a></small>
+<small>Author: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
 <br>
 {% load tz %}
 {% localtime on %}
-<small>Created: {{post.created_on}}</small>
+<small>Created: {{post.published}}</small>
 {% endlocaltime %}
 <br>
 <small>Description: {{post.description}}</small>
@@ -34,22 +35,22 @@
 
 <p class="mb-3 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
 
-{% if user.username == post.author.username %}
+{% if user.displayName == post.author.displayName %}
   {% if user.is_authenticated %}
     {% if post|post_liked:user %}
-      <a href="{% url 'unlikeObject' user.username post.id "post" %}">{% post_text post user %}</a>
+      <a href="{% url 'unlikeObject' user.displayName post.id "post" %}">{% post_text post user %}</a>
     {% else %}
-      <a href="{% url 'likeObject' user.username post.id "post" %}">{% post_text post user %}</a>
+      <a href="{% url 'likeObject' user.displayName post.id "post" %}">{% post_text post user %}</a>
     {% endif %}
   {% endif %}
   {% if post.is_shared_post %}
-    <a href="{% url 'viewPost' post.author.username post.originalPost.pk %}">View Original</a>
+    <a href="{% url 'viewPost' post.author.displayName post.originalPost.id %}">View Original</a>
   {% else %}
-    <a href="{% url 'updatePost' post.author.username post.pk %}">Edit</a>
+    <a href="{% url 'updatePost' post.author.displayName post.id %}">Edit</a>
   {% endif %}
-    <a href="{% url 'deletePost' post.author.username post.pk %}">Delete</a>
+    <a href="{% url 'deletePost' post.author.displayName post.id %}">Delete</a>
 {% else %}
-  <a href="{% url 'sharePost' post.author.username post.pk %}" onclick="return confirm('Are you sure?');">Share</a>
+  <a href="{% url 'sharePost' post.author.displayName post.id %}" onclick="return confirm('Are you sure?');">Share</a>
 {% endif %}
 
 <br>
@@ -70,14 +71,14 @@
   <br>
   {% for comment in post.comment.all %}
   <div class="comment-box mb-3">
-    <strong><a href="{% url 'profile' comment.author.pk %}">{{comment.author}}</a> - {{comment.published}}</strong>
+    <strong><a href="{% url 'profile' comment.author.id %}">{{comment.author}}</a> - {{comment.published}}</strong>
     <p>{{ comment.comment}}</p>
     <p>{% like_count_comment comment.id %} {% singular_like comment.id %} -
     {% if user.is_authenticated %}
       {% if comment|comment_liked:user %}
-      <a href="{% url 'unlikeObject' user.username comment.id "comment" %}">{% comment_text comment user %}</a>
+      <a href="{% url 'unlikeObject' user.displayName comment.id "comment" %}">{% comment_text comment user %}</a>
       {% else %}
-      <a href="{% url 'likeObject' user.username comment.id "comment" %}">{% comment_text comment user %}</a>
+      <a href="{% url 'likeObject' user.displayName comment.id "comment" %}">{% comment_text comment user %}</a>
       {% endif %}
     {% endif %}</p>
   </div>

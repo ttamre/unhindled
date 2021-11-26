@@ -9,6 +9,13 @@ def test():
     else:
         t = test.json()
     return t
+
+def get_json_post(id):
+    found_post = ''
+    for post in test():
+        if post['id'] == id:
+            found_post = post
+    return found_post
     
 #get our own authors
 def test_authors():
@@ -28,7 +35,7 @@ def get_foreign_posts_list():
     if t3_req.status_code == 500:
         pass
     else:
-        js_req_3 = t3_req.json()['items']
+        js_req_3 = t3_req.json()
         post_list.append(js_req_3) 
         
     #foreign posts from team 5
