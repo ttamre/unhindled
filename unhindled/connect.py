@@ -19,7 +19,7 @@ def get_foreign_posts_list():
         post_list.append(js_req_3) 
         
     #foreign posts from team 5
-    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
     if t5_req.status_code == 500:
         pass
     else:
@@ -50,7 +50,7 @@ def get_foreign_authors_list():
         author_list.append(js_req_3)
     
     # foreign authors from team 5
-    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/authors/', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/authors/', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
     if t5_req.status_code == 500:
         pass
     else:
