@@ -14,9 +14,9 @@
       {% if object_list %}
         {% for post in object_list %}
           <!-- change this to ID when author and user are matched -->
-          {% if post.author.username == user.username %}
+          {% if post..author.displayName == user.username %}
             <div class="post">
-                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                <a href="{% url 'viewPost' post..author.displayName post.id %}">{{ post.title }}</a> <br>
                 By: {{ post.author }} <br>
                 {{ post.description }}
             </div>
@@ -26,7 +26,7 @@
         {% for post in object_list %}
           {% if post.send_to.username == user.username and post.visibility == "send" %}
             <div class="post">
-                <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                <a href="{% url 'viewPost' post..author.displayName post.id %}">{{ post.title }}</a> <br>
                 By: {{ post.author }} <br>
                 {{ post.description }}
             </div>

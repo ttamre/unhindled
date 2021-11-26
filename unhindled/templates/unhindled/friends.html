@@ -21,10 +21,10 @@
 	{% for follow in object_list %}
 	        {% if follow.follower.username == user.username %}
 			<li>
-				Following: {{ follow.author }} 
+				Following: {{ follow.author.displayName }} 
 				<form action="/unfollow" method="POST">
 					{% csrf_token %}
-					<input type="hidden" name="author" value="{{ follow.author }}">
+					<input type="hidden" name="author" value="{{ follow.author.displayName }}">
 					<input type="hidden" name="next" value="{{ request.path }}">
 					<input type="submit" value="Unfollow">
 				</form>

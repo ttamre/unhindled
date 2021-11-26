@@ -1,6 +1,6 @@
 from django.contrib.auth import login
 from django.db import reset_queries
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls.base import reverse
 from django.views import generic, View
 from django.http import HttpResponse, HttpResponseRedirect
@@ -248,11 +248,11 @@ class PostViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def deletePost(self, request, username, post_ID):
+    def deletePost(self, request, username, pk):
         loggedInUser = request.user
         user = User.objects.get(username=username)
         try:
-            postToDelete = Post.objects.get(id=post_ID)
+            postToDelete = Post.objects.get(id=pk)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
 
@@ -713,18 +713,33 @@ def unlikeObject(request, user, id, obj_type):
 
 
 def view_post(request, user, id):
-    print(request)
-    post = get_object_or_404(Post, id=id)
-    comments = Comment.objects.filter(post=post).order_by('-published')
-    if request.method == 'POST':
-        form_comment = FormComment(request.POST or None)
-        if form_comment.is_valid():
-            comment = request.POST.get('comment')
-            comm = Comment.objects.create(post=post, author=request.user, comment=comment)
-            comm.save()
-            return HttpResponseRedirect(post.get_absolute_url())
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    if type(post) is dict:
+        comments = Comment.objects.filter(post=post['id']).order_by('-published')
+        if request.method == 'POST':
+            form_comment = FormComment(request.POST or None)
+            if form_comment.is_valid():
+                comment = request.POST.get('comment')
+                comm = Comment.objects.create(post=post, author=request.user, comment=comment)
+                comm.save()
+                return HttpResponseRedirect(post.get_absolute_url())
+        else:
+            form_comment= FormComment()
     else:
-        form_comment= FormComment()
+        comments = Comment.objects.filter(post=post).order_by('-published')
+        if request.method == 'POST':
+            form_comment = FormComment(request.POST or None)
+            if form_comment.is_valid():
+                comment = request.POST.get('comment')
+                comm = Comment.objects.create(post=post, author=request.user, comment=comment)
+                comm.save()
+                return HttpResponseRedirect(post.get_absolute_url())
+        else:
+            form_comment= FormComment()
 
     context = {
         'post': post,
