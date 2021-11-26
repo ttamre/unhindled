@@ -30,7 +30,7 @@ from .serializers import *
 from rest_framework import serializers
 from drf_yasg.utils import swagger_auto_schema
 
-import requests
+import requests, uuid
 import json
 import os
 import datetime, math
@@ -41,7 +41,7 @@ from itertools import chain
 from django.core import serializers as core_serializers
 
 from unhindled import serializers
-from .connect import get_foreign_posts_list, get_foreign_authors_list
+from .connect import *
 
 User = get_user_model()
 
@@ -58,7 +58,9 @@ GITHUB_EVENTS = {
     "PullRequestEvent": "Pull request",
     None: "Unknown event"
 }
-
+#get id for apis given user
+def getForeignId(user):
+    return "https://unhindled.herokuapp.com/" + "author/" + str(user.id)
 def paginationGetter(page, size):
     try:
         size = int(size)
@@ -499,9 +501,8 @@ class FollowerViewset (viewsets.ViewSet):
         """
         Get a follower
         """
-        authorObj = get_object_or_404(User, user_id=author)
-        followerObj = get_object_or_404(User, user_id=follower)
-        follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
+        authorObj = get_object_or_404(User, username=author)
+        follow = get_object_or_404(Follower, author=authorObj, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
 
@@ -510,9 +511,8 @@ class FollowerViewset (viewsets.ViewSet):
         """
         Follow a user
         """
-        authorObj = get_object_or_404(User, user_id=author)
-        followerObj = get_object_or_404(User, user_id=follower)
-        Follower.objects.create(author=authorObj, follower=followerObj)
+        authorObj = get_object_or_404(User, username=author)
+        Follower.objects.create(author=authorObj, follower=follower)
         follow = get_object_or_404(Follower, author=author, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
@@ -522,9 +522,8 @@ class FollowerViewset (viewsets.ViewSet):
         """
         Delete a follower
         """
-        authorObj = get_object_or_404(User, user_id=author)
-        followerObj = get_object_or_404(User, user_id=follower)
-        follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
+        authorObj = get_object_or_404(User, username=author)
+        follow = get_object_or_404(Follower, author=authorObj, follower=follower)
         serializer = FollowerSerializer(follow)
         follow.delete()
         return Response(serializer.data)
@@ -737,12 +736,26 @@ class ManageFriendView(generic.ListView):
     fields = "__all__"
     
 def follow(request):
-    if User.objects.filter(user_id=request.POST["author"]).count() == 1:
-       author = User.objects.get(user_id=request.POST["author"])
-       if Follower.objects.filter(author=author,follower=request.user).count() == 0 :
-           Follower.objects.create(follower=request.user, author=author)
-           if Follower.objects.filter(author=request.user,follower=author).count() == 0 and FollowRequest.objects.filter(author=request.user,follower=author).count() == 0:
-                FollowRequest.objects.create(author=request.user, follower=author)
+    author = request.POST["author"]
+    #internal user
+    if User.objects.filter(username=author).count() == 1:
+       authorId = User.objects.get(username=author).id
+       if Follower.objects.filter(author=authorId,follower=request.user.id).count() == 0:
+           Follower.objects.create(author=authorId, follower=request.user.id)
+           if Follower.objects.filter(author=request.user.id,follower=authorId).count() == 0 and FollowRequest.objects.filter(author=request.user.id,follower=authorId).count() == 0:
+                FollowRequest.objects.create(author=request.user.id, follower=authorId)
+    #foreign user
+    else:
+        foreignAuthors = get_foreign_authors_list()
+        for foreignAuthor in foreignAuthors:
+            if foreignAuthor['displayName'] == author:
+                authorId = foreignAuthor['id']
+                if Follower.objects.filter(author=authorId,follower=request.user.id).count() == 0 :
+                    Follower.objects.create(author=authorId, follower=request.user.id)
+                    # will put to other servers once they are implemented
+                    #x = foreign_add_follower(authorId,  getForeignId(request.user))
+           ### will need to send friend request here ###
+                    break
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
 
@@ -753,8 +766,8 @@ def deleteFollowRequest(request):
     return HttpResponseRedirect(next)    
 
 def unfollow(request):
-    author = User.objects.get(user_id=request.POST["author"])
-    follow = Follower.objects.get(author=author,follower=request.user)
+    author = request.POST["author"]
+    follow = Follower.objects.get(author=author,follower=request.user.id)
     follow.delete()
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
@@ -885,10 +898,22 @@ class DeletePostView(generic.DeleteView):
 
 class ProfileView(View):
     def get(self, request, id, *args, **kwargs):
-        profile = UserProfile.objects.get(pk=id)
-        user = profile.user
-        user_post = Post.objects.filter(author=user).order_by('-published')
 
+        try:
+            profile = UserProfile.objects.get(pk=id)
+        except:
+            profile = get_json_authors(id)
+
+       
+        if type(profile) is dict:
+            user = profile['displayName']
+            user_post = []
+
+        else:
+            profile = UserProfile.objects.get(pk=id)
+            user = profile.user
+            user_post = Post.objects.filter(author=user).order_by('-published')
+        
         context = {
             'user': user,
             'profile': profile,
@@ -932,3 +957,5 @@ def get_foreign_authors(request):
         return Response({"foreign authors": foreign_authors})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
