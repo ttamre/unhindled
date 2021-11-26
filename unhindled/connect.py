@@ -1,10 +1,12 @@
 import requests
-from .models import *
 
 def test():
     test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
     # test = requests.get('http://127.0.0.1:8000/service/allposts', auth=('q','q'), headers={'Referer': "http://127.0.0.1:8000/"})
-    t = test.json()
+    if test.status_code == 500:
+        pass
+    else:
+        t = test.json()
     return t
 
 def get_json_post(id):
@@ -19,6 +21,28 @@ def get_json_post(id):
 
     return found_post
     
+#get our own authors
+def test_authors():
+    test = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if test.status_code == 500:
+        pass
+    else:
+        t = test.json()
+    return t  
+
+def get_json_authors(id):
+    found_authors = ''
+    for authors in get_foreign_authors_list():
+        try:
+            split = authors['id'].split('/')[-1]
+        except:
+            split = ''
+        if split == id:
+            found_authors = authors
+    return found_authors
+    
+
+
     
 #get foreign posts
 def get_foreign_posts_list():
@@ -67,13 +91,13 @@ def get_foreign_authors_list():
         js_req_3 = t3_req.json()['items']
         for author in js_req_3:
             author_list.append(author)
-    
+
     # foreign authors from team 5
     t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/authors/', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
     if t5_req.status_code == 500:
         pass
     else:
-        js_req_5 = t5_req.json()['items']
+        js_req_5 = t5_req.json()
         for author in js_req_5:
             author_list.append(author)
     
@@ -83,7 +107,7 @@ def get_foreign_authors_list():
         pass
     else:
         js_req_14 = t14_req.json()['items']
-        for author in js_req_3:
+        for author in js_req_14:
             author_list.append(author)
             
     #foreign authors from our own heroku for testing 

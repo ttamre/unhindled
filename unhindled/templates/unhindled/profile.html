@@ -4,17 +4,19 @@
 {% block content %}
 {% #header user=user %}
 {% /header %}
-{% load url_check %}
+
+{% load image_helper %}
 
 <main>
 <div class="container my-5">
     <div >
         <div >
-            <img class="my-3 pfp mr-3" src="{{ profile.profileImage.url }}" width="100" height="100" >
+            <img class="my-3 pfp mr-3" src="{% image_exists profile.profileImage.url %}" width="100" height="100" >
             <br>
             <span>
                 {% if user.id == profile.user.id %}
-                    <a href="{% url 'editProfile' profile.pk %}">EDIT PROFILE</a>
+                <!-- add back in once we figure out getting users -->
+                    <!-- <a href="{ url 'editProfile' profile.pk }">EDIT PROFILE</a> -->
                 {% endif %}
             </span>
 
@@ -23,7 +25,7 @@
                 {% if profile.displayName %}
                     <p> {{ profile.displayName }}</p>
                 {% else %}
-                    <p>{{ user.username }}</p>
+                    <p>{{ user.displayName }}</p>
                 {% endif %}
             </div>
             <!-- TODO: password change? -->
@@ -60,22 +62,12 @@
         <p class="non-white-title is-size-6">Posts: </p>
         {% if posts %}
             {% for post in posts %}
-            <div class="post">
-                <div class="is-flex">
-                    <small>
-                        {% load tz %}
-                        {% localtime on %}
-                        <small>Created: {{post.published}}</small>
-                        {% endlocaltime %}
-                    </small>
-                </div>
-                {% if post.is_shared_post %}
-                    <p class="is-size-5 has-text-weight-bold"><a href="{% url 'viewPost' post.author.id post.id %}">{{ post.title }}</a></p>
-                    Shared by: <a href="/author/{% valid_url_profile post.sharedBy.id %}">{{ post.sharedBy }}</a>
-                {% else %}
-                    <p class="is-size-5 has-text-weight-bold"><a href="{% url 'viewPost' post.author.id post.id %}">{{ post.title }}</a></p>
+            <div class="comment-box mt-3">
+                {% if post.visibility != "unlisted" %}
+                    <a href="{% url 'viewPost' post.author.displayName post.id %}">{{ post.title }}</a> <br>
+                    <p>{{ post.published }}</p>
+                    <p>{{ post.description }}</p>
                 {% endif %}
-                <p>{{ post.description }}</p>
             </div>
             {% endfor %}
         {% else %}

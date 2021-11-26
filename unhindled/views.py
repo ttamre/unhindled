@@ -29,7 +29,7 @@ from rest_framework import viewsets
 from .serializers import *
 from rest_framework import serializers
 
-import requests
+import requests, uuid
 import json
 import os
 import datetime, math
@@ -792,10 +792,22 @@ class DeletePostView(generic.DeleteView):
 
 class ProfileView(View):
     def get(self, request, id, *args, **kwargs):
-        profile = UserProfile.objects.get(pk=id)
-        user = profile.user
-        user_post = Post.objects.filter(author=user).order_by('-published')
 
+        try:
+            profile = UserProfile.objects.get(pk=id)
+        except:
+            profile = get_json_authors(id)
+
+       
+        if type(profile) is dict:
+            user = profile['displayName']
+            user_post = []
+
+        else:
+            profile = UserProfile.objects.get(pk=id)
+            user = profile.user
+            user_post = Post.objects.filter(author=user).order_by('-published')
+        
         context = {
             'user': user,
             'profile': profile,
@@ -837,3 +849,5 @@ def get_foreign_authors(request):
         return Response({"foreign authors": foreign_authors})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
