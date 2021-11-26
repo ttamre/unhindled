@@ -10,25 +10,29 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
 
 class User(AbstractUser):
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	username = models.CharField(max_length=100, unique=True)
+	displayName = models.CharField(max_length=100, null=True)
 	password = models.CharField(max_length=100)
+
+	def save(self, *args, **kwargs):
+		self.displayName = self.username
+		super(User, self).save(*args, **kwargs)
 	
 #maybe not best implementation
 class Follower(models.Model):
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author")
 	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
 	class Meta:
         	unique_together = (("author", "follower"),)
         	
 class FollowRequest(models.Model):
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestauthor")
 	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requestfollower")
 	class Meta:
         	unique_together = (("author", "follower"),)	
-
 
 
 class Post(models.Model):
@@ -42,7 +46,7 @@ class Post(models.Model):
 		('friends', 'Friends Only'),
 		('send', 'Send to Author')
 	)
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
 	title = models.CharField(max_length=200)
@@ -80,7 +84,7 @@ class Comment(models.Model):
 		('md', 'text/markdown'),
 		('txt','text/plain'),
 	)
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment')
 	comment = models.TextField(blank=True, max_length=500)
@@ -91,7 +95,7 @@ class Comment(models.Model):
 		return self.comment
 
 class Like(models.Model):
-	ID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
 	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)

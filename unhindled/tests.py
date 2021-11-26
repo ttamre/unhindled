@@ -24,11 +24,11 @@ class PostTests(TestCase):
 		User.objects.filter(username = self.user).delete()
 		self.new_post.delete()
 		for post in self.posts_to_delete:
-				Post.objects.filter(ID=post).delete()
+				Post.objects.filter(id=post).delete()
 
 	def test_addingPosts(self):
 		# Adding post and checking if post is added
-		existing_ID_query = Post.objects.filter(title="Test Title").values_list('ID', flat=True)
+		existing_ID_query = Post.objects.filter(title="Test Title").values_list('id', flat=True)
 		
 		totalID = len(existing_ID_query)
 		response = self.client.post("/post/",data={"author":self.user.pk, "contentType":"md", 
@@ -37,7 +37,7 @@ class PostTests(TestCase):
 		"images":"", "originalPost":"", "sharedBy":""})
 		id_to_delete = ""
 		
-		addedPost = Post.objects.filter(title="Test Title").values_list('ID', flat=True)
+		addedPost = Post.objects.filter(title="Test Title").values_list('id', flat=True)
 		self.assertEqual(len(addedPost), totalID + 1)
 		for id_val in list(addedPost):
 				if id_val not in list(existing_ID_query):
@@ -49,28 +49,28 @@ class PostTests(TestCase):
 
 	def test_edittingPosts(self):
 		# Editing post and checking if post is edited
-		response = self.client.post("/"+self.user.username + "/articles/" + str(self.new_post.ID) + "/edit",data={'author': ['1'], "contentType":["md"], 
+		response = self.client.post("/"+self.user.username + "/articles/" + str(self.new_post.id) + "/edit",data={'author': ['1'], "contentType":["md"], 
 		"title":["Test Title"], "description":["This is a test Post"],
 		"visibility":["public"], "content":["TEST POST(EDITED)"],
 		"images":[""], "originalPost":[""], "sharedBy":[""]})
 
-		editedPost = Post.objects.filter(ID=self.new_post.ID)
+		editedPost = Post.objects.filter(id=self.new_post.id)
 		self.assertEqual(editedPost[0].content, "TEST POST(EDITED)")
 
 	def test_deletingPosts(self):
 		# Deleting post and checking if post is deleted
-		oldPost = Post.objects.filter(ID=self.new_post.ID)
+		oldPost = Post.objects.filter(id=self.new_post.id)
 		self.assertEqual(len(oldPost), 1)
-		response = self.client.post("/"+self.user.username + "/articles/" + str(self.new_post.ID) + "/delete")
+		response = self.client.post("/"+self.user.username + "/articles/" + str(self.new_post.id) + "/delete")
 
-		oldPost = Post.objects.filter(ID=self.new_post.ID)
+		oldPost = Post.objects.filter(id=self.new_post.id)
 		self.assertEqual(len(oldPost), 0)
 
 	def test_sharingPosts(self):
 		# Sharing post and checking if post is shared
 		totalShare = Post.objects.filter(originalPost=self.new_post)
 		totalShares = len(totalShare)
-		response = self.client.get("/"+self.user.username + "/articles/" + str(self.new_post.ID) + "/share")
+		response = self.client.get("/"+self.user.username + "/articles/" + str(self.new_post.id) + "/share")
 
 		totalShare = Post.objects.filter(originalPost=self.new_post)
 		self.assertEqual(len(totalShare), totalShares + 1)
@@ -82,7 +82,7 @@ class PostTests(TestCase):
 		images=None, originalPost=None, sharedBy=None)
 		other_post.save()
 
-		response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.ID))
+		response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.id))
 
 		# Checking For unauthorized access
 		# response_str = str(response.rendered_content)
@@ -91,7 +91,7 @@ class PostTests(TestCase):
 		self.assertEqual("Delete" in response_str, False)
 
 		login = self.client.login(username='testuser2', password='12345')
-		response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.ID))
+		response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.id))
 
 		# Checking for authorized access
 		response_str = str(response.content)
@@ -167,7 +167,7 @@ class FriendshipTests(TestCase):
    def test_friendships(self):
    	friendship = Friendship.objects.create(requesterId='testuser',adresseeId='testuser2')
    	friendship.save()
-   	self.assertEqual(len(Friendship.objects.filter(requesterId = self.user1.username).values_list('ID', flat=True)),1)
+   	self.assertEqual(len(Friendship.objects.filter(requesterId = self.user1.username).values_list('id', flat=True)),1)
    	friendship = Friendship.objects.filter(requesterId = self.user1.username)[0]
    	self.assertEqual(friendship.status, "pending")
    	
@@ -185,7 +185,7 @@ class CommentTests(TestCase):
    def test_comments(self):
    	comment = Comment.objects.create(author=self.user,post=self.new_post,comment='test comment' )
    	comment.save()
-   	self.assertEqual(len(Comment.objects.filter(author=self.user).values_list('ID', flat=True)),1)
+   	self.assertEqual(len(Comment.objects.filter(author=self.user).values_list('id', flat=True)),1)
    	
 class UserProfileTests(TestCase):
    def setUp(self):

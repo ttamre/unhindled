@@ -32,14 +32,14 @@
 <img src="{{post.images.url}}">
 {% endif %}
 
-<p class="mb-3 has-text-weight-bold">{% like_count_post post.ID %} {% singular_like post.ID %}</p>
+<p class="mb-3 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
 
 {% if user.username == post.author.username %}
   {% if user.is_authenticated %}
     {% if post|post_liked:user %}
-      <a href="{% url 'unlikeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
+      <a href="{% url 'unlikeObject' user.username post.id "post" %}">{% post_text post user %}</a>
     {% else %}
-      <a href="{% url 'likeObject' user.username post.ID "post" %}">{% post_text post user %}</a>
+      <a href="{% url 'likeObject' user.username post.id "post" %}">{% post_text post user %}</a>
     {% endif %}
   {% endif %}
   {% if post.is_shared_post %}
@@ -72,12 +72,12 @@
   <div class="comment-box mb-3">
     <strong><a href="{% url 'profile' comment.author.pk %}">{{comment.author}}</a> - {{comment.published}}</strong>
     <p>{{ comment.comment}}</p>
-    <p>{% like_count_comment comment.ID %} {% singular_like comment.ID %} -
+    <p>{% like_count_comment comment.id %} {% singular_like comment.id %} -
     {% if user.is_authenticated %}
       {% if comment|comment_liked:user %}
-      <a href="{% url 'unlikeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
+      <a href="{% url 'unlikeObject' user.username comment.id "comment" %}">{% comment_text comment user %}</a>
       {% else %}
-      <a href="{% url 'likeObject' user.username comment.ID "comment" %}">{% comment_text comment user %}</a>
+      <a href="{% url 'likeObject' user.username comment.id "comment" %}">{% comment_text comment user %}</a>
       {% endif %}
     {% endif %}</p>
   </div>

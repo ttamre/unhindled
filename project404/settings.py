@@ -151,4 +151,6 @@ REST_FRAMEWORK = {
     ]
 }
 
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 django_on_heroku.settings(locals())
