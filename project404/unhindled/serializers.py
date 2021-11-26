@@ -13,7 +13,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://127.0.0.1:8000"
     class Meta:
         model = Post
-        fields = ('id', 'author', 'contentType', 'title', 'description','visibility', 'created_on')
+        fields = ('id', 'author', 'contentType', 'title', 'description','visibility', 'published')
         depth = 1
 
     def to_representation(self, obj):

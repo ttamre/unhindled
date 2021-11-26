@@ -1,10 +1,18 @@
 import requests
+from .models import *
 
 def test():
     test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
     # test = requests.get('http://127.0.0.1:8000/service/allposts', auth=('q','q'), headers={'Referer': "http://127.0.0.1:8000/"})
     t = test.json()
     return t
+
+def get_json_post(id):
+    found_post = ''
+    for post in test():
+        if post['id'] == id:
+            found_post = post
+    return found_post
     
 #get foreign posts
 def get_foreign_posts_list():
@@ -15,7 +23,7 @@ def get_foreign_posts_list():
     if t3_req.status_code == 500:
         pass
     else:
-        js_req_3 = t3_req.json()['items']
+        js_req_3 = t3_req.json()
         post_list.append(js_req_3) 
         
     #foreign posts from team 5
