@@ -6,22 +6,24 @@
 
 {% #header user=user %}
 {% /header %}
+{% load friends %}
 
 <main>
 <p class="non-white-title">Manage Friends</p>
 
 <form action="/follow" method="POST">
 	{% csrf_token %}
-	<label for="author">Friends Username: </label>
+	<label for="author">Friends display name: </label>
 	<input id="author" type="text" name="author" value="">
 	<input type="hidden" name="next" value="{{ request.path }}">
     	<input type="submit" value="OK">
 </form>
 {% if object_list %}
 	{% for follow in object_list %}
-	        {% if follow.follower.username == user.username %}
+	        {% if follow.follower.toString == user.id.toString %}
 			<li>
-				Following: {{ follow.author }} 
+				Following: {{ follow.author }}
+				<!--getDisplayName follow.author "once implemented" --> 
 				<form action="/unfollow" method="POST">
 					{% csrf_token %}
 					<input type="hidden" name="author" value="{{ follow.author }}">

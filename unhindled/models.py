@@ -22,8 +22,8 @@ class User(AbstractUser):
 #maybe not best implementation
 class Follower(models.Model):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author")
-	follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
+	author = models.CharField(max_length=200)
+	follower = models.CharField(max_length=200)
 	class Meta:
         	unique_together = (("author", "follower"),)
         	
