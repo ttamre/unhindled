@@ -28,6 +28,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework import viewsets
 from .serializers import *
 from rest_framework import serializers
+from drf_yasg.utils import swagger_auto_schema
 
 import requests, uuid
 import json
@@ -96,12 +97,19 @@ class SignUpView(generic.CreateView):
     template_name = 'registration/signup.html'
 
 class PostViewSet(viewsets.ViewSet):
+    """
+    API endpoint that allows posts to be viewed, created, updated, and deleted
+    """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('published')
     serializer_class = PostSerializer
 
+    @swagger_auto_schema(responses={200:"Success"})
     def list(self, request, user_id):
+        """
+        List an author's posts
+        """
         user = User.objects.get(user_id=user_id)
         queryset = Post.objects.filter(author=user).order_by('published')
         serializer = PostSerializer(queryset, many=True)
@@ -121,7 +129,11 @@ class PostViewSet(viewsets.ViewSet):
 
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success", 404:"Not"})
     def retrieve(self, request, user_id, post_id):
+        """
+        Get a post
+        """
         user = User.objects.get(user_id=user_id)
         try:
             queryset = Post.objects.get(id=post_id)
@@ -131,12 +143,20 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={200:"Success"})
     def allPosts(self, request):
+        """
+        Get all posts
+        """
         posts = Post.objects.filter(visibility='PUBLIC').order_by('published')
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={201:"Created", 400:"Bad request", 401:"Unauthorized"})
     def createPost(self, request, user_id,post_id=None):
+        """
+        Create a post
+        """
         if post_id != None:
             post = Post.objects.filter(id=post_id)
             if len(post) > 0:
@@ -198,7 +218,11 @@ class PostViewSet(viewsets.ViewSet):
 
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(responses={202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
     def updatePost(self, request, user_id, pk):
+        """
+        Update a post
+        """
         loggedInUser = request.user
         user = User.objects.get(user_id=user_id)
         try:
@@ -252,7 +276,11 @@ class PostViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(responses={202:"Accepted", 401:"Unauthorized", 404:"Not found"})
     def deletePost(self, request, user_id, pk):
+        """
+        Delete a post
+        """
         loggedInUser = request.user
         user = User.objects.get(user_id=user_id)
         try:
@@ -276,7 +304,11 @@ class UserViewSet(viewsets.ViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    @swagger_auto_schema(responses={200:"Success"})
     def list(self, request):
+        """
+        List all authors
+        """
         queryset = User.objects.all()
         serializer = UserSerializer(queryset, many=True)
 
@@ -293,7 +325,11 @@ class UserViewSet(viewsets.ViewSet):
         data["items"] = userData
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
     def retrieve(self, request, id):
+        """
+        Get an user
+        """
         queryset = UserProfile.objects.all()
         try:
             user = User.objects.get(user_id=id)
@@ -305,7 +341,11 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
     def authorUpdate(self, request, id):
+        """
+        Update a user
+        """
         try:
             user = User.objects.get(user_id=id)
         except:
@@ -362,8 +402,12 @@ class CommentViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('published')
     serializer_class = CommentSerializer
-
+    
+    @swagger_auto_schema(responses={200:"Success"})
     def list(self, request, user_id, post_id):
+        """
+        List comments on a post
+        """
         user = User.objects.get(user_id=user_id)
         post = Post.objects.get(id=post_id)
         comments = Comment.objects.filter(post=post)
@@ -383,14 +427,22 @@ class CommentViewSet(viewsets.ViewSet):
         data["comments"] = commentData
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success"})
     def retrieve(self, request, user_id, post_id, comment_id):
+        """
+        Get a comment
+        """
         user = User.objects.get(user_id=user_id)
         post = Post.objects.get(id=post_id)
         comments = Comment.objects.get(id=comment_id)
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={200:"Success", 201:"Created", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
     def postComment(self, request, user_id, post_id):
+        """
+        Post a comment
+        """
         loggedInUser = request.user
         try:
             post = Post.objects.get(id=post_id)
@@ -421,29 +473,55 @@ class CommentViewSet(viewsets.ViewSet):
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
 class FollowerListViewset (viewsets.ViewSet):
+    """
+    API endpoint that allows followers to be listed
+    """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(responses={200:"Success"})
     def list(self, request, author):
+        """
+        List an author's followers
+        """
         authorObj = get_object_or_404(User, user_id=author)
         user = Follower.objects.filter(author=authorObj)
         serializer = FollowerListSerializer(user, many=True)
         return Response(serializer.data)
     
 class FollowerViewset (viewsets.ViewSet):
+    """
+    API endpoint that allows users to follow each other
+    """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
     def retrieve(self, request, author, follower):
+        """
+        Get a follower
+        """
         authorObj = get_object_or_404(User, username=author)
         follow = get_object_or_404(Follower, author=authorObj, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
+
+    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
     def update(self, request, author, follower):
+        """
+        Follow a user
+        """
         authorObj = get_object_or_404(User, username=author)
         Follower.objects.create(author=authorObj, follower=follower)
         follow = get_object_or_404(Follower, author=author, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
+
+    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
     def destroy(self, request, author, follower):
+        """
+        Delete a follower
+        """
         authorObj = get_object_or_404(User, username=author)
         follow = get_object_or_404(Follower, author=authorObj, follower=follower)
         serializer = FollowerSerializer(follow)
@@ -451,9 +529,17 @@ class FollowerViewset (viewsets.ViewSet):
         return Response(serializer.data)
 
 class FriendRequestViewset (viewsets.ViewSet):
+    """
+    API endpoint that allows friend requests to be created
+    """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
     def create(self, request, author, follower):
+        """
+        Create a friend request
+        """
         authorObj = get_object_or_404(User, id=author)
         followerObj = get_object_or_404(User, id=follower)
         FollowRequest.objects.create(author=authorObj, follower=followerObj)
@@ -463,12 +549,16 @@ class FriendRequestViewset (viewsets.ViewSet):
 
 class LikeViewSet(viewsets.ViewSet):
     """
-    API endpoint that allows comments to be viewed or edited.
+    API endpoint that allows likes to be viewed or created
     """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(responses={200:"Success"})
     def commentList(self, request, user_id, post_id, comment_id):
+        """
+        List the likes on a comment
+        """
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -485,7 +575,11 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success"})
     def postList(self, request, user_id, post_id):
+        """
+        List the likes on a post
+        """
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -502,7 +596,11 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success"})
     def authorList(self, request, user_id):
+        """
+        List posts an author has liked
+        """
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -522,7 +620,11 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
+    @swagger_auto_schema(responses={201:"Created", 202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
     def likePost(self, request, user_id, post_id):
+        """
+        Like a post
+        """
         loggedInUser = request.user
         try:
             post = Post.objects.get(id=post_id)
@@ -552,7 +654,11 @@ class LikeViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    @swagger_auto_schema(responses={201:"Created", 202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
     def likeComment(self, request, user_id, post_id, comment_id):
+        """
+        Like a comment
+        """
         loggedInUser = request.user
         try:
             comment = Comment.objects.get(id=comment_id)
@@ -832,6 +938,7 @@ class EditProfileView(generic.UpdateView):
 
 
 @api_view(['GET'])
+@swagger_auto_schema(responses={200:"Success", 405:"Method not allowed"})
 # @authentication_classes([CustomAuthentication])
 def get_foreign_posts(request):
     if request.method == "GET":
@@ -842,6 +949,7 @@ def get_foreign_posts(request):
 
 
 @api_view(['GET'])
+@swagger_auto_schema(responses={200:"Success", 405:"Method not allowed"})
 # @authentication_classes([CustomAuthentication])
 def get_foreign_authors(request):
     if request.method == "GET":
