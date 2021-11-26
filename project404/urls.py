@@ -35,10 +35,11 @@ follower_actions = {
 }
 
 
+
 schema_view = get_schema_view(
-    # validators=['ssv'],
-    public=True,
-    permission_classes=(permissions.AllowAny,),
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+#    validators=['ssv']
 )
 
 urlpatterns = [
@@ -49,12 +50,12 @@ urlpatterns = [
     path('service/allposts/', views.PostViewSet.as_view({'get':'allPosts'})),
     path('service/authors/', views.UserViewSet.as_view({'get':'list'}) ),
     path('service/author/<str:id>/', views.UserViewSet.as_view({'get': 'retrieve', 'post':'authorUpdate'}) ),
-    path('service/author/<str:username>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
-    path('service/author/<str:username>/posts/', views.PostViewSet.as_view({'get':'list', 'post':'createPost'})),
-    path('service/author/<str:username>/posts/<str:post_ID>/', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),
-    path('service/author/<str:username>/post/<str:post_ID>/comments', views.CommentViewSet.as_view({'get':'list', 'post':'postComment'})),
-    path('service/author/<str:username>/post/<str:post_ID>/likes', views.LikeViewSet.as_view({'get':'postList', 'post':'likePost'})),
-    path('service/author/<str:username>/post/<str:post_ID>/comments/<str:comment_ID>/likes', views.LikeViewSet.as_view({'get':'commentList', 'post':'likeComment'})),
+    path('service/author/<str:user_id>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
+    path('service/author/<str:user_id>/posts/', views.PostViewSet.as_view({'get':'list', 'post':'createPost'})),
+    path('service/author/<str:user_id>/posts/<str:post_id>/', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),
+    path('service/author/<str:user_id>/post/<str:post_id>/comments', views.CommentViewSet.as_view({'get':'list', 'post':'postComment'})),
+    path('service/author/<str:user_id>/post/<str:post_id>/likes', views.LikeViewSet.as_view({'get':'postList', 'post':'likePost'})),
+    path('service/author/<str:user_id>/post/<str:post_id>/comments/<str:comment_id>/likes', views.LikeViewSet.as_view({'get':'commentList', 'post':'likeComment'})),
     path('service/author/<str:author>/followers', views.FollowerListViewSet.as_view({'get':'list'})), 
     path('service/author/<str:author>/followers/<str:follower>', views.FollowerViewSet.as_view(actions=follower_actions)),
     path('service/author/<str:author>/friend_request/<str:follower>', views.FriendRequestViewSet.as_view({'post':'create'})),
@@ -69,4 +70,3 @@ urlpatterns = [
     url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     url(r'^redoc/$', cache_page(cache_timer)(schema_view.with_ui('redoc', cache_timeout=0)), name='schema-redoc')
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

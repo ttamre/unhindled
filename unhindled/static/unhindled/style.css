@@ -1,4 +1,6 @@
 /* General */
+@import url(https://fonts.googleapis.com/css?family=EBGaramond);
+
 .flex {
   display: flex;
 }
@@ -12,10 +14,18 @@
   margin-bottom: auto;
 }
 
+.ml-auto {
+  margin-left: auto;
+}
+
 html {
   background-color: #DEF2F1;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* p {
+  font-family: EBGaramond, serif;
+} */
 
 main {
   margin: 0 36px;
@@ -159,10 +169,15 @@ a.white-text:hover {
 }
 
 .post {
-  margin-top: 12px;
-  padding: 12px;
+  min-height: 84px;
+  margin-top: 16px;
+  padding: 8px 12px;
   border: 1px solid #17252A;
-  border-radius: 10px;
+  border-radius: 6px;
+}
+
+.source-text {
+  color: #2B7A78;
 }
 
 .link-navigation {
@@ -191,4 +206,20 @@ th {
   padding-bottom: 12px;
   background-color: #2B7A78;
   color: white;
+}
+
+@media (min-width: 480px) {
+  .link-navigation li {
+    display: inherit;
+  }
+
+  .link-navigation {
+    min-width: 180px;
+    display: inherit;
+  }
+
+  main {
+    margin: 0 auto;
+    width: 60%;
+  }
 }

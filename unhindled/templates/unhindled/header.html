@@ -1,12 +1,12 @@
-<div>
+<nav>
   {% if user.is_authenticated %}
     <div class="login-banner">
         <div class="user-info">
             <a class="white-title" href="{% url 'index' %}">Unhindled</a>
-            <div class="link-navigation">
-              <a class="white-text mr-3" href="{% url 'mystream' user.pk %}">My Stream</a>
-              <a class="white-text mr-3" href="{% url 'createPost' %}">Create Post</a>
-            </div>
+            <ul class="link-navigation">
+              <li><a class="white-text mr-3" href="{% url 'mystream' user.pk %}">My Stream</a></li>
+              <li><a class="white-text mr-3" href="{% url 'createPost' %}">Create Post</a></li>
+            </ul>
             <div class="dropdown ml-2 mr-5-half">
               <img class="pfp" src="{{ user.profile.profileImage.url }}" width="40px" height="40px" />
               <div class="dropdown-content">
@@ -26,4 +26,4 @@
         </div>
     </div>
   {% endif %}
-</div>
+  </nav>
