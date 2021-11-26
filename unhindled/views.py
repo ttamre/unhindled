@@ -26,8 +26,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework import viewsets
-from .serializers import *
 from rest_framework import serializers
+from .serializers import *
+from drf_yasg.utils import swagger_auto_schema
 
 import requests
 import json
@@ -75,7 +76,7 @@ def paginationGetter(page, size):
 
     return page, size
 
-# Create your views here.
+# Views
 class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
@@ -93,13 +94,133 @@ class SignUpView(generic.CreateView):
     success_url = reverse_lazy('login')
     template_name = 'registration/signup.html'
 
+class StreamView(generic.ListView):
+    model = Post
+    template_name = "unhindled/mystream.html"
+    ordering = ['-created_on']
+
+    def get(self, request, *args, **kwargs):
+        response = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=GITHUB_AUTH)
+        events = response.json()
+        event_list = []
+
+        if response.ok:
+            for event in events:
+                repo = event.get("repo", {}).get("name")
+                type_ = GITHUB_EVENTS.get(event.get("type"))
+
+                repo_api = event.get("repo", {}).get("url")
+                repo_resp = requests.get(repo_api, auth=GITHUB_AUTH)
+                
+                # Public repos
+                if repo_resp.ok:
+                    url = repo_resp.json().get("html_url")
+
+                # Private repos - use profile URL instead
+                else:
+                    user_api = event.get("actor", {}).get("url")
+                    user_resp = requests.get(user_api, auth=GITHUB_AUTH)
+                    if user_resp.ok:
+                        url = user_resp.json().get("html_url")
+                    else:
+                        url = None
+
+                event_list.append({"repo": repo, "type": type_, "url": url,})
+
+        return render(request, 'unhindled/mystream.html', {"event_list": event_list})
+
+class AccountView(generic.CreateView):
+    model = User
+    template_name = "unhindled/account.html"
+    fields = "__all__"
+
+class ManageFriendView(generic.ListView):
+    model = Follower
+    template_name = "unhindled/friends.html"
+    fields = "__all__"
+
+class CreatePostView(generic.CreateView):
+    model = Post
+    template_name = "unhindled/create_post.html"
+    fields = "__all__"
+
+class SharePost(generic.View):
+    def get(self, request, user, id):
+        post_object = get_object_or_404(Post, pk=id)
+        current_user = request.user
+        if current_user == User:
+            return HttpResponseRedirect(reverse('viewPost', args=(str(current_user ), post_object.id)))
+
+        if post_object.is_shared_post:
+            post_object = post_object.originalPost
+
+        sharedPost = Post.objects.create(author=post_object.author, contentType=post_object.contentType,
+        title=post_object.title, description=post_object.description,
+        visibility=post_object.visibility, published=post_object.published, content=post_object.content,
+        images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
+        return HttpResponseRedirect(reverse('index'))
+
+class UpdatePostView(generic.UpdateView):
+    model = Post
+    template_name = "unhindled/edit_post.html"
+    fields = "__all__"
+
+    def post(self, request, *args, **kwargs):
+        if "Cancel" in request.POST:
+            return HttpResponseRedirect(self.get_object().get_absolute_url())
+        else:
+            return super(UpdatePostView, self).post(request, *args, **kwargs)
+
+class DeletePostView(generic.DeleteView):
+    model = Post
+    template_name = "unhindled/delete_post.html"
+    success_url = reverse_lazy('index')
+
+    def post(self, request, *args, **kwargs):
+        if "Cancel" in request.POST:
+            return HttpResponseRedirect(self.get_object().get_absolute_url())
+        else:
+            return super(DeletePostView, self).post(request, *args, **kwargs)
+
+class ProfileView(View):
+    def get(self, request, id, *args, **kwargs):
+        profile = UserProfile.objects.get(pk=id)
+        user = profile.user
+        user_post = Post.objects.filter(author=user).order_by('-published')
+
+        context = {
+            'user': user,
+            'profile': profile,
+            'posts': user_post,
+        }
+        return render(request, 'unhindled/profile.html', context)
+
+class EditProfileView(generic.UpdateView):
+    model = UserProfile
+    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
+    template_name = 'unhindled/edit_profile.html'
+    
+    def get_success_url(self):
+        pk = self.kwargs['pk']
+        return reverse_lazy('profile', kwargs={'pk': pk})
+    
+    def test_func(self):
+        profile = self.get_object()
+        return self.request.user == profile.user
+
+
+# ViewSets
 class PostViewSet(viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('published')
     serializer_class = PostSerializer
 
+    @swagger_auto_schema(responses={200:"Success"})
     def list(self, request, user_id):
+        """
+        List all posts by an author
+        """
         user = User.objects.get(user_id=user_id)
         queryset = Post.objects.filter(author=user).order_by('published')
         serializer = PostSerializer(queryset, many=True)
@@ -119,8 +240,12 @@ class PostViewSet(viewsets.ViewSet):
 
         return Response(data)
 
-    def retrieve(self, request, user_id, post_id):
-        user = User.objects.get(user_id=user_id)
+    @swagger_auto_schema(responses={200:"Success", 404:"Not Found"})
+    def retrieve(self, request, username, post_id):
+        """
+        Get a post
+        """
+        user = User.objects.get(username=username)
         try:
             queryset = Post.objects.get(id=post_id)
         except:
@@ -129,14 +254,22 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={200:"Success"})
     def allPosts(self, request):
-        posts = Post.objects.filter(visibility='PUBLIC').order_by('published')
+        """
+        List all existing posts
+        """
+        posts = Post.objects.filter(visibility='public').order_by('created_on')
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
-    def createPost(self, request, user_id,post_id=None):
+    @swagger_auto_schema(responses={200:"Success"})
+    def createPost(self, request, user_id, post_id=None):
+        """
+        Create a post
+        """
         if post_id != None:
-            post = Post.objects.filter(id=post_id)
+            post = Post.objects.filter(ID=post_id)
             if len(post) > 0:
                 return Response({"Error":"Post id already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -196,11 +329,15 @@ class PostViewSet(viewsets.ViewSet):
 
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
-    def updatePost(self, request, user_id, pk):
+    @swagger_auto_schema(responses={200:"Success", 401:"Unauthorized"})
+    def updatePost(self, request, user_id, post_id):
+        """
+        Update a post
+        """
         loggedInUser = request.user
         user = User.objects.get(user_id=user_id)
         try:
-            postToEdit = Post.objects.get(id=pk)
+            postToEdit = Post.objects.get(id=post_id)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
             
@@ -250,11 +387,15 @@ class PostViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def deletePost(self, request, user_id, pk):
+    @swagger_auto_schema(responses={200:"Success", 401:"Unauthorized"})
+    def deletePost(self, request, user_id, post_id):
+        """
+        Delete a post
+        """
         loggedInUser = request.user
         user = User.objects.get(user_id=user_id)
         try:
-            postToDelete = Post.objects.get(id=pk)
+            postToDelete = Post.objects.get(id=post_id)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
 
@@ -267,14 +408,18 @@ class PostViewSet(viewsets.ViewSet):
 
 class UserViewSet(viewsets.ViewSet):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint that allows users to be viewed or edited
     """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    @swagger_auto_schema(responses={200:"Success"})
     def list(self, request):
+        """
+        List all users
+        """
         queryset = User.objects.all()
         serializer = UserSerializer(queryset, many=True)
 
@@ -291,7 +436,11 @@ class UserViewSet(viewsets.ViewSet):
         data["items"] = userData
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
     def retrieve(self, request, id):
+        """
+        Get a user
+        """
         queryset = UserProfile.objects.all()
         try:
             user = User.objects.get(user_id=id)
@@ -303,7 +452,11 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    @swagger_auto_schema(responses={200:"Success", 401:"Unauthorized", 404:"Not found"})
     def authorUpdate(self, request, id):
+        """
+        Edit a user
+        """
         try:
             user = User.objects.get(user_id=id)
         except:
@@ -354,16 +507,20 @@ class UserViewSet(viewsets.ViewSet):
 
 class CommentViewSet(viewsets.ViewSet):
     """
-    API endpoint that allows comments to be viewed or edited.
+    API endpoint that allows comments to be viewed or edited
     """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Post.objects.all().order_by('published')
     serializer_class = CommentSerializer
 
-    def list(self, request, user_id, post_id):
-        user = User.objects.get(user_id=user_id)
-        post = Post.objects.get(id=post_id)
+    @swagger_auto_schema(responses={200:"Success"})
+    def list(self, request, username, post_ID):
+        """
+        List comments on a post
+        """
+        user = User.objects.get(username=username)
+        post = Post.objects.get(ID=post_ID)
         comments = Comment.objects.filter(post=post)
         serializer = CommentSerializer(comments, many=True)
         page = request.GET.get("page",1)
@@ -381,14 +538,22 @@ class CommentViewSet(viewsets.ViewSet):
         data["comments"] = commentData
         return Response(data)
 
-    def retrieve(self, request, user_id, post_id, comment_id):
-        user = User.objects.get(user_id=user_id)
-        post = Post.objects.get(id=post_id)
-        comments = Comment.objects.get(id=comment_id)
+    @swagger_auto_schema(responses={200:"Success"})
+    def retrieve(self, request, username, post_ID, comment_ID):
+        """
+        Get a comment
+        """
+        user = User.objects.get(username=username)
+        post = Post.objects.get(ID=post_ID)
+        comments = Comment.objects.get(id=comment_ID)
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
-    def postComment(self, request, user_id, post_id):
+    @swagger_auto_schema(responses={201:"Created", 400:"Bad request", 401:"Unauthorized"})
+    def postComment(self, request, username, post_id):
+        """
+        Post a comment
+        """
         loggedInUser = request.user
         try:
             post = Post.objects.get(id=post_id)
@@ -418,43 +583,77 @@ class CommentViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
-class FollowerListViewset (viewsets.ViewSet):
+class FollowerListViewSet (viewsets.ViewSet):
+    """
+    API endpoint that lists followers
+    """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(responses={200:"Success"})
     def list(self, request, author):
-        authorObj = get_object_or_404(User, user_id=author)
+        """
+        Get a list of users following an author
+        """
+        authorObj = get_object_or_404(User, username=author)
         user = Follower.objects.filter(author=authorObj)
         serializer = FollowerListSerializer(user, many=True)
         return Response(serializer.data)
     
-class FollowerViewset (viewsets.ViewSet):
+class FollowerViewSet (viewsets.ViewSet):
+    """
+    API endpoint that allows followers to be viewed, updated, or deleted
+    """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(responses={200:"Success"})
     def retrieve(self, request, author, follower):
-        authorObj = get_object_or_404(User, user_id=author)
-        followerObj = get_object_or_404(User, user_id=follower)
+        """
+        Get a user from an author's followers
+        """
+        authorObj = get_object_or_404(User, username=author)
+        followerObj = get_object_or_404(User, username=follower)
         follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
+
+    @swagger_auto_schema(responses={200:"Success"})
     def update(self, request, author, follower):
-        authorObj = get_object_or_404(User, user_id=author)
-        followerObj = get_object_or_404(User, user_id=follower)
+        """
+        Update a follower
+        """
+        authorObj = get_object_or_404(User, username=author)
+        followerObj = get_object_or_404(User, username=follower)
         Follower.objects.create(author=authorObj, follower=followerObj)
         follow = get_object_or_404(Follower, author=author, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
+
+    @swagger_auto_schema(responses={200:"Success"})
     def destroy(self, request, author, follower):
-        authorObj = get_object_or_404(User, user_id=author)
-        followerObj = get_object_or_404(User, user_id=follower)
+        """
+        Delete a follower
+        """
+        authorObj = get_object_or_404(User, username=author)
+        followerObj = get_object_or_404(User, username=follower)
         follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
         serializer = FollowerSerializer(follow)
         follow.delete()
         return Response(serializer.data)
 
-class FriendRequestViewset (viewsets.ViewSet):
+class FriendRequestViewSet (viewsets.ViewSet):
+    """
+    API endpoint that allows friend requests to be created
+    """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(responses={200:"Success"})
     def create(self, request, author, follower):
+        """
+        Create a friend request
+        """
         authorObj = get_object_or_404(User, id=author)
         followerObj = get_object_or_404(User, id=follower)
         FollowRequest.objects.create(author=authorObj, follower=followerObj)
@@ -464,12 +663,16 @@ class FriendRequestViewset (viewsets.ViewSet):
 
 class LikeViewSet(viewsets.ViewSet):
     """
-    API endpoint that allows comments to be viewed or edited.
+    API endpoint that allows comments to be viewed or edited
     """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(responses={200:"Success"})
     def commentList(self, request, user_id, post_id, comment_id):
+        """
+        List the likes on a comment
+        """
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -486,7 +689,11 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success"})
     def postList(self, request, user_id, post_id):
+        """
+        List the likes on a psot
+        """
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -503,7 +710,11 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
+    @swagger_auto_schema(responses={200:"Success"})
     def authorList(self, request, user_id):
+        """
+        List posts liked by an author
+        """
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -523,6 +734,7 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
+    @swagger_auto_schema(responses={201:"Created", 202:"Accepted", 400:"Bad request", 401:"Unauthorized"})
     def likePost(self, request, user_id, post_id):
         loggedInUser = request.user
         try:
@@ -553,6 +765,7 @@ class LikeViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
+    @swagger_auto_schema(responses={201:"Created", 202:"Accepted", 400:"Bad request", 401:"Unauthorized"})
     def likeComment(self, request, user_id, post_id, comment_id):
         loggedInUser = request.user
         try:
@@ -583,53 +796,8 @@ class LikeViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
-class StreamView(generic.ListView):
-    model = Post
-    template_name = "unhindled/mystream.html"
-    ordering = ['-published']
 
-    def get(self, request, *args, **kwargs):
-        response = requests.get(f'https://api.github.com/users/{request.user}/events/PUBLIC', auth=GITHUB_AUTH)
-        events = response.json()
-        event_list = []
-
-        if response.ok:
-            for event in events:
-                repo = event.get("repo", {}).get("name")
-                type_ = GITHUB_EVENTS.get(event.get("type"))
-
-                repo_api = event.get("repo", {}).get("url")
-                repo_resp = requests.get(repo_api, auth=GITHUB_AUTH)
-                
-                # Public repos
-                if repo_resp.ok:
-                    url = repo_resp.json().get("html_url")
-
-                # Private repos - use profile URL instead
-                else:
-                    user_api = event.get("actor", {}).get("url")
-                    user_resp = requests.get(user_api, auth=GITHUB_AUTH)
-                    if user_resp.ok:
-                        url = user_resp.json().get("html_url")
-                    else:
-                        url = None
-
-                event_list.append({"repo": repo, "type": type_, "url": url,})
-
-        return render(request, 'unhindled/mystream.html', {"event_list": event_list})
-
-
-class AccountView(generic.CreateView):
-    model = User
-    template_name = "unhindled/account.html"
-    fields = "__all__"
-
-
-class ManageFriendView(generic.ListView):
-    model = Follower
-    template_name = "unhindled/friends.html"
-    fields = "__all__"
-    
+# Extra functions
 def follow(request):
     if User.objects.filter(user_id=request.POST["author"]).count() == 1:
        author = User.objects.get(user_id=request.POST["author"])
@@ -653,32 +821,6 @@ def unfollow(request):
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)
 
-
-class CreatePostView(generic.CreateView):
-    model = Post
-    template_name = "unhindled/create_post.html"
-    fields = "__all__"
-
-# def SharePost(request, user, post_id):
-#     return HttpResponseRedirect(reverse('index'))
-
-
-class SharePost(generic.View):
-    def get(self, request, user, id):
-        post_object = get_object_or_404(Post, pk=id)
-        current_user = request.user
-        if current_user == User:
-            return HttpResponseRedirect(reverse('viewPost', args=(str(current_user ), post_object.id)))
-
-        if post_object.is_shared_post:
-            post_object = post_object.originalPost
-
-        sharedPost = Post.objects.create(author=post_object.author, contentType=post_object.contentType,
-        title=post_object.title, description=post_object.description,
-        visibility=post_object.visibility, published=post_object.published, content=post_object.content,
-        images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
-        return HttpResponseRedirect(reverse('index'))
-  
 def likeObject(request, user_id, id, obj_type):
     author = User.objects.get(id=user_id)
     if obj_type == "comment":
@@ -712,7 +854,6 @@ def unlikeObject(request, user_id, id, obj_type):
             existingLike.delete()
 
     return HttpResponseRedirect(post.get_absolute_url())
-
 
 def view_post(request, user_id, id):
     try:
@@ -752,73 +893,26 @@ def view_post(request, user_id, id):
     }
     return render(request, 'unhindled/view_post.html', context)
 
-
-class UpdatePostView(generic.UpdateView):
-    model = Post
-    template_name = "unhindled/edit_post.html"
-    fields = "__all__"
-
-    def post(self, request, *args, **kwargs):
-        if "Cancel" in request.POST:
-            return HttpResponseRedirect(self.get_object().get_absolute_url())
-        else:
-            return super(UpdatePostView, self).post(request, *args, **kwargs)
-
-
-class DeletePostView(generic.DeleteView):
-    model = Post
-    template_name = "unhindled/delete_post.html"
-    success_url = reverse_lazy('index')
-
-    def post(self, request, *args, **kwargs):
-        if "Cancel" in request.POST:
-            return HttpResponseRedirect(self.get_object().get_absolute_url())
-        else:
-            return super(DeletePostView, self).post(request, *args, **kwargs)
-
-
-class ProfileView(View):
-    def get(self, request, id, *args, **kwargs):
-        profile = UserProfile.objects.get(pk=id)
-        user = profile.user
-        user_post = Post.objects.filter(author=user).order_by('-published')
-
-        context = {
-            'user': user,
-            'profile': profile,
-            'posts': user_post,
-        }
-        return render(request, 'unhindled/profile.html', context)
-
-
-class EditProfileView(generic.UpdateView):
-    model = UserProfile
-    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
-    template_name = 'unhindled/edit_profile.html'
-    
-    def get_success_url(self):
-        pk = self.kwargs['pk']
-        return reverse_lazy('profile', kwargs={'pk': pk})
-    
-    def test_func(self):
-        profile = self.get_object()
-        return self.request.user == profile.user
-
-
-
 @api_view(['GET'])
+@swagger_auto_schema(responses={200:"Success", 405:"Method now allowed"})
 # @authentication_classes([CustomAuthentication])
 def get_foreign_posts(request):
+    """
+    Get a list of posts from foreign authors
+    """
     if request.method == "GET":
         foreign_posts = get_foreign_posts_list()
         return Response({"foreign posts": foreign_posts})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
 @api_view(['GET'])
+@swagger_auto_schema(responses={200:"Success", 405:"Method now allowed"})
 # @authentication_classes([CustomAuthentication])
 def get_foreign_authors(request):
+    """
+    Get a list of foreign authors
+    """
     if request.method == "GET":
         foreign_authors = get_foreign_authors_list()
         return Response({"foreign authors": foreign_authors})
