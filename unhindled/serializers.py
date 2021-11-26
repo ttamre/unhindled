@@ -27,9 +27,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         data.update(profileData.data)
         if (data["profileImage"] is None) == False:
             data["profileImage"] = self.host[:-1] + str(data["profileImage"])
-        data["url"] = self.host + "profile/" + str(userProfile.pk)
-        data["host"] = self.host + "profile/" + str(userProfile.pk)
-        data["id"] = self.host + "profile/" + str(userProfile.pk)
+        data["url"] = self.host + "author/" + str(userProfile.pk)
+        data["host"] = self.host + "author/" + str(userProfile.pk)
+        data["id"] = self.host + "author/" + str(userProfile.pk)
         data["type"] = "author"
         return data
         
@@ -39,21 +39,21 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = Post
-        fields = ('ID', 'author','content', 'contentType', 'title', 'description','visibility', 'created_on')
+        fields = ('id', 'author','content', 'contentType', 'title', 'description','visibility', 'created_on')
         depth = 1
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
         data['type'] = 'post'
-        data['source'] = self.host + obj.author.username + "/articles/" + str(obj.ID)
-        data['origin'] = self.host + obj.author.username + "/articles/" + str(obj.ID)
+        data['source'] = self.host + obj.author.username + "/articles/" + str(obj.id)
+        data['origin'] = self.host + obj.author.username + "/articles/" + str(obj.id)
         return data
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
     class Meta:
         model = Comment
-        fields = ('author','comment','contentType','published','ID')
+        fields = ('author','comment','contentType','published','id')
         depth = 1
         
     def to_representation(self, obj):
@@ -67,13 +67,13 @@ class FollowerListSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = Follower
-        fields = ( 'ID', 'follower' )
+        fields = ( 'id', 'follower' )
         depth = 1
     def to_representation(self, obj):
     	data = super().to_representation(obj)
     	data["id"] = self.host + "author/" + obj.follower.username
     	data["url"] = self.host + "author/" + obj.follower.username
-    	data["host"] = self.host 
+    	data["host"] = self.host
     	data["type"] = "author" 
     	return data
 #for URL: ://service/author/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}                  
@@ -102,21 +102,21 @@ class LikeSerializer(serializers.HyperlinkedModelSerializer):
     post = PostSerializer()
     class Meta:
         model = Like
-        fields = ('author', 'comment', 'post', 'ID')
+        fields = ('author', 'comment', 'post', 'id')
         depth = 1
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
         data["type"] = "Like"
         if data["post"] is not None:
-            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.post.ID)
+            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.post.id)
             data["summary"] = str(obj.author.username) + " likes your post"
-            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.post.ID)
+            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.post.id)
         elif data["comment"] is not None:
-            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.ID) + "/comments/" + str(obj.comment.ID)
+            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.id) + "/comments/" + str(obj.comment.id)
             data["summary"] = str(obj.author.username) + " likes your comment"
-            data["comment"] = str(obj.comment.ID)
-            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.ID)
+            data["comment"] = str(obj.comment.id)
+            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.id)
         
         return data
 

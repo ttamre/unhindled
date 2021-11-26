@@ -4,28 +4,26 @@
 
 {% block content %}
 {% load friend_check %}
+{% load url_check %}
 
 {% #header user=user %}
 {% /header %}
 
 <main>
 <div>
-    {% for post in foreign_posts %}
-        <a href="{% url 'viewPost' post.author.displayName post.ID %}">{{ post.title }}</a> <br>
-    {% endfor %}
     {% if user.is_authenticated %}
         <p class="non-white-title">Home</p>
         {% if object_list %}
             {% for post in object_list %}
-                {% if post.visibility == "friends" and post.author.username|friend_check:user.username  or post.visibility == "public" %}
+                {% if post.visibility == "friends" and post.author.displayName|friend_check:user.displayName  or post.visibility == "public" %}
                     <div class="post">
                         {% if post.is_shared_post %}
-                            <a href="{% url 'viewPost' post.author.displayName post.ID %}">{{ post.title }}</a> <br>
-                            Shared by: <a href="{% url 'profile' post.sharedBy.username.pk %}">{{ post.sharedBy.username }}</a> <br>
+                            <a href="{% url 'viewPost' post.author.displayName post.id %}">{{ post.title }}</a> <br>
+                            Shared by: <a href="{% url 'profile' post.sharedBy.id %}">{{ post.sharedBy }}</a> <br>
                         {% else %}
-                            <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                            <a href="{% url 'viewPost' post.author.displayName post.id %}">{{ post.title }}</a> <br>
                         {% endif %}
-                        <p><b>Author: </b><a href="{% url 'profile' post.author.pk %}">{{post.author}}</a><br></p>
+                        <p><b>Author: </b><a href="{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a><br></p>
                         <b>Description:</b> {{ post.description }}
                     </div>
                 {% endif %}
@@ -39,26 +37,12 @@
                 {% if post.visibility == "public" %}
                     <div class="post">
                         {% if post.is_shared_post %}
-                            <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a><br>
-                            Shared by: <a href="{% url 'profile' post.sharedBy.username.pk %}">{{ post.sharedBy.username }}</a> <br>
+                            <a href="{% url 'viewPost' post.author.displayName post.id %}">{{ post.title }}</a><br>
+                            Shared by: <a href="{% url 'profile' post.sharedBy.id %}">{{ post.sharedBy }}</a> <br>
                         {% else %}
-                            <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                            <a href="{% url 'viewPost' post.author.displayName post.id %}">{{ post.title }}</a> <br>
                         {% endif %}
-                        <p><b>Author: </b><a href="{% url 'profile' post.author.pk %}">{{post.author}}</a><br></p>
-                        <b>Description:</b> {{ post.description }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-            {% for post in object_list %}
-                {% if post.visibility == "public" %}
-                    <div class="post">
-                        {% if post.is_shared_post %}
-                            <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a><br>
-                            Shared by: <a href="{% url 'profile' post.sharedBy.username.pk %}">{{ post.sharedBy.username }}</a> <br>
-                        {% else %}
-                            <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                        {% endif %}
-                        <p><b>Author: </b><a href="{% url 'profile' post.author.pk %}">{{post.author}}</a><br></p>
+                        <p><b>Author: </b><a href="{% url 'profile' post.author.id %}">{{post.author.displayName}}</a><br></p>
                         <b>Description:</b> {{ post.description }}
                     </div>
                 {% endif %}

@@ -1,4 +1,5 @@
 from django.contrib.auth import login
+from django.db import reset_queries
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.views import generic, View
@@ -33,6 +34,7 @@ import os
 import datetime, math
 import sys
 import socket
+from itertools import chain
 
 from django.core import serializers as core_serializers
 
@@ -80,7 +82,8 @@ class HomeView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super(HomeView, self).get_context_data(**kwargs)
-        context['foreign_posts'] = test()
+        original = context['object_list']
+        context['object_list'] = chain(test(), original)
         return context
 
 class SignUpView(generic.CreateView):
@@ -117,7 +120,7 @@ class PostViewSet(viewsets.ViewSet):
     def retrieve(self, request, username, post_ID):
         user = User.objects.get(username=username)
         try:
-            queryset = Post.objects.get(ID=post_ID)
+            queryset = Post.objects.get(id=post_ID)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
 
@@ -131,9 +134,9 @@ class PostViewSet(viewsets.ViewSet):
 
     def createPost(self, request, username,post_ID=None):
         if post_ID != None:
-            post = Post.objects.filter(ID=post_ID)
+            post = Post.objects.filter(id=post_ID)
             if len(post) > 0:
-                return Response({"Error":"Post ID already exists"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"Error":"Post id already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
         loggedInUser = request.user
         user = User.objects.get(username=username)
@@ -177,7 +180,7 @@ class PostViewSet(viewsets.ViewSet):
             newPost = Post(author=author,title=title,description=description,visibility=visibility,send_to=send_to,created_on=created_on,
                             content=content,contentType=contentType,images=images)
             if post_ID != None:
-                newPost.ID = post_ID
+                newPost.id = post_ID
 
             newPost.save()
             serializer = PostSerializer(newPost)
@@ -195,7 +198,7 @@ class PostViewSet(viewsets.ViewSet):
         loggedInUser = request.user
         user = User.objects.get(username=username)
         try:
-            postToEdit = Post.objects.get(ID=post_ID)
+            postToEdit = Post.objects.get(id=post_ID)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
             
@@ -249,7 +252,7 @@ class PostViewSet(viewsets.ViewSet):
         loggedInUser = request.user
         user = User.objects.get(username=username)
         try:
-            postToDelete = Post.objects.get(ID=post_ID)
+            postToDelete = Post.objects.get(id=post_ID)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
 
@@ -358,7 +361,7 @@ class CommentViewSet(viewsets.ViewSet):
 
     def list(self, request, username, post_ID):
         user = User.objects.get(username=username)
-        post = Post.objects.get(ID=post_ID)
+        post = Post.objects.get(id=post_ID)
         comments = Comment.objects.filter(post=post)
         serializer = CommentSerializer(comments, many=True)
         page = request.GET.get("page",1)
@@ -372,13 +375,13 @@ class CommentViewSet(viewsets.ViewSet):
         data["type"] = "comments"
         data["page"] = page
         data["size"] = math.ceil(len(serializer.data) / size)
-        data["post"] = host + post.author.username + "/articles/" + str(post.ID) + "/comments"
+        data["post"] = host + post.author.username + "/articles/" + str(post.id) + "/comments"
         data["comments"] = commentData
         return Response(data)
 
     def retrieve(self, request, username, post_ID, comment_ID):
         user = User.objects.get(username=username)
-        post = Post.objects.get(ID=post_ID)
+        post = Post.objects.get(id=post_ID)
         comments = Comment.objects.get(id=comment_ID)
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
@@ -386,7 +389,7 @@ class CommentViewSet(viewsets.ViewSet):
     def postComment(self, request, username, post_ID):
         loggedInUser = request.user
         try:
-            post = Post.objects.get(ID=post_ID)
+            post = Post.objects.get(id=post_ID)
         except:
             return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
 
@@ -471,7 +474,7 @@ class LikeViewSet(viewsets.ViewSet):
         serializer_context = {
             'request': Request(request),
         }
-        comment = Comment.objects.get(ID=comment_ID)
+        comment = Comment.objects.get(id=comment_ID)
         likes = Like.objects.filter(comment=comment)
         serializer = LikeSerializer(likes, many=True, context=serializer_context)
 
@@ -488,7 +491,7 @@ class LikeViewSet(viewsets.ViewSet):
         serializer_context = {
             'request': Request(request),
         }
-        post = Post.objects.get(ID=post_ID)
+        post = Post.objects.get(id=post_ID)
         likes = Like.objects.filter(post=post)
         serializer = LikeSerializer(likes, many=True, context=serializer_context)
 
@@ -521,7 +524,7 @@ class LikeViewSet(viewsets.ViewSet):
     def likePost(self, request, username, post_ID):
         loggedInUser = request.user
         try:
-            post = Post.objects.get(ID=post_ID)
+            post = Post.objects.get(id=post_ID)
         except:
             return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
 
@@ -551,7 +554,7 @@ class LikeViewSet(viewsets.ViewSet):
     def likeComment(self, request, username, post_ID, comment_ID):
         loggedInUser = request.user
         try:
-            comment = Comment.objects.get(ID=comment_ID)
+            comment = Comment.objects.get(id=comment_ID)
         except:
             return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
 
@@ -659,11 +662,11 @@ class CreatePostView(generic.CreateView):
 
 
 class SharePost(generic.View):
-    def get(self, request, user, pk):
-        post_object = get_object_or_404(Post, pk=pk)
+    def get(self, request, user, id):
+        post_object = get_object_or_404(Post, pk=id)
         current_user = request.user
         if current_user == User:
-            return HttpResponseRedirect(reverse('viewPost', args=(str(current_user ), post_object.ID)))
+            return HttpResponseRedirect(reverse('viewPost', args=(str(current_user ), post_object.id)))
 
         if post_object.is_shared_post:
             post_object = post_object.originalPost
@@ -677,14 +680,14 @@ class SharePost(generic.View):
 def likeObject(request, user, id, obj_type):
     author = User.objects.get(username=user)
     if obj_type == "comment":
-        comment = Comment.objects.get(ID = id)
+        comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
         if (len(existingLike) == 0):
             like = Like(comment=comment,author=author)
             like.save()
         post = comment.post
     elif obj_type == "post":
-        post = Post.objects.get(ID = id)
+        post = Post.objects.get(id = id)
         existingLike = Like.objects.filter(post=post,author=author)
         if (len(existingLike) == 0):
             like = Like(post=post,author=author)
@@ -695,13 +698,13 @@ def likeObject(request, user, id, obj_type):
 def unlikeObject(request, user, id, obj_type):
     author = User.objects.get(username=user)
     if obj_type == "comment":
-        comment = Comment.objects.get(ID = id)
+        comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
         if (len(existingLike) >= 1):
             existingLike.delete()
         post = comment.post
     elif obj_type == "post":
-        post = Post.objects.get(ID = id)
+        post = Post.objects.get(id = id)
         existingLike = Like.objects.filter(post=post,author=author)
         if (len(existingLike) >= 1):
             existingLike.delete()
@@ -709,12 +712,9 @@ def unlikeObject(request, user, id, obj_type):
     return HttpResponseRedirect(post.get_absolute_url())
 
 
-def view_post(request, user, pk):
-    if get_object_or_404(Post, ID=pk) == 404:
-        post = test()
-    else:
-        post = get_object_or_404(Post, ID=pk)
-    print(post)
+def view_post(request, user, id):
+    print(request)
+    post = get_object_or_404(Post, id=id)
     comments = Comment.objects.filter(post=post).order_by('-published')
     if request.method == 'POST':
         form_comment = FormComment(request.POST or None)
@@ -759,8 +759,8 @@ class DeletePostView(generic.DeleteView):
 
 
 class ProfileView(View):
-    def get(self, request, pk, *args, **kwargs):
-        profile = UserProfile.objects.get(pk=pk)
+    def get(self, request, id, *args, **kwargs):
+        profile = UserProfile.objects.get(pk=id)
         user = profile.user
         user_post = Post.objects.filter(author=user).order_by('-created_on')
 
