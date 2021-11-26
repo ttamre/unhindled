@@ -176,6 +176,10 @@ a.white-text:hover {
   border-radius: 6px;
 }
 
+.source-text {
+  color: #2B7A78;
+}
+
 .link-navigation {
   margin: auto 0 auto auto;
 }
