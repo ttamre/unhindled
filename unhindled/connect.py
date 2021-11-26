@@ -25,7 +25,7 @@ def get_foreign_posts_list():
     if t14_req.status_code == 500:
         pass
     else:
-        js_req_14 = t14_req.json()['items']
+        js_req_14 = t14_req.json()
         post_list.append(js_req_14)
 
     return post_list
