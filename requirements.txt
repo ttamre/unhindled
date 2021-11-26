@@ -20,5 +20,3 @@ slippers==0.3.0
 sqlparse==0.4.2
 urllib3==1.26.7
 whitenoise==5.3.0
-drf-yasg==1.20.0
-swagger-spec-validator==2.7.4
