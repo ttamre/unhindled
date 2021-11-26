@@ -78,7 +78,7 @@ def paginationGetter(page, size):
 class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
-    ordering = ['-created_on']
+    ordering = ['-published']
 
     def get_context_data(self, **kwargs):
         context = super(HomeView, self).get_context_data(**kwargs)
@@ -94,12 +94,12 @@ class SignUpView(generic.CreateView):
 class PostViewSet(viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = Post.objects.all().order_by('created_on')
+    queryset = Post.objects.all().order_by('published')
     serializer_class = PostSerializer
 
     def list(self, request, username):
         user = User.objects.get(username=username)
-        queryset = Post.objects.filter(author=user).order_by('created_on')
+        queryset = Post.objects.filter(author=user).order_by('published')
         serializer = PostSerializer(queryset, many=True)
 
         page = request.GET.get("page",1)
@@ -128,7 +128,7 @@ class PostViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def allPosts(self, request):
-        posts = Post.objects.filter(visibility='public').order_by('created_on')
+        posts = Post.objects.filter(visibility='public').order_by('published')
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
@@ -168,16 +168,16 @@ class PostViewSet(viewsets.ViewSet):
                 except:
                     send_to = User.objects.get(pk=postData["sent_to"])
 
-        created_on = datetime.datetime.now()
+        published = datetime.datetime.now()
         if ("published") in postData.keys():
             if (postData["published"] is not None) and postData["published"] != "":
-                created_on = datetime.datetime(postData["published"])
+                published = datetime.datetime(postData["published"])
         #will need to change
         content = postData.get("content",None)
         images = postData.get("images",None)
 
         try:
-            newPost = Post(author=author,title=title,description=description,visibility=visibility,send_to=send_to,created_on=created_on,
+            newPost = Post(author=author,title=title,description=description,visibility=visibility,send_to=send_to,published=published,
                             content=content,contentType=contentType,images=images)
             if post_ID != None:
                 newPost.id = post_ID
@@ -228,8 +228,8 @@ class PostViewSet(viewsets.ViewSet):
                         warning["visibility"] =  "Post can't be converted to a Inbox post, please delete the post and repost with changed visibility"
         if "send_to" in postData.keys() and postData["send_to"] != "":
             warning["send_to"] =  "Post can't change receiver. Please delete post and resend"
-        if "created_on" in postData.keys() and postData["created_on"] != "":
-            warning["created_on"] = "Published date can't be changed"
+        if "published" in postData.keys() and postData["published"] != "":
+            warning["published"] = "Published date can't be changed"
         if "images" in postData.keys() and postData["images"] != "":
             postToEdit.images = postData["images"]
     
@@ -356,7 +356,7 @@ class CommentViewSet(viewsets.ViewSet):
     """
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = Post.objects.all().order_by('created_on')
+    queryset = Post.objects.all().order_by('published')
     serializer_class = CommentSerializer
 
     def list(self, request, username, post_ID):
@@ -584,7 +584,7 @@ class LikeViewSet(viewsets.ViewSet):
 class StreamView(generic.ListView):
     model = Post
     template_name = "unhindled/mystream.html"
-    ordering = ['-created_on']
+    ordering = ['-published']
 
     def get(self, request, *args, **kwargs):
         response = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=GITHUB_AUTH)
@@ -673,7 +673,7 @@ class SharePost(generic.View):
 
         sharedPost = Post.objects.create(author=post_object.author, contentType=post_object.contentType,
         title=post_object.title, description=post_object.description,
-        visibility=post_object.visibility, created_on=post_object.created_on, content=post_object.content,
+        visibility=post_object.visibility, published=post_object.published, content=post_object.content,
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
         return HttpResponseRedirect(reverse('index'))
   
@@ -777,7 +777,7 @@ class ProfileView(View):
     def get(self, request, id, *args, **kwargs):
         profile = UserProfile.objects.get(pk=id)
         user = profile.user
-        user_post = Post.objects.filter(author=user).order_by('-created_on')
+        user_post = Post.objects.filter(author=user).order_by('-published')
 
         context = {
             'user': user,

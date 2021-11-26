@@ -61,8 +61,8 @@
             {% for post in posts %}
             <div class="comment-box mt-3">
                 {% if post.visibility != "unlisted" %}
-                    <a href="{% url 'viewPost' post..author.displayName post.id %}">{{ post.title }}</a> <br>
-                    <p>{{ post.created_on }}</p>
+                    <a href="{% url 'viewPost' post.author.displayName post.id %}">{{ post.title }}</a> <br>
+                    <p>{{ post.published }}</p>
                     <p>{{ post.description }}</p>
                 {% endif %}
             </div>

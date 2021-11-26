@@ -53,7 +53,7 @@ class Post(models.Model):
 	description = models.CharField(max_length=500)
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0][0], null=False)
 	send_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='send_to', null=True, blank=True)
-	created_on = models.DateTimeField(auto_now_add=True)
+	published = models.DateTimeField(auto_now_add=True)
 	#will need to change
 	content = models.TextField(blank=True)
 	images = models.ImageField(null=True,blank=True, upload_to='images/')
