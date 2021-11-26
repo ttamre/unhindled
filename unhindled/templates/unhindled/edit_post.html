@@ -9,12 +9,13 @@
 
 {% load crispy_forms_tags %}
 
-<p class="non-white-title">Edit Post</p>
-
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <input type="submit" value="Confirm" />
-    <input type="submit" name="Cancel" value="Cancel" /> 
-</form>
+<main>
+    <p class="non-white-title">Edit Post</p>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input type="submit" value="Confirm" />
+        <input type="submit" name="Cancel" value="Cancel" />
+    </form>
+</main>
 {% endblock %}

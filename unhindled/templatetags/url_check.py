@@ -8,5 +8,8 @@ def valid_url_profile(string):
   if 'https://' in str(string):
     string = string.split('/')
     return string[-1]
+  elif 'http://' in str(string):
+    string = string.split('/')
+    return string[-1]
   else:
     return string

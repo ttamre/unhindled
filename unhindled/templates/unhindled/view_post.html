@@ -12,15 +12,17 @@
 {% load post_like %}
 
 <main>
+<div class="is-flex mt-3">
+  <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
+  <small>
+    &nbsp;• {% load tz %}
+    {% localtime on %}
+    <small>Created: {{post.published}}</small>
+    {% endlocaltime %}
+  </small>
+</div>
 <p class="non-white-title is-size-4 mb-2">{{post.title}}</p>
-<small>Author: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
-<br>
-{% load tz %}
-{% localtime on %}
-<small>Created: {{post.published}}</small>
-{% endlocaltime %}
-<br>
-<small>Description: {{post.description}}</small>
+<p>{{post.description}}</p>
 
 <div class="post-box">
   {% if post.contentType == "md" %}
@@ -33,27 +35,27 @@
 <img src="{{post.images.url}}">
 {% endif %}
 
-<p class="mb-3 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
-
+<div class="is-flex">
+  <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
 {% if user.displayName == post.author.displayName %}
   {% if user.is_authenticated %}
     {% if post|post_liked:user %}
-      <a href="{% url 'unlikeObject' user.displayName post.id "post" %}">{% post_text post user %}</a>
+      <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
     {% else %}
-      <a href="{% url 'likeObject' user.displayName post.id "post" %}">{% post_text post user %}</a>
+      <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
     {% endif %}
   {% endif %}
   {% if post.is_shared_post %}
-    <a href="{% url 'viewPost' post.author.displayName post.originalPost.id %}">View Original</a>
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">View Original</a></span>
   {% else %}
-    <a href="{% url 'updatePost' post.author.displayName post.id %}">Edit</a>
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/edit">Edit</a></span>
   {% endif %}
-    <a href="{% url 'deletePost' post.author.displayName post.id %}">Delete</a>
+  <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/delete">Delete</a></span>
 {% else %}
-  <a href="{% url 'sharePost' post.author.displayName post.id %}" onclick="return confirm('Are you sure?');">Share</a>
+  <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/share" onclick="return confirm('Are you sure?');">Share</a></span>
 {% endif %}
+</div>
 
-<br>
 <div class="mt-2">
   <form method = 'post'>
     {% csrf_token %}
@@ -66,7 +68,7 @@
   </form>
 </div>
 
-<div class="mt-5 mb-6">
+<div class="mt-5 mb-5">
   <p class="mt-3">{{ post.comment.count}} Comment{{ post.comment.count|pluralize}}</p>
   <br>
   {% for comment in post.comment.all %}

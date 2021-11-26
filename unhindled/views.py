@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
+from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 from .models import Like, Post, Follower, FollowRequest, UserProfile, Comment
 from requests.models import Response as MyResponse
@@ -79,11 +80,12 @@ class HomeView(generic.ListView):
     model = Post
     template_name = "unhindled/index.html"
     ordering = ['-published']
+    # paginate_by = 8
 
     def get_context_data(self, **kwargs):
         context = super(HomeView, self).get_context_data(**kwargs)
         original = context['object_list']
-        context['object_list'] = chain(test(), original)
+        context['object_list'] = chain(get_foreign_posts_list(), original)
         return context
 
 class SignUpView(generic.CreateView):
@@ -97,8 +99,8 @@ class PostViewSet(viewsets.ViewSet):
     queryset = Post.objects.all().order_by('published')
     serializer_class = PostSerializer
 
-    def list(self, request, username):
-        user = User.objects.get(username=username)
+    def list(self, request, user_id):
+        user = User.objects.get(user_id=user_id)
         queryset = Post.objects.filter(author=user).order_by('published')
         serializer = PostSerializer(queryset, many=True)
 
@@ -117,10 +119,10 @@ class PostViewSet(viewsets.ViewSet):
 
         return Response(data)
 
-    def retrieve(self, request, username, post_ID):
-        user = User.objects.get(username=username)
+    def retrieve(self, request, user_id, post_id):
+        user = User.objects.get(user_id=user_id)
         try:
-            queryset = Post.objects.get(id=post_ID)
+            queryset = Post.objects.get(id=post_id)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
 
@@ -128,18 +130,18 @@ class PostViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def allPosts(self, request):
-        posts = Post.objects.filter(visibility='public').order_by('published')
+        posts = Post.objects.filter(visibility='PUBLIC').order_by('published')
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
-    def createPost(self, request, username,post_ID=None):
-        if post_ID != None:
-            post = Post.objects.filter(id=post_ID)
+    def createPost(self, request, user_id,post_id=None):
+        if post_id != None:
+            post = Post.objects.filter(id=post_id)
             if len(post) > 0:
                 return Response({"Error":"Post id already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
         loggedInUser = request.user
-        user = User.objects.get(username=username)
+        user = User.objects.get(user_id=user_id)
 
         if user != loggedInUser:
             return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -155,7 +157,7 @@ class PostViewSet(viewsets.ViewSet):
         title = postData.get("title",None)
         description = postData.get("description",None)
 
-        visibility = 'public'
+        visibility = 'PUBLIC'
         for types in Post.VISIBILITY:
             if types[1].lower() == postData["visibility"].lower():
                 visibility = types[0]
@@ -164,7 +166,7 @@ class PostViewSet(viewsets.ViewSet):
         if ("sent_to" in postData.keys()):
             if (postData["sent_to"] is not None) and postData["sent_to"] != "":
                 try:
-                    send_to = User.objects.get(username=username)
+                    send_to = User.objects.get(user_id=user_id)
                 except:
                     send_to = User.objects.get(pk=postData["sent_to"])
 
@@ -179,8 +181,8 @@ class PostViewSet(viewsets.ViewSet):
         try:
             newPost = Post(author=author,title=title,description=description,visibility=visibility,send_to=send_to,published=published,
                             content=content,contentType=contentType,images=images)
-            if post_ID != None:
-                newPost.id = post_ID
+            if post_id != None:
+                newPost.id = post_id
 
             newPost.save()
             serializer = PostSerializer(newPost)
@@ -194,11 +196,11 @@ class PostViewSet(viewsets.ViewSet):
 
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
-    def updatePost(self, request, username, post_ID):
+    def updatePost(self, request, user_id, pk):
         loggedInUser = request.user
-        user = User.objects.get(username=username)
+        user = User.objects.get(user_id=user_id)
         try:
-            postToEdit = Post.objects.get(id=post_ID)
+            postToEdit = Post.objects.get(id=pk)
         except:
             return Response({}, status.HTTP_404_NOT_FOUND)
             
@@ -248,9 +250,9 @@ class PostViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def deletePost(self, request, username, pk):
+    def deletePost(self, request, user_id, pk):
         loggedInUser = request.user
-        user = User.objects.get(username=username)
+        user = User.objects.get(user_id=user_id)
         try:
             postToDelete = Post.objects.get(id=pk)
         except:
@@ -292,7 +294,7 @@ class UserViewSet(viewsets.ViewSet):
     def retrieve(self, request, id):
         queryset = UserProfile.objects.all()
         try:
-            user = User.objects.get(username=id)
+            user = User.objects.get(user_id=id)
         except:
             try:
                 user = User.objects.get(pk=int(id))
@@ -303,7 +305,7 @@ class UserViewSet(viewsets.ViewSet):
 
     def authorUpdate(self, request, id):
         try:
-            user = User.objects.get(username=id)
+            user = User.objects.get(user_id=id)
         except:
             try:
                 user = User.objects.get(pk=int(id))
@@ -318,11 +320,11 @@ class UserViewSet(viewsets.ViewSet):
         
         updateData = request.POST
 
-        if "username" in updateData.keys() and updateData["username"] != "":
-            otherUser = User.objects.filter(username=updateData["username"])
+        if "user_id" in updateData.keys() and updateData["user_id"] != "":
+            otherUser = User.objects.filter(user_id=updateData["user_id"])
             if len(otherUser) > 0:
-                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
-            user.username = updateData["username"]
+                return Response({"error": "user_id already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            user.user_id = updateData["user_id"]
         if "first_name" in updateData.keys() and updateData["first_name"] != "":
             user.first_name = updateData["first_name"]
         if "last_name" in updateData.keys() and updateData["last_name"] != "":
@@ -359,9 +361,9 @@ class CommentViewSet(viewsets.ViewSet):
     queryset = Post.objects.all().order_by('published')
     serializer_class = CommentSerializer
 
-    def list(self, request, username, post_ID):
-        user = User.objects.get(username=username)
-        post = Post.objects.get(id=post_ID)
+    def list(self, request, user_id, post_id):
+        user = User.objects.get(user_id=user_id)
+        post = Post.objects.get(id=post_id)
         comments = Comment.objects.filter(post=post)
         serializer = CommentSerializer(comments, many=True)
         page = request.GET.get("page",1)
@@ -375,21 +377,21 @@ class CommentViewSet(viewsets.ViewSet):
         data["type"] = "comments"
         data["page"] = page
         data["size"] = math.ceil(len(serializer.data) / size)
-        data["post"] = host + post.author.username + "/articles/" + str(post.id) + "/comments"
+        data["post"] = host + post.author.user_id + "/posts/" + str(post.id) + "/comments"
         data["comments"] = commentData
         return Response(data)
 
-    def retrieve(self, request, username, post_ID, comment_ID):
-        user = User.objects.get(username=username)
-        post = Post.objects.get(id=post_ID)
-        comments = Comment.objects.get(id=comment_ID)
+    def retrieve(self, request, user_id, post_id, comment_id):
+        user = User.objects.get(user_id=user_id)
+        post = Post.objects.get(id=post_id)
+        comments = Comment.objects.get(id=comment_id)
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
-    def postComment(self, request, username, post_ID):
+    def postComment(self, request, user_id, post_id):
         loggedInUser = request.user
         try:
-            post = Post.objects.get(id=post_ID)
+            post = Post.objects.get(id=post_id)
         except:
             return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
 
@@ -420,7 +422,7 @@ class FollowerListViewset (viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     def list(self, request, author):
-        authorObj = get_object_or_404(User, username=author)
+        authorObj = get_object_or_404(User, user_id=author)
         user = Follower.objects.filter(author=authorObj)
         serializer = FollowerListSerializer(user, many=True)
         return Response(serializer.data)
@@ -429,21 +431,21 @@ class FollowerViewset (viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     def retrieve(self, request, author, follower):
-        authorObj = get_object_or_404(User, username=author)
-        followerObj = get_object_or_404(User, username=follower)
+        authorObj = get_object_or_404(User, user_id=author)
+        followerObj = get_object_or_404(User, user_id=follower)
         follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
     def update(self, request, author, follower):
-        authorObj = get_object_or_404(User, username=author)
-        followerObj = get_object_or_404(User, username=follower)
+        authorObj = get_object_or_404(User, user_id=author)
+        followerObj = get_object_or_404(User, user_id=follower)
         Follower.objects.create(author=authorObj, follower=followerObj)
         follow = get_object_or_404(Follower, author=author, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
     def destroy(self, request, author, follower):
-        authorObj = get_object_or_404(User, username=author)
-        followerObj = get_object_or_404(User, username=follower)
+        authorObj = get_object_or_404(User, user_id=author)
+        followerObj = get_object_or_404(User, user_id=follower)
         follow = get_object_or_404(Follower, author=authorObj, follower=followerObj)
         serializer = FollowerSerializer(follow)
         follow.delete()
@@ -467,14 +469,14 @@ class LikeViewSet(viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def commentList(self, request, username, post_ID, comment_ID):
+    def commentList(self, request, user_id, post_id, comment_id):
         factory = APIRequestFactory()
         request = factory.get('/')
 
         serializer_context = {
             'request': Request(request),
         }
-        comment = Comment.objects.get(id=comment_ID)
+        comment = Comment.objects.get(id=comment_id)
         likes = Like.objects.filter(comment=comment)
         serializer = LikeSerializer(likes, many=True, context=serializer_context)
 
@@ -484,14 +486,14 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
-    def postList(self, request, username, post_ID):
+    def postList(self, request, user_id, post_id):
         factory = APIRequestFactory()
         request = factory.get('/')
 
         serializer_context = {
             'request': Request(request),
         }
-        post = Post.objects.get(id=post_ID)
+        post = Post.objects.get(id=post_id)
         likes = Like.objects.filter(post=post)
         serializer = LikeSerializer(likes, many=True, context=serializer_context)
 
@@ -501,7 +503,7 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
-    def authorList(self, request, username):
+    def authorList(self, request, user_id):
         factory = APIRequestFactory()
         request = factory.get('/')
 
@@ -509,7 +511,7 @@ class LikeViewSet(viewsets.ViewSet):
             'request': Request(request),
         }
 
-        author = User.objects.get(username=username)
+        author = User.objects.get(user_id=user_id)
         likes = Like.objects.filter(author=author)
         serializer = LikeSerializer(likes, many=True, context=serializer_context)
 
@@ -521,10 +523,10 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
-    def likePost(self, request, username, post_ID):
+    def likePost(self, request, user_id, post_id):
         loggedInUser = request.user
         try:
-            post = Post.objects.get(id=post_ID)
+            post = Post.objects.get(id=post_id)
         except:
             return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
 
@@ -551,10 +553,10 @@ class LikeViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    def likeComment(self, request, username, post_ID, comment_ID):
+    def likeComment(self, request, user_id, post_id, comment_id):
         loggedInUser = request.user
         try:
-            comment = Comment.objects.get(id=comment_ID)
+            comment = Comment.objects.get(id=comment_id)
         except:
             return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
 
@@ -587,7 +589,7 @@ class StreamView(generic.ListView):
     ordering = ['-published']
 
     def get(self, request, *args, **kwargs):
-        response = requests.get(f'https://api.github.com/users/{request.user}/events/public', auth=GITHUB_AUTH)
+        response = requests.get(f'https://api.github.com/users/{request.user}/events/PUBLIC', auth=GITHUB_AUTH)
         events = response.json()
         event_list = []
 
@@ -629,8 +631,8 @@ class ManageFriendView(generic.ListView):
     fields = "__all__"
     
 def follow(request):
-    if User.objects.filter(username=request.POST["author"]).count() == 1:
-       author = User.objects.get(username=request.POST["author"])
+    if User.objects.filter(user_id=request.POST["author"]).count() == 1:
+       author = User.objects.get(user_id=request.POST["author"])
        if Follower.objects.filter(author=author,follower=request.user).count() == 0 :
            Follower.objects.create(follower=request.user, author=author)
            if Follower.objects.filter(author=request.user,follower=author).count() == 0 and FollowRequest.objects.filter(author=request.user,follower=author).count() == 0:
@@ -639,13 +641,13 @@ def follow(request):
     return HttpResponseRedirect(next)
 
 def deleteFollowRequest(request):
-    followRequest = FollowRequest.objects.get(author=request.POST["author"],follower=request.user.username)
+    followRequest = FollowRequest.objects.get(author=request.POST["author"],follower=request.user.user_id)
     follow.delete()
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)    
 
 def unfollow(request):
-    author = User.objects.get(username=request.POST["author"])
+    author = User.objects.get(user_id=request.POST["author"])
     follow = Follower.objects.get(author=author,follower=request.user)
     follow.delete()
     next = request.POST.get('next', '/')
@@ -677,8 +679,8 @@ class SharePost(generic.View):
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
         return HttpResponseRedirect(reverse('index'))
   
-def likeObject(request, user, id, obj_type):
-    author = User.objects.get(username=user)
+def likeObject(request, user_id, id, obj_type):
+    author = User.objects.get(id=user_id)
     if obj_type == "comment":
         comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
@@ -695,8 +697,8 @@ def likeObject(request, user, id, obj_type):
 
     return HttpResponseRedirect(post.get_absolute_url())
 
-def unlikeObject(request, user, id, obj_type):
-    author = User.objects.get(username=user)
+def unlikeObject(request, user_id, id, obj_type):
+    author = User.objects.get(id=user_id)
     if obj_type == "comment":
         comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
@@ -712,14 +714,16 @@ def unlikeObject(request, user, id, obj_type):
     return HttpResponseRedirect(post.get_absolute_url())
 
 
-def view_post(request, user, id):
+def view_post(request, user_id, id):
     try:
         post = get_object_or_404(Post, id=id)
     except:
         post = get_json_post(id)
 
     if type(post) is dict:
-        comments = Comment.objects.filter(post=post['id']).order_by('-published')
+        post_id = post['id'].split('/post')[-1]
+        post_id = uuid.UUID(post_id.split('s/')[-1])
+        comments = Comment.objects.filter(post=post_id).order_by('-published')
         if request.method == 'POST':
             form_comment = FormComment(request.POST or None)
             if form_comment.is_valid():
@@ -810,7 +814,6 @@ class EditProfileView(generic.UpdateView):
 def get_foreign_posts(request):
     if request.method == "GET":
         foreign_posts = get_foreign_posts_list()
-        print(foreign_posts)
         return Response({"foreign posts": foreign_posts})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -821,7 +824,6 @@ def get_foreign_posts(request):
 def get_foreign_authors(request):
     if request.method == "GET":
         foreign_authors = get_foreign_authors_list()
-        print(foreign_authors)
         return Response({"foreign authors": foreign_authors})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

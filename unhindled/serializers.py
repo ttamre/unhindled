@@ -18,7 +18,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = User
-        fields = ('username','email', 'first_name', 'last_name')
+        fields = ('displayName','email', 'first_name', 'last_name', 'github')
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
@@ -28,9 +28,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         if (data["profileImage"] is None) == False:
             data["profileImage"] = self.host[:-1] + str(data["profileImage"])
         data["url"] = self.host + "author/" + str(userProfile.pk)
-        data["host"] = self.host + "author/" + str(userProfile.pk)
+        data["host"] = self.host
         data["id"] = self.host + "author/" + str(userProfile.pk)
         data["type"] = "author"
+        data["github"] = str(userProfile.github)
         return data
         
 
@@ -44,9 +45,10 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
+        data["id"] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['type'] = 'post'
-        data['source'] = self.host + obj.author.username + "/articles/" + str(obj.id)
-        data['origin'] = self.host + obj.author.username + "/articles/" + str(obj.id)
+        data['source'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
+        data['origin'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         return data
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
@@ -71,8 +73,8 @@ class FollowerListSerializer(serializers.HyperlinkedModelSerializer):
         depth = 1
     def to_representation(self, obj):
     	data = super().to_representation(obj)
-    	data["id"] = self.host + "author/" + obj.follower.username
-    	data["url"] = self.host + "author/" + obj.follower.username
+    	data["id"] = self.host + "author/" + obj.follower.displayName
+    	data["url"] = self.host + "author/" + obj.follower.displayName
     	data["host"] = self.host
     	data["type"] = "author" 
     	return data
@@ -109,14 +111,14 @@ class LikeSerializer(serializers.HyperlinkedModelSerializer):
         data = super().to_representation(obj)
         data["type"] = "Like"
         if data["post"] is not None:
-            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.post.id)
-            data["summary"] = str(obj.author.username) + " likes your post"
-            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.post.id)
+            data["object"] = self.host + obj.author.id + "/posts/" + str(obj.post.id)
+            data["summary"] = str(obj.author.displayName) + " likes your post"
+            data["post"] = self.host + obj.author.id + "/posts/" + str(obj.post.id)
         elif data["comment"] is not None:
-            data["object"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.id) + "/comments/" + str(obj.comment.id)
-            data["summary"] = str(obj.author.username) + " likes your comment"
+            data["object"] = self.host + obj.author.id + "/posts/" + str(obj.comment.post.id) + "/comments/" + str(obj.comment.id)
+            data["summary"] = str(obj.author.id) + " likes your comment"
             data["comment"] = str(obj.comment.id)
-            data["post"] = self.host + obj.author.username + "/articles/" + str(obj.comment.post.id)
+            data["post"] = self.host + obj.author.id + "/posts/" + str(obj.comment.post.id)
         
         return data
 

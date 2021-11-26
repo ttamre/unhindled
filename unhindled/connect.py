@@ -11,9 +11,14 @@ def test():
 
 def get_json_post(id):
     found_post = ''
-    for post in test():
-        if post['id'] == id:
+    for post in get_foreign_posts_list():
+        try:
+            split = post['id'].split('/')[-1]
+        except:
+            split = ''
+        if split == id:
             found_post = post
+
     return found_post
     
 #get our own authors
@@ -36,32 +41,34 @@ def get_foreign_posts_list():
     post_list=[]
 
     # foreign posts from team 3
-    t3_req = requests.get('https://social-dis.herokuapp.com/posts', auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t3_req = requests.get('https://social-dis.herokuapp.com/posts?size=1000', auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/%22%7D"})
     if t3_req.status_code == 500:
         pass
     else:
-        js_req_3 = t3_req.json()
-        post_list.append(js_req_3) 
-        
+        js_req_3 = t3_req.json()['items']
+        for post in js_req_3:
+            post_list.append(post)
+
+
     #foreign posts from team 5
-    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=1000', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/%22%7D"})
     if t5_req.status_code == 500:
         pass
     else:
         js_req_5 = t5_req.json()
-        post_list.append(js_req_5)
+        for post in js_req_5:
+            post_list.append(post)
 
     #foreign posts from team 14
-    t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts?size=1000', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/%22%7D"})
     if t14_req.status_code == 500:
         pass
     else:
         js_req_14 = t14_req.json()
-        post_list.append(js_req_14)
+        for post in js_req_14:
+            post_list.append(post)
 
     return post_list
-
-
 
 #get foreign authors
 def get_foreign_authors_list():
