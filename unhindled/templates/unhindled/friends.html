@@ -13,7 +13,7 @@
 
 <form action="/follow" method="POST">
 	{% csrf_token %}
-	<label for="author">Friends display name: </label>
+	<label for="author">Friends Display Name: </label>
 	<input id="author" type="text" name="author" value="">
 	<input type="hidden" name="next" value="{{ request.path }}">
     	<input type="submit" value="OK">
