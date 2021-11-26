@@ -106,6 +106,14 @@ def foreign_get_author(author):
             return ""
         else:
             return t3_req.json()
+        #our own heroku for local testing
+    if "unhindled.herokuapp.com" in author:
+        url = author
+        t15_req = requests.put(url, auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t15_req.status_code == 500:
+            return ""
+        else:
+            return t15_req.json()
     
 def foreign_add_follower(author, follower):
     #team 5 once implemented

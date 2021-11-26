@@ -23,11 +23,10 @@
 	        {% if follow.follower.toString == user.id.toString %}
 			<li>
 				Following: {{ follow.author }}
-				<!--getDisplayName follow.author "once implemented" --> 
-				Following: {{ follow.author.displayName }} 
+				<!--getDisplayName follow.author "once implemented" -->  
 				<form action="/unfollow" method="POST">
 					{% csrf_token %}
-					<input type="hidden" name="author" value="{{ follow.author.displayName }}">
+					<input type="hidden" name="author" value="{{ follow.author }}">
 					<input type="hidden" name="next" value="{{ request.path }}">
 					<input type="submit" value="Unfollow">
 				</form>
