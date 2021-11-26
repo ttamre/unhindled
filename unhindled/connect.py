@@ -1,5 +1,4 @@
 import requests
-from .models import *
 
 def test():
     test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -23,7 +22,13 @@ def test_authors():
     t = test.json()
     return t    
 
-
+# def get_json_authors(id):
+#     found_authors = ''
+#     for authors in test_authors():
+#         if authors['id'] == id:
+#             found_authors = authors
+#     return found_authors
+    
 
 
 #get foreign posts
