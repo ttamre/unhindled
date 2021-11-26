@@ -6,7 +6,7 @@
 * [Heroku](https://dashboard.heroku.com/apps/unhindled)
 * [Project Requirements](https://github.com/abramhindle/CMPUT404-project-socialdistribution/blob/master/project.org)
 * [Docs/Wiki](https://github.com/ttamre/CMPUT404Project/wiki) 
-
+* API Documentation: https://unhindled.herokuapp.com/redoc/
 ## Commands
 **Create user**
 ```bash
