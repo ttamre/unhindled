@@ -23,7 +23,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes,
 from rest_framework import viewsets
 from .serializers import *
 from rest_framework import serializers
@@ -39,7 +39,7 @@ from itertools import chain
 from django.core import serializers as core_serializers
 
 from unhindled import serializers
-from .connect import get_foreign_posts_list, get_foreign_authors_list
+from .connect import get_foreign_posts_list, get_foreign_authors_list,test_authors
 
 User = get_user_model()
 
@@ -805,5 +805,16 @@ def get_foreign_authors(request):
         foreign_authors = get_foreign_authors_list()
         print(foreign_authors)
         return Response({"foreign authors": foreign_authors})
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['GET'])
+# @authentication_classes([CustomAuthentication])
+def get_our_authors(request):
+    if request.method == "GET":
+        our_authors = test_authors()
+        print(our_authors)
+        return Response({"Our own authors": our_authors})
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
