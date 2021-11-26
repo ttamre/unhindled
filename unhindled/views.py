@@ -679,8 +679,8 @@ class SharePost(generic.View):
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
         return HttpResponseRedirect(reverse('index'))
   
-def likeObject(request, user, id, obj_type):
-    author = User.objects.get(user_id=user)
+def likeObject(request, user_id, id, obj_type):
+    author = User.objects.get(id=user_id)
     if obj_type == "comment":
         comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
@@ -697,8 +697,8 @@ def likeObject(request, user, id, obj_type):
 
     return HttpResponseRedirect(post.get_absolute_url())
 
-def unlikeObject(request, user, id, obj_type):
-    author = User.objects.get(user_id=user)
+def unlikeObject(request, user_id, id, obj_type):
+    author = User.objects.get(id=user_id)
     if obj_type == "comment":
         comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
