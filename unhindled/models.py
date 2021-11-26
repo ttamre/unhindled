@@ -37,26 +37,27 @@ class FollowRequest(models.Model):
 
 class Post(models.Model):
 	CONTENT_TYPES = (
-		('md', 'text/markdown'),
-		('txt','text/plain'),
+		('text/markdown', 'Markdown'),
+		('text/plain','Plaintext'),
 	)
 	VISIBILITY = (
-		('public', 'Public'),
-		('unlisted', 'Unlisted'),
-		('friends', 'Friends Only'),
-		('send', 'Send to Author')
+		('PUBLIC', 'Public'),
+		('FRIENDS', 'Friends Only'),
+		('SEND', 'Send to Author')
 	)
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
-	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
+	contentType = models.CharField(max_length=20, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0][0], null=False)
 	send_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='send_to', null=True, blank=True)
-	created_on = models.DateTimeField(auto_now_add=True)
+	published = models.DateTimeField(auto_now_add=True)
+	source = models.CharField(max_length=50, default="https://unhindled.herokuapp.com/")
 	#will need to change
 	content = models.TextField(blank=True)
 	images = models.ImageField(null=True,blank=True, upload_to='images/')
+	unlisted = models.BooleanField(default=False)
 	#class Meta:
 		#abstract = True
 

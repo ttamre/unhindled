@@ -16,7 +16,7 @@ class PostTests(TestCase):
 		self.posts_to_delete = []
 		self.new_post = Post.objects.create(author=self.user, contentType=Post.CONTENT_TYPES[0], 
 		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], created_on=datetime.datetime.now(), content="TEST POST 1",
+		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
 		self.new_post.save()
 
@@ -33,7 +33,7 @@ class PostTests(TestCase):
 		totalID = len(existing_ID_query)
 		response = self.client.post("/post/",data={"author":self.user.pk, "contentType":"md", 
 		"title":"Test Title", "description":"This is a test Post",
-		"visibility":"public", "created_on":datetime.datetime.now(), "content":"TEST POST 2",
+		"visibility":"PUBLIC", "published":datetime.datetime.now(), "content":"TEST POST 2",
 		"images":"", "originalPost":"", "sharedBy":""})
 		id_to_delete = ""
 		
@@ -45,13 +45,13 @@ class PostTests(TestCase):
 						self.posts_to_delete.append(id_to_delete)
 
 		self.assertEqual(response.status_code, 302)
-		self.assertEqual(response.url, "/" + self.user.username + "/articles/" + str(id_to_delete))
+		self.assertEqual(response.url, "/" + self.user.username + "/posts/" + str(id_to_delete))
 
 	def test_edittingPosts(self):
 		# Editing post and checking if post is edited
-		response = self.client.post("/"+self.user.username + "/articles/" + str(self.new_post.id) + "/edit",data={'author': ['1'], "contentType":["md"], 
+		response = self.client.post("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/edit",data={'author': ['1'], "contentType":["md"], 
 		"title":["Test Title"], "description":["This is a test Post"],
-		"visibility":["public"], "content":["TEST POST(EDITED)"],
+		"visibility":["PUBLIC"], "content":["TEST POST(EDITED)"],
 		"images":[""], "originalPost":[""], "sharedBy":[""]})
 
 		editedPost = Post.objects.filter(id=self.new_post.id)
@@ -61,7 +61,7 @@ class PostTests(TestCase):
 		# Deleting post and checking if post is deleted
 		oldPost = Post.objects.filter(id=self.new_post.id)
 		self.assertEqual(len(oldPost), 1)
-		response = self.client.post("/"+self.user.username + "/articles/" + str(self.new_post.id) + "/delete")
+		response = self.client.post("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/delete")
 
 		oldPost = Post.objects.filter(id=self.new_post.id)
 		self.assertEqual(len(oldPost), 0)
@@ -70,7 +70,7 @@ class PostTests(TestCase):
 		# Sharing post and checking if post is shared
 		totalShare = Post.objects.filter(originalPost=self.new_post)
 		totalShares = len(totalShare)
-		response = self.client.get("/"+self.user.username + "/articles/" + str(self.new_post.id) + "/share")
+		response = self.client.get("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/share")
 
 		totalShare = Post.objects.filter(originalPost=self.new_post)
 		self.assertEqual(len(totalShare), totalShares + 1)
@@ -78,11 +78,11 @@ class PostTests(TestCase):
 	def test_restrictions(self):
 		other_post = Post.objects.create(author=self.other_user, contentType=Post.CONTENT_TYPES[0], 
 		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], created_on=datetime.datetime.now(), content="TEST POST 1",
+		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
 		other_post.save()
 
-		response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.id))
+		response = self.client.get("/"+self.other_user.username + "/posts/" + str(other_post.id))
 
 		# Checking For unauthorized access
 		# response_str = str(response.rendered_content)
@@ -91,7 +91,7 @@ class PostTests(TestCase):
 		self.assertEqual("Delete" in response_str, False)
 
 		login = self.client.login(username='testuser2', password='12345')
-		response = self.client.get("/"+self.other_user.username + "/articles/" + str(other_post.id))
+		response = self.client.get("/"+self.other_user.username + "/posts/" + str(other_post.id))
 
 		# Checking for authorized access
 		response_str = str(response.content)
@@ -178,7 +178,7 @@ class CommentTests(TestCase):
         login = self.client.login(username='testuser', password='12345')
         self.new_post = Post.objects.create(author=self.user, 
 		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], created_on=datetime.datetime.now(), content="TEST POST 1",
+		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
         self.new_post.save()
         

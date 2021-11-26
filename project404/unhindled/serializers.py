@@ -13,13 +13,13 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://127.0.0.1:8000"
     class Meta:
         model = Post
-        fields = ('id', 'author', 'contentType', 'title', 'description','visibility', 'created_on')
+        fields = ('id', 'author', 'contentType', 'title', 'description','visibility', 'published')
         depth = 1
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
         data['type'] = 'post'
-        data['source'] = self.host + "/" + obj.author.username + "/articles/" + str(obj.id)
-        data['origin'] = self.host + "/" + obj.author.username + "/articles/" + str(obj.id)
+        data['source'] = self.host + "/" + obj.author.username + "/posts/" + str(obj.id)
+        data['origin'] = self.host + "/" + obj.author.username + "/posts/" + str(obj.id)
         return data
 

@@ -4,6 +4,7 @@
 {% block content %}
 {% #header user=user %}
 {% /header %}
+{% load url_check %}
 
 <main>
 <div class="container my-5">
@@ -59,12 +60,22 @@
         <p class="non-white-title is-size-6">Posts: </p>
         {% if posts %}
             {% for post in posts %}
-            <div class="comment-box mt-3">
-                {% if post.visibility != "unlisted" %}
-                    <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                    <p>{{ post.created_on }}</p>
-                    <p>{{ post.description }}</p>
+            <div class="post">
+                <div class="is-flex">
+                    <small>
+                        {% load tz %}
+                        {% localtime on %}
+                        <small>Created: {{post.published}}</small>
+                        {% endlocaltime %}
+                    </small>
+                </div>
+                {% if post.is_shared_post %}
+                    <p class="is-size-5 has-text-weight-bold"><a href="{% url 'viewPost' post.author.id post.id %}">{{ post.title }}</a></p>
+                    Shared by: <a href="/author/{% valid_url_profile post.sharedBy.id %}">{{ post.sharedBy }}</a>
+                {% else %}
+                    <p class="is-size-5 has-text-weight-bold"><a href="{% url 'viewPost' post.author.id post.id %}">{{ post.title }}</a></p>
                 {% endif %}
+                <p>{{ post.description }}</p>
             </div>
             {% endfor %}
         {% else %}
