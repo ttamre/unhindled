@@ -41,10 +41,9 @@ class Post(models.Model):
 		('txt','text/plain'),
 	)
 	VISIBILITY = (
-		('public', 'Public'),
-		('unlisted', 'Unlisted'),
-		('friends', 'Friends Only'),
-		('send', 'Send to Author')
+		('PUBLIC', 'Public'),
+		('FRIENDS', 'Friends Only'),
+		('SEND', 'Send to Author')
 	)
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -57,6 +56,7 @@ class Post(models.Model):
 	#will need to change
 	content = models.TextField(blank=True)
 	images = models.ImageField(null=True,blank=True, upload_to='images/')
+	unlisted = models.BooleanField(default=False)
 	#class Meta:
 		#abstract = True
 

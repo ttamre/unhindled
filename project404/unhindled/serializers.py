@@ -19,7 +19,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     def to_representation(self, obj):
         data = super().to_representation(obj)
         data['type'] = 'post'
-        data['source'] = self.host + "/" + obj.author.username + "/articles/" + str(obj.id)
-        data['origin'] = self.host + "/" + obj.author.username + "/articles/" + str(obj.id)
+        data['source'] = self.host + "/" + obj.author.username + "/posts/" + str(obj.id)
+        data['origin'] = self.host + "/" + obj.author.username + "/posts/" + str(obj.id)
         return data
 
