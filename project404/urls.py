@@ -22,7 +22,8 @@ from rest_framework import routers
 from unhindled import views
 
 router = routers.DefaultRouter()
-router.register(r'posts', views.PostViewSet)
+router.register(r'allposts', views.PostViewSet)
+router.register(r'author', views.UserViewSet)
 
 follower_actions = {
     "get": "retrieve",

@@ -271,8 +271,8 @@ class UserViewSet(viewsets.ViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    authentication_classes = [BasicAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [BasicAuthentication]
+    # permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
