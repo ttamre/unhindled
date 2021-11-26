@@ -17,20 +17,29 @@ from django.contrib import admin
 from django.urls import path, include
 
 from django.conf import settings
+from django.conf.urls import url
 from django.conf.urls.static import static
+from django.views.decorators.cache import cache_page
 from rest_framework import routers
+from rest_framework import routers, permissions
+from drf_yasg.views import get_schema_view
 from unhindled import views
 
 router = routers.DefaultRouter()
 router.register(r'allposts', views.PostViewSet)
 router.register(r'author', views.UserViewSet)
+cache_timer = 60 * 15 # Documentation cache expires every 15mins
 
 follower_actions = {
     "get": "retrieve",
     "delete": "destroy",
     "put": "update",
 }
-
+schema_view = get_schema_view(
+   public=True,
+   permission_classes=(permissions.AllowAny,),
+   # validators=['ssv']
+)
 urlpatterns = [
     path('', include('unhindled.urls')),
     path('admin/', admin.site.urls),
@@ -51,5 +60,12 @@ urlpatterns = [
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('foreign_posts', views.get_foreign_posts),
     path('foreign_authors', views.get_foreign_authors),
+
+    # Redocs
+    # path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    # path('swagger.yaml', schema_view.without_ui(cache_timeout=0), name='schema-yaml'),
+    url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    url(r'^redoc/$', cache_page(cache_timer)(schema_view.with_ui('redoc', cache_timeout=0)), name='schema-redoc')
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
