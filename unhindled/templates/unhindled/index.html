@@ -16,7 +16,8 @@
         <p class="non-white-title">Home</p>
         {% if object_list %}
             {% for post in object_list %}
-                {% if post.visibility == "friends" and post.author.displayName|friend_check:user.displayName or post.visibility == "PUBLIC" %}
+                {% with post.author.id|addstr:" "|addstr:user.id as ids %}
+                {% if post.visibility == "FRIENDS" and ids|friend_check or post.visibility == "PUBLIC" %}
                     <div class="post">
                         <div class="is-flex">
                             <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
@@ -39,6 +40,7 @@
                         <p>{{ post.description }}</p>
                     </div>
                 {% endif %}
+                {% endwith %}
             {% endfor %}
         {% else %}
             <p>No Posts to Show.</p>
