@@ -10,8 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import django_on_heroku
-from django.conf import settings
-from drf_yasg import openapi
+
 from pathlib import Path
 import os
 
@@ -45,7 +44,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'rest_framework',
     'slippers',
-    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -60,15 +58,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'project404.urls'
 
-REDOC_SETTINGS   = {'LAZY_RENDERING': False}
-SWAGGER_SETTINGS = {'DEFAULT_INFO': openapi.Info(
-    title="Unhindled API",
-    default_version='v1',
-    description="Documentation for the Unhindled API",
-    contact=openapi.Contact(email="ttamre@ualberta.ca"),
-    license=openapi.License(name="GNU GPLv3 License"),
-   )}
-   
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
