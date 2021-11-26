@@ -91,13 +91,13 @@ def get_foreign_authors_list():
         js_req_3 = t3_req.json()['items']
         for author in js_req_3:
             author_list.append(author)
-    
+
     # foreign authors from team 5
     t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/authors/', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
     if t5_req.status_code == 500:
         pass
     else:
-        js_req_5 = t5_req.json()['items']
+        js_req_5 = t5_req.json()
         for author in js_req_5:
             author_list.append(author)
     
@@ -107,7 +107,7 @@ def get_foreign_authors_list():
         pass
     else:
         js_req_14 = t14_req.json()['items']
-        for author in js_req_3:
+        for author in js_req_14:
             author_list.append(author)
             
     #foreign authors from our own heroku for testing 

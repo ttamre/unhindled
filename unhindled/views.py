@@ -792,11 +792,13 @@ class DeletePostView(generic.DeleteView):
 
 class ProfileView(View):
     def get(self, request, id, *args, **kwargs):
+
         try:
             profile = UserProfile.objects.get(pk=id)
         except:
             profile = get_json_authors(id)
 
+       
         if type(profile) is dict:
             user = profile['displayName']
             user_post = []
