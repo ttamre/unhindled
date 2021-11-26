@@ -26,7 +26,7 @@ from drf_yasg.views import get_schema_view
 from unhindled import views
 
 router = routers.DefaultRouter()
-router.register(r'posts', views.PostViewSet)
+router.register(r'author', views.UserViewSet)
 cache_timer = 60 * 15 # Documentation cache expires every 15mins
 
 follower_actions = {
