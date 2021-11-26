@@ -11,14 +11,14 @@ class UserProfileSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = UserProfile
-        fields = ('displayName','github','profileImage')
+        fields = ('displayName','profileImage')
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = User
-        fields = ('displayName','email', 'first_name', 'last_name', 'github')
+        fields = ('displayName','email', 'first_name', 'last_name')
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
@@ -31,7 +31,7 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         data["host"] = self.host
         data["id"] = self.host + "author/" + str(userProfile.pk)
         data["type"] = "author"
-        data["github"] = str(userProfile.github)
+        # data["github"] = str(userProfile.github)
         return data
         
 
