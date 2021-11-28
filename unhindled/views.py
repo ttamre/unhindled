@@ -28,6 +28,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework import viewsets
 from .serializers import *
 from rest_framework import serializers
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 import requests, uuid
@@ -105,7 +106,45 @@ class PostViewSet(viewsets.ViewSet):
     queryset = Post.objects.all().order_by('published')
     serializer_class = PostSerializer
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="List an author's posts",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "posts",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "author": {
+                                    "username": "admin",
+                                    "email": "admin@admin.ca",
+                                    "first_name": "",
+                                    "last_name": "",
+                                    "displayName": "admin",
+                                    "github": None,
+                                    "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                                    "url": "https://unhindled.herokuapp.com/profile/1",
+                                    "host": "https://unhindled.herokuapp.com/profile/1",
+                                    "id": "https://unhindled.herokuapp.com/profile/1",
+                                    "type": "author"
+                                },
+                                "contentType": "md",
+                                "title": "asdqw",
+                                "description": "123",
+                                "visibility": "public",
+                                "created_on": "2021-11-13T02:18:31.132761-06:00",
+                                "type": "post",
+                                "source": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "origin": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
+                            }
+                        ]
+                }
+            })
+        })
     def list(self, request, user_id):
         """
         List an author's posts
@@ -129,7 +168,42 @@ class PostViewSet(viewsets.ViewSet):
 
         return Response(data)
 
-    @swagger_auto_schema(responses={200:"Success", 404:"Not"})
+    @swagger_auto_schema(
+        operation_description="Get a post",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "post",
+                        "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                        "author": {
+                            "username": "admin",
+                            "email": "admin@admin.ca",
+                            "first_name": "",
+                            "last_name": "",
+                            "displayName": "admin",
+                            "github": None,
+                            "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                            "url": "https://unhindled.herokuapp.com/profile/1",
+                            "host": "https://unhindled.herokuapp.com/profile/1",
+                            "id": "https://unhindled.herokuapp.com/profile/1",
+                            "type": "author"
+                        },
+                        "contentType": "md",
+                        "title": "asdqw",
+                        "description": "123",
+                        "visibility": "public",
+                        "created_on": "2021-11-13T02:18:31.132761-06:00",
+                        "source": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                        "origin": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
+                }
+            }),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def retrieve(self, request, user_id, post_id):
         """
         Get a post
@@ -143,7 +217,45 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="Get all posts",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "posts",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "author": {
+                                    "username": "admin",
+                                    "email": "admin@admin.ca",
+                                    "first_name": "",
+                                    "last_name": "",
+                                    "displayName": "admin",
+                                    "github": None,
+                                    "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                                    "url": "https://unhindled.herokuapp.com/profile/1",
+                                    "host": "https://unhindled.herokuapp.com/profile/1",
+                                    "id": "https://unhindled.herokuapp.com/profile/1",
+                                    "type": "author"
+                                },
+                                "contentType": "md",
+                                "title": "asdqw",
+                                "description": "123",
+                                "visibility": "public",
+                                "created_on": "2021-11-13T02:18:31.132761-06:00",
+                                "type": "post",
+                                "source": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "origin": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
+                            }
+                        ]
+                }
+            })
+        })
     def allPosts(self, request):
         """
         Get all posts
@@ -152,7 +264,38 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={201:"Created", 400:"Bad request", 401:"Unauthorized"})
+    @swagger_auto_schema(
+        operation_description="Create a post",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['type', 'id', 'author', 'contentType', 'title', 'description', 'visibility', 'created_on', 'source', 'origin'],
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "ID": openapi.Schema(type=openapi.TYPE_STRING),
+                "author": openapi.Schema(type=openapi.TYPE_OBJECT),
+                "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+                "title": openapi.Schema(type=openapi.TYPE_STRING),
+                "description": openapi.Schema(type=openapi.TYPE_STRING),
+                "visibility": openapi.Schema(type=openapi.TYPE_STRING),
+                "created_on": openapi.Schema(type=openapi.TYPE_STRING),
+                "source": openapi.Schema(type=openapi.TYPE_STRING),
+                "origin": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            201: openapi.Response(
+                description="Created",
+                examples={"application/json": {"message": "Success"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+        })
     def createPost(self, request, user_id,post_id=None):
         """
         Create a post
@@ -218,7 +361,42 @@ class PostViewSet(viewsets.ViewSet):
 
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(responses={202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Update a post",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['type', 'id', 'author', 'contentType', 'title', 'description', 'visibility', 'created_on', 'source', 'origin'],
+            properties={  # TODO ^ are all these required?
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "ID": openapi.Schema(type=openapi.TYPE_STRING),
+                "author": openapi.Schema(type=openapi.TYPE_OBJECT),
+                "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+                "title": openapi.Schema(type=openapi.TYPE_STRING),
+                "description": openapi.Schema(type=openapi.TYPE_STRING),
+                "visibility": openapi.Schema(type=openapi.TYPE_STRING),
+                "created_on": openapi.Schema(type=openapi.TYPE_STRING),
+                "source": openapi.Schema(type=openapi.TYPE_STRING),
+                "origin": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            202: openapi.Response(
+                description="Accepted",
+                examples={"application/json": {"message": "Accepted"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            ),
+        })
     def updatePost(self, request, user_id, pk):
         """
         Update a post
@@ -276,7 +454,22 @@ class PostViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(responses={202:"Accepted", 401:"Unauthorized", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Delete a post",
+        responses={
+            202: openapi.Response(
+                description="Accepted",
+                examples={"application/json": {"message": "Accepted"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            ),
+        })
     def deletePost(self, request, user_id, pk):
         """
         Delete a post
@@ -304,7 +497,39 @@ class UserViewSet(viewsets.ViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="Get all authors on the server",
+        manual_parameters=[
+            openapi.Parameter('page', openapi.IN_QUERY, description="pages", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('size', openapi.IN_QUERY, description="users per page", type=openapi.TYPE_INTEGER)
+        ],
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "authors",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "username": "user1",
+                                "email": "admin@admin.ca",
+                                "first_name": "",
+                                "last_name": "",
+                                "displayName": "user1",
+                                "github": None,
+                                "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                                "url": "https://unhindled.herokuapp.com/profile/1",
+                                "host": "https://unhindled.herokuapp.com/profile/1",
+                                "id": "https://unhindled.herokuapp.com/profile/1",
+                                "type": "author"
+                            }
+                        ]
+                    }
+                }
+            )
+        })
     def list(self, request):
         """
         List all authors
@@ -325,7 +550,32 @@ class UserViewSet(viewsets.ViewSet):
         data["items"] = userData
         return Response(data)
 
-    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Get an author",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "author",
+                        "username": "user1",
+                        "email": "admin@admin.ca",
+                        "first_name": "",
+                        "last_name": "",
+                        "displayName": "user1",
+                        "github": None,
+                        "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                        "url": "https://unhindled.herokuapp.com/profile/1",
+                        "host": "https://unhindled.herokuapp.com/profile/1",
+                        "id": "https://unhindled.herokuapp.com/profile/1",
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def retrieve(self, request, id):
         """
         Get an user
@@ -341,7 +591,43 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Update an author",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['type', 'username', 'email', 'first_name', 'last_name', 'displayName', 'github', 'profileImage', 'url', 'host' ,'id'],
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "username": openapi.Schema(type=openapi.TYPE_STRING),
+                "email": openapi.Schema(type=openapi.TYPE_STRING),
+                "first_name": openapi.Schema(type=openapi.TYPE_STRING),
+                "last_name": openapi.Schema(type=openapi.TYPE_STRING),
+                "displayName": openapi.Schema(type=openapi.TYPE_STRING),
+                "github": openapi.Schema(type=openapi.TYPE_STRING),
+                "profileImage": openapi.Schema(type=openapi.TYPE_STRING),
+                "url": openapi.Schema(type=openapi.TYPE_STRING),
+                "host": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            202: openapi.Response(
+                description="Accepted",
+                examples={"application/json": {"message": "Accepted"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            ),
+        })
     def authorUpdate(self, request, id):
         """
         Update a user
@@ -403,7 +689,43 @@ class CommentViewSet(viewsets.ViewSet):
     queryset = Post.objects.all().order_by('published')
     serializer_class = CommentSerializer
     
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="List comments on a post",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "comments",
+                        "page": 1,
+                        "size": 1,
+                        "post": "https://unhindled.herokuapp.com/admin/articles/44e360ca-20e5-4856-b161-91344c7976e0/comments",
+                        "comments": [
+                            {
+                                "author": {
+                                    "username": "admin",
+                                    "email": "admin@admin.ca",
+                                    "first_name": "",
+                                    "last_name": "",
+                                    "displayName": "admin",
+                                    "github": None,
+                                    "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                                    "url": "https://unhindled.herokuapp.com/profile/1",
+                                    "host": "https://unhindled.herokuapp.com/profile/1",
+                                    "id": "https://unhindled.herokuapp.com/profile/1",
+                                    "type": "author"
+                                },
+                                "comment": "3",
+                                "contentType": "md",
+                                "published": "2021-11-21T22:35:30.617098-06:00",
+                                "ID": "e9024d02-6824-4ba3-94d3-be0bc20b9909",
+                                "type": "comment"
+                            }
+                        ]
+                    }
+                }
+            )
+        })
     def list(self, request, user_id, post_id):
         """
         List comments on a post
@@ -427,7 +749,35 @@ class CommentViewSet(viewsets.ViewSet):
         data["comments"] = commentData
         return Response(data)
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="Get a comment",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "author": {
+                            "username": "admin",
+                            "email": "admin@admin.ca",
+                            "first_name": "",
+                            "last_name": "",
+                            "displayName": "admin",
+                            "github": None,
+                            "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                            "url": "https://unhindled.herokuapp.com/profile/1",
+                            "host": "https://unhindled.herokuapp.com/profile/1",
+                            "id": "https://unhindled.herokuapp.com/profile/1",
+                            "type": "author"
+                        },
+                        "comment": "3",
+                        "contentType": "md",
+                        "published": "2021-11-21T22:35:30.617098-06:00",
+                        "ID": "e9024d02-6824-4ba3-94d3-be0bc20b9909",
+                        "type": "comment"
+                    }
+                }
+            )
+        })
     def retrieve(self, request, user_id, post_id, comment_id):
         """
         Get a comment
@@ -438,7 +788,42 @@ class CommentViewSet(viewsets.ViewSet):
         serializer = CommentSerializer(comments)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200:"Success", 201:"Created", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Post a comment",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['type', 'author', 'comment', 'contentType', 'published', 'ID'],
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "author": openapi.Schema(type=openapi.TYPE_OBJECT),
+                "comment": openapi.Schema(type=openapi.TYPE_STRING),
+                "contentType": openapi.Schema(type=openapi.TYPE_STRING),
+                "published": openapi.Schema(type=openapi.TYPE_STRING),
+                "ID": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={"application/json": {"message": "Success"}}
+            ),
+            201: openapi.Response(
+                description="Created",
+                examples={"application/json": {"message": "Created"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def postComment(self, request, user_id, post_id):
         """
         Post a comment
@@ -479,7 +864,31 @@ class FollowerListViewset (viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="List an author's followers",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "followers",      
+                        "items":[
+                            {
+                                "type":"author",
+                                "id":"https://unhindled.herokuapp.com/author/1d698d25ff008f7538453c120f581471",
+                                "url":"https://unhindled.herokuapp.com/author/1d698d25ff008f7538453c120f581471",
+                                "host":"https://unhindled.herokuapp.com/",
+                                "displayName":"admin",
+                                "github": None,
+                                "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png"
+                            }]
+                    }
+            }),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def list(self, request, author):
         """
         List an author's followers
@@ -496,17 +905,39 @@ class FollowerViewset (viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Check if a foreign author follows an author, returning 200 if they are",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={"application/json": {"message": "Success"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def retrieve(self, request, author, follower):
         """
-        Get a follower
+        Check if a foreign author is following another
         """
         authorObj = get_object_or_404(User, username=author)
         follow = get_object_or_404(Follower, author=authorObj, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Follow an author as a foreign author",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={"application/json": {"message": "Success"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def update(self, request, author, follower):
         """
         Follow a user
@@ -517,7 +948,18 @@ class FollowerViewset (viewsets.ViewSet):
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Unfollow an author as a foreign author",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={"application/json": {"message": "Success"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def destroy(self, request, author, follower):
         """
         Delete a follower
@@ -535,7 +977,27 @@ class FriendRequestViewset (viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
     
-    @swagger_auto_schema(responses={200:"Success", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Create a friend request",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['type', 'actor', 'object'],
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "actor": openapi.Schema(type=openapi.TYPE_OBJECT),
+                "object": openapi.Schema(type=openapi.TYPE_STRING)
+            }
+        ),
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={"application/json": {"message": "Success"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def create(self, request, author, follower):
         """
         Create a friend request
@@ -554,7 +1016,27 @@ class LikeViewSet(viewsets.ViewSet):
     authentication_classes = [BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="List the likes on a comment",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={"application/json": {
+                    "type": "Like",
+                    "summary": "Lara Croft Likes your comment",
+                    "object": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                    "author": {
+                        "type":"author",
+                        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host":"http://127.0.0.1:5454/",
+                        "displayName":"Lara Croft",
+                        "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "github":"http://github.com/laracroft",
+                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    }
+                }}
+            )
+        })
     def commentList(self, request, user_id, post_id, comment_id):
         """
         List the likes on a comment
@@ -575,7 +1057,27 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="List the likes on a post",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={"application/json": {
+                    "type": "Like",
+                    "summary": "Lara Croft Likes your post",
+                    "object": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                    "author": {
+                        "type":"author",
+                        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "host":"http://127.0.0.1:5454/",
+                        "displayName":"Lara Croft",
+                        "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                        "github":"http://github.com/laracroft",
+                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                    }
+                }}
+            )
+        })
     def postList(self, request, user_id, post_id):
         """
         List the likes on a post
@@ -596,10 +1098,34 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        operation_description="List public likes by an author",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "type":"liked",
+                    "items":[
+                        {
+                            "type": "Like",
+                            "summary": "Lara Croft Likes your post",         
+                            "object": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+                            "author": {
+                                "type":"author",
+                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "host":"http://127.0.0.1:5454/",
+                                "displayName":"Lara Croft",
+                                "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                                "github":"http://github.com/laracroft",
+                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
+                            }
+                        }]
+                }
+            )}
+            )
     def authorList(self, request, user_id):
         """
-        List posts an author has liked
+        List public posts an author has liked
         """
         factory = APIRequestFactory()
         request = factory.get('/')
@@ -620,7 +1146,41 @@ class LikeViewSet(viewsets.ViewSet):
         data["items"] = likeData
         return Response(data)
 
-    @swagger_auto_schema(responses={201:"Created", 202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
+
+    @swagger_auto_schema(
+        operation_description="Like a post",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['type', 'summary', 'author', 'object'],
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "summary": openapi.Schema(type=openapi.TYPE_STRING),
+                "object": openapi.Schema(type=openapi.TYPE_STRING),
+                "author": openapi.Schema(type=openapi.TYPE_OBJECT)
+            }
+        ),
+        responses={
+            201: openapi.Response(
+                description="Created",
+                examples={"application/json": {"message": "Created"}}
+            ),
+            202: openapi.Response(
+                description="Accepted",
+                examples={"application/json": {"message": "Accepted"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def likePost(self, request, user_id, post_id):
         """
         Like a post
@@ -654,7 +1214,40 @@ class LikeViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    @swagger_auto_schema(responses={201:"Created", 202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
+    @swagger_auto_schema(
+        operation_description="Like a comment",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['type', 'summary', 'author', 'object'],
+            properties={
+                "type": openapi.Schema(type=openapi.TYPE_STRING),
+                "summary": openapi.Schema(type=openapi.TYPE_STRING),
+                "object": openapi.Schema(type=openapi.TYPE_STRING),
+                "author": openapi.Schema(type=openapi.TYPE_OBJECT)
+            }
+        ),
+        responses={
+            201: openapi.Response(
+                description="Created",
+                examples={"application/json": {"message": "Created"}}
+            ),
+            202: openapi.Response(
+                description="Accepted",
+                examples={"application/json": {"message": "Accepted"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def likeComment(self, request, user_id, post_id, comment_id):
         """
         Like a comment
@@ -687,6 +1280,7 @@ class LikeViewSet(viewsets.ViewSet):
             
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class StreamView(generic.ListView):
     model = Post
