@@ -40,6 +40,7 @@ CREATE DATABASE unhindled;
 * W3 School: https://www.w3schools.com/howto/howto_css_dropdown.asp
 * Geeksforgeeks: https://www.geeksforgeeks.org/basic-authentication-django-rest-framework/
 * Django REST Framework: https://www.django-rest-framework.org/tutorial/2-requests-and-responses/
+* Python dict comprehension: https://discuss.python.org/t/copy-a-dictionary-except-some-keys/2559/3
 
 ## Project Part 1 Stories Complete (20/43) 
 PROJ-1 UI - UI is complete for all implemented stories (custom)\

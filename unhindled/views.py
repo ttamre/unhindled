@@ -46,6 +46,73 @@ from .connect import *
 
 User = get_user_model()
 
+EXAMPLE_POST_OBJECT = {
+    "type": "post",
+    "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+    "author": {
+        "username": "admin",
+        "email": "admin@admin.ca",
+        "first_name": "",
+        "last_name": "",
+        "displayName": "admin",
+        "github": None,
+        "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+        "url": "https://unhindled.herokuapp.com/profile/1",
+        "host": "https://unhindled.herokuapp.com/profile/1",
+        "id": "https://unhindled.herokuapp.com/profile/1",
+        "type": "author"
+    },
+    "contentType": "md",
+    "title": "asdqw",
+    "description": "123",
+    "visibility": "public",
+    "created_on": "2021-11-13T02:18:31.132761-06:00",
+    "source": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+    "origin": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"}
+EXAMPLE_USER_OBJECT = {
+    "type": "author",
+    "username": "user1",
+    "email": "admin@admin.ca",
+    "first_name": "",
+    "last_name": "",
+    "displayName": "user1",
+    "github": None,
+    "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+    "url": "https://unhindled.herokuapp.com/profile/1",
+    "host": "https://unhindled.herokuapp.com/profile/1",
+    "id": "https://unhindled.herokuapp.com/profile/1"}
+EXAMPLE_LIKE_OBJECT = {
+    "type": "Like",
+    "summary": "Lara Croft Likes your post",
+    "object": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
+    "author": {
+        "type":"author",
+        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+        "host":"http://127.0.0.1:5454/",
+        "displayName":"Lara Croft",
+        "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+        "github":"http://github.com/laracroft",
+        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"}}
+EXAMPLE_COMMENT_OBJECT = {
+        "type": "comment",
+        "author": {
+            "username": "admin",
+            "email": "admin@admin.ca",
+            "first_name": "",
+            "last_name": "",
+            "displayName": "admin",
+            "github": None,
+            "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+            "url": "https://unhindled.herokuapp.com/profile/1",
+            "host": "https://unhindled.herokuapp.com/profile/1",
+            "id": "https://unhindled.herokuapp.com/profile/1",
+            "type": "author"
+        },
+        "comment": "3",
+        "contentType": "md",
+        "published": "2021-11-21T22:35:30.617098-06:00",
+        "ID": "e9024d02-6824-4ba3-94d3-be0bc20b9909"}
+
 CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
 GITHUB_AUTH = (CLIENT_ID, CLIENT_SECRET)
@@ -59,9 +126,12 @@ GITHUB_EVENTS = {
     "PullRequestEvent": "Pull request",
     None: "Unknown event"
 }
-#get id for apis given user
+
+
+# get id for apis given user
 def getForeignId(user):
     return "https://unhindled.herokuapp.com/" + "author/" + str(user.id)
+
 def paginationGetter(page, size):
     try:
         size = int(size)
@@ -111,39 +181,7 @@ class PostViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={
-                    "application/json": {
-                        "type": "posts",
-                        "page": 1,
-                        "size": 1,
-                        "items": [
-                            {
-                                "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
-                                "author": {
-                                    "username": "admin",
-                                    "email": "admin@admin.ca",
-                                    "first_name": "",
-                                    "last_name": "",
-                                    "displayName": "admin",
-                                    "github": None,
-                                    "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
-                                    "url": "https://unhindled.herokuapp.com/profile/1",
-                                    "host": "https://unhindled.herokuapp.com/profile/1",
-                                    "id": "https://unhindled.herokuapp.com/profile/1",
-                                    "type": "author"
-                                },
-                                "contentType": "md",
-                                "title": "asdqw",
-                                "description": "123",
-                                "visibility": "public",
-                                "created_on": "2021-11-13T02:18:31.132761-06:00",
-                                "type": "post",
-                                "source": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
-                                "origin": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
-                            }
-                        ]
-                }
-            })
+                examples={"application/json": {"type": "posts", "page": 1, "size": 2, "items": [EXAMPLE_POST_OBJECT, EXAMPLE_POST_OBJECT]}})
         })
     def list(self, request, user_id):
         """
@@ -173,32 +211,7 @@ class PostViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={
-                    "application/json": {
-                        "type": "post",
-                        "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
-                        "author": {
-                            "username": "admin",
-                            "email": "admin@admin.ca",
-                            "first_name": "",
-                            "last_name": "",
-                            "displayName": "admin",
-                            "github": None,
-                            "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
-                            "url": "https://unhindled.herokuapp.com/profile/1",
-                            "host": "https://unhindled.herokuapp.com/profile/1",
-                            "id": "https://unhindled.herokuapp.com/profile/1",
-                            "type": "author"
-                        },
-                        "contentType": "md",
-                        "title": "asdqw",
-                        "description": "123",
-                        "visibility": "public",
-                        "created_on": "2021-11-13T02:18:31.132761-06:00",
-                        "source": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
-                        "origin": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
-                }
-            }),
+                examples={"application/json": EXAMPLE_POST_OBJECT}),
             404: openapi.Response(
                 description="Not found",
                 examples={"application/json": {"message": "Not found"}}
@@ -222,39 +235,7 @@ class PostViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={
-                    "application/json": {
-                        "type": "posts",
-                        "page": 1,
-                        "size": 1,
-                        "items": [
-                            {
-                                "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
-                                "author": {
-                                    "username": "admin",
-                                    "email": "admin@admin.ca",
-                                    "first_name": "",
-                                    "last_name": "",
-                                    "displayName": "admin",
-                                    "github": None,
-                                    "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
-                                    "url": "https://unhindled.herokuapp.com/profile/1",
-                                    "host": "https://unhindled.herokuapp.com/profile/1",
-                                    "id": "https://unhindled.herokuapp.com/profile/1",
-                                    "type": "author"
-                                },
-                                "contentType": "md",
-                                "title": "asdqw",
-                                "description": "123",
-                                "visibility": "public",
-                                "created_on": "2021-11-13T02:18:31.132761-06:00",
-                                "type": "post",
-                                "source": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
-                                "origin": "https://unhindled.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
-                            }
-                        ]
-                }
-            })
+                examples={"application/json": {"type": "posts", "page": 1, "size": 2, "items": [EXAMPLE_POST_OBJECT, EXAMPLE_POST_OBJECT]}})
         })
     def allPosts(self, request):
         """
@@ -506,29 +487,7 @@ class UserViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={
-                    "application/json": {
-                        "type": "authors",
-                        "page": 1,
-                        "size": 1,
-                        "items": [
-                            {
-                                "username": "user1",
-                                "email": "admin@admin.ca",
-                                "first_name": "",
-                                "last_name": "",
-                                "displayName": "user1",
-                                "github": None,
-                                "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
-                                "url": "https://unhindled.herokuapp.com/profile/1",
-                                "host": "https://unhindled.herokuapp.com/profile/1",
-                                "id": "https://unhindled.herokuapp.com/profile/1",
-                                "type": "author"
-                            }
-                        ]
-                    }
-                }
-            )
+                examples={"application/json": {"type": "authors", "page": 1, "size": 1, "items": [EXAMPLE_USER_OBJECT, EXAMPLE_USER_OBJECT]}})
         })
     def list(self, request):
         """
@@ -555,21 +514,7 @@ class UserViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={
-                    "application/json": {
-                        "type": "author",
-                        "username": "user1",
-                        "email": "admin@admin.ca",
-                        "first_name": "",
-                        "last_name": "",
-                        "displayName": "user1",
-                        "github": None,
-                        "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
-                        "url": "https://unhindled.herokuapp.com/profile/1",
-                        "host": "https://unhindled.herokuapp.com/profile/1",
-                        "id": "https://unhindled.herokuapp.com/profile/1",
-                    }
-                }
+                examples={"application/json": EXAMPLE_USER_OBJECT}
             ),
             404: openapi.Response(
                 description="Not found",
@@ -595,7 +540,7 @@ class UserViewSet(viewsets.ViewSet):
         operation_description="Update an author",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['type', 'username', 'email', 'first_name', 'last_name', 'displayName', 'github', 'profileImage', 'url', 'host' ,'id'],
+            required=['type', 'id'],
             properties={
                 "type": openapi.Schema(type=openapi.TYPE_STRING),
                 "username": openapi.Schema(type=openapi.TYPE_STRING),
@@ -700,31 +645,7 @@ class CommentViewSet(viewsets.ViewSet):
                         "page": 1,
                         "size": 1,
                         "post": "https://unhindled.herokuapp.com/admin/articles/44e360ca-20e5-4856-b161-91344c7976e0/comments",
-                        "comments": [
-                            {
-                                "author": {
-                                    "username": "admin",
-                                    "email": "admin@admin.ca",
-                                    "first_name": "",
-                                    "last_name": "",
-                                    "displayName": "admin",
-                                    "github": None,
-                                    "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
-                                    "url": "https://unhindled.herokuapp.com/profile/1",
-                                    "host": "https://unhindled.herokuapp.com/profile/1",
-                                    "id": "https://unhindled.herokuapp.com/profile/1",
-                                    "type": "author"
-                                },
-                                "comment": "3",
-                                "contentType": "md",
-                                "published": "2021-11-21T22:35:30.617098-06:00",
-                                "ID": "e9024d02-6824-4ba3-94d3-be0bc20b9909",
-                                "type": "comment"
-                            }
-                        ]
-                    }
-                }
-            )
+                        "comments": [EXAMPLE_COMMENT_OBJECT, EXAMPLE_COMMENT_OBJECT]}})
         })
     def list(self, request, user_id, post_id):
         """
@@ -754,29 +675,7 @@ class CommentViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={
-                    "application/json": {
-                        "author": {
-                            "username": "admin",
-                            "email": "admin@admin.ca",
-                            "first_name": "",
-                            "last_name": "",
-                            "displayName": "admin",
-                            "github": None,
-                            "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
-                            "url": "https://unhindled.herokuapp.com/profile/1",
-                            "host": "https://unhindled.herokuapp.com/profile/1",
-                            "id": "https://unhindled.herokuapp.com/profile/1",
-                            "type": "author"
-                        },
-                        "comment": "3",
-                        "contentType": "md",
-                        "published": "2021-11-21T22:35:30.617098-06:00",
-                        "ID": "e9024d02-6824-4ba3-94d3-be0bc20b9909",
-                        "type": "comment"
-                    }
-                }
-            )
+                examples={"application/json": EXAMPLE_COMMENT_OBJECT})
         })
     def retrieve(self, request, user_id, post_id, comment_id):
         """
@@ -871,17 +770,8 @@ class FollowerListViewset (viewsets.ViewSet):
                 description="Success",
                 examples={
                     "application/json": {
-                        "type": "followers",      
-                        "items":[
-                            {
-                                "type":"author",
-                                "id":"https://unhindled.herokuapp.com/author/1d698d25ff008f7538453c120f581471",
-                                "url":"https://unhindled.herokuapp.com/author/1d698d25ff008f7538453c120f581471",
-                                "host":"https://unhindled.herokuapp.com/",
-                                "displayName":"admin",
-                                "github": None,
-                                "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png"
-                            }]
+                        "type": "followers", 
+                        "items": [{k: EXAMPLE_USER_OBJECT[k] for k in EXAMPLE_USER_OBJECT.keys() - {'first_name', 'last_name', 'username', 'email'}} ]
                     }
             }),
             404: openapi.Response(
@@ -1021,21 +911,7 @@ class LikeViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={"application/json": {
-                    "type": "Like",
-                    "summary": "Lara Croft Likes your comment",
-                    "object": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
-                    "author": {
-                        "type":"author",
-                        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "host":"http://127.0.0.1:5454/",
-                        "displayName":"Lara Croft",
-                        "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "github":"http://github.com/laracroft",
-                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                    }
-                }}
-            )
+                examples={"type": "likes", "items": EXAMPLE_LIKE_OBJECT})
         })
     def commentList(self, request, user_id, post_id, comment_id):
         """
@@ -1062,21 +938,7 @@ class LikeViewSet(viewsets.ViewSet):
         responses={
             200: openapi.Response(
                 description="Success",
-                examples={"application/json": {
-                    "type": "Like",
-                    "summary": "Lara Croft Likes your post",
-                    "object": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
-                    "author": {
-                        "type":"author",
-                        "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "host":"http://127.0.0.1:5454/",
-                        "displayName":"Lara Croft",
-                        "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                        "github":"http://github.com/laracroft",
-                        "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                    }
-                }}
-            )
+                examples={"type": "likes", "items":[EXAMPLE_LIKE_OBJECT, EXAMPLE_LIKE_OBJECT]})
         })
     def postList(self, request, user_id, post_id):
         """
@@ -1105,24 +967,8 @@ class LikeViewSet(viewsets.ViewSet):
                 description="Success",
                 examples={
                     "type":"liked",
-                    "items":[
-                        {
-                            "type": "Like",
-                            "summary": "Lara Croft Likes your post",         
-                            "object": "http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/764efa883dda1e11db47671c4a3bbd9e",
-                            "author": {
-                                "type":"author",
-                                "id":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "host":"http://127.0.0.1:5454/",
-                                "displayName":"Lara Croft",
-                                "url":"http://127.0.0.1:5454/author/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                                "github":"http://github.com/laracroft",
-                                "profileImage": "https://i.imgur.com/k7XVwpB.jpeg"
-                            }
-                        }]
-                }
-            )}
-            )
+                    "items":[EXAMPLE_LIKE_OBJECT, EXAMPLE_LIKE_OBJECT]})
+        })
     def authorList(self, request, user_id):
         """
         List public posts an author has liked
@@ -1532,8 +1378,49 @@ class EditProfileView(generic.UpdateView):
 
 
 @api_view(['GET'])
-@swagger_auto_schema(responses={200:"Success", 405:"Method not allowed"})
-# @authentication_classes([CustomAuthentication])
+@swagger_auto_schema(
+        operation_description="Get all foreign posts",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "posts",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "author": {
+                                    "username": "admin",
+                                    "email": "admin@admin.ca",
+                                    "first_name": "",
+                                    "last_name": "",
+                                    "displayName": "admin",
+                                    "github": None,
+                                    "profileImage": "https://foreignservice.herokuapp.com/media/upload/profile_photos/default.png",
+                                    "url": "https://foreignservice.herokuapp.com/profile/1",
+                                    "host": "https://foreignservice.herokuapp.com/profile/1",
+                                    "id": "https://foreignservice.herokuapp.com/profile/1",
+                                    "type": "author"
+                                },
+                                "contentType": "md",
+                                "title": "asdqw",
+                                "description": "123",
+                                "visibility": "public",
+                                "created_on": "2021-11-13T02:18:31.132761-06:00",
+                                "type": "post",
+                                "source": "https://foreignservice.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "origin": "https://foreignservice.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
+                            }
+                        ]
+                }
+            }),
+            405: openapi.Response(
+                description="Method not allowed",
+                examples={"application/json": {"message": "Method not allowed"}}
+            )
+        })
 def get_foreign_posts(request):
     if request.method == "GET":
         foreign_posts = get_foreign_posts_list()
@@ -1543,8 +1430,39 @@ def get_foreign_posts(request):
 
 
 @api_view(['GET'])
-@swagger_auto_schema(responses={200:"Success", 405:"Method not allowed"})
-# @authentication_classes([CustomAuthentication])
+@swagger_auto_schema(
+        operation_description="Get all foreign authors",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "authors",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "username": "user1",
+                                "email": "admin@admin.ca",
+                                "first_name": "",
+                                "last_name": "",
+                                "displayName": "user1",
+                                "github": None,
+                                "profileImage": "https://foreignservice.herokuapp.com/media/upload/profile_photos/default.png",
+                                "url": "https://foreignservice.herokuapp.com/profile/1",
+                                "host": "https://foreignservice.herokuapp.com/profile/1",
+                                "id": "https://foreignservice.herokuapp.com/profile/1",
+                                "type": "author"
+                            }
+                        ]
+                    }
+                }
+            ),
+            405: openapi.Response(
+                description="Method not allowed",
+                examples={"application/json": {"message": "Method not allowed"}}
+            )
+        })
 def get_foreign_authors(request):
     if request.method == "GET":
         foreign_authors = get_foreign_authors_list()
