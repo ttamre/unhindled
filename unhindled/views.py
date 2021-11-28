@@ -1532,8 +1532,49 @@ class EditProfileView(generic.UpdateView):
 
 
 @api_view(['GET'])
-@swagger_auto_schema(responses={200:"Success", 405:"Method not allowed"})
-# @authentication_classes([CustomAuthentication])
+@swagger_auto_schema(
+        operation_description="Get all foreign posts",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "posts",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "author": {
+                                    "username": "admin",
+                                    "email": "admin@admin.ca",
+                                    "first_name": "",
+                                    "last_name": "",
+                                    "displayName": "admin",
+                                    "github": None,
+                                    "profileImage": "https://foreignservice.herokuapp.com/media/upload/profile_photos/default.png",
+                                    "url": "https://foreignservice.herokuapp.com/profile/1",
+                                    "host": "https://foreignservice.herokuapp.com/profile/1",
+                                    "id": "https://foreignservice.herokuapp.com/profile/1",
+                                    "type": "author"
+                                },
+                                "contentType": "md",
+                                "title": "asdqw",
+                                "description": "123",
+                                "visibility": "public",
+                                "created_on": "2021-11-13T02:18:31.132761-06:00",
+                                "type": "post",
+                                "source": "https://foreignservice.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d",
+                                "origin": "https://foreignservice.herokuapp.com/admin/articles/37d3fa93-a58d-4a38-9536-1792e0bacc0d"
+                            }
+                        ]
+                }
+            }),
+            405: openapi.Response(
+                description="Method not allowed",
+                examples={"application/json": {"message": "Method not allowed"}}
+            )
+        })
 def get_foreign_posts(request):
     if request.method == "GET":
         foreign_posts = get_foreign_posts_list()
@@ -1543,8 +1584,35 @@ def get_foreign_posts(request):
 
 
 @api_view(['GET'])
-@swagger_auto_schema(responses={200:"Success", 405:"Method not allowed"})
-# @authentication_classes([CustomAuthentication])
+@swagger_auto_schema(
+        operation_description="Get all foreign authors",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "authors",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "username": "user1",
+                                "email": "admin@admin.ca",
+                                "first_name": "",
+                                "last_name": "",
+                                "displayName": "user1",
+                                "github": None,
+                                "profileImage": "https://foreignservice.herokuapp.com/media/upload/profile_photos/default.png",
+                                "url": "https://foreignservice.herokuapp.com/profile/1",
+                                "host": "https://foreignservice.herokuapp.com/profile/1",
+                                "id": "https://foreignservice.herokuapp.com/profile/1",
+                                "type": "author"
+                            }
+                        ]
+                    }
+                }
+            )
+        })
 def get_foreign_authors(request):
     if request.method == "GET":
         foreign_authors = get_foreign_authors_list()
