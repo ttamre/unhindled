@@ -28,6 +28,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework import viewsets
 from .serializers import *
 from rest_framework import serializers
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 import requests, uuid
@@ -105,7 +106,36 @@ class PostViewSet(viewsets.ViewSet):
     queryset = Post.objects.all().order_by('published')
     serializer_class = PostSerializer
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        description="List an author's posts",
+        operation_description="GET /service/author/<author_id>/posts/",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "authors",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "username": "user1",
+                                "email": "admin@admin.ca",
+                                "first_name": "",
+                                "last_name": "",
+                                "displayName": "user1",
+                                "github": None,
+                                "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                                "url": "https://unhindled.herokuapp.com/profile/1",
+                                "host": "https://unhindled.herokuapp.com/profile/1",
+                                "id": "https://unhindled.herokuapp.com/profile/1",
+                                "type": "author"
+                            }
+                        ]
+                    }
+                }
+            )
+        })
     def list(self, request, user_id):
         """
         List an author's posts
@@ -129,7 +159,40 @@ class PostViewSet(viewsets.ViewSet):
 
         return Response(data)
 
-    @swagger_auto_schema(responses={200:"Success", 404:"Not"})
+    @swagger_auto_schema(
+        description="Get a post",
+        operation_description="GET /service/author/<author_id>/posts/<post_id>",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "authors",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "username": "user1",
+                                "email": "admin@admin.ca",
+                                "first_name": "",
+                                "last_name": "",
+                                "displayName": "user1",
+                                "github": None,
+                                "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                                "url": "https://unhindled.herokuapp.com/profile/1",
+                                "host": "https://unhindled.herokuapp.com/profile/1",
+                                "id": "https://unhindled.herokuapp.com/profile/1",
+                                "type": "author"
+                            }
+                        ]
+                    }
+                }
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            )
+        })
     def retrieve(self, request, user_id, post_id):
         """
         Get a post
@@ -143,7 +206,36 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(queryset)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={200:"Success"})
+    @swagger_auto_schema(
+        description="Get all posts",
+        operation_description="GET /service/allposts",
+        responses={
+            200: openapi.Response(
+                description="Success",
+                examples={
+                    "application/json": {
+                        "type": "authors",
+                        "page": 1,
+                        "size": 1,
+                        "items": [
+                            {
+                                "username": "user1",
+                                "email": "admin@admin.ca",
+                                "first_name": "",
+                                "last_name": "",
+                                "displayName": "user1",
+                                "github": None,
+                                "profileImage": "https://unhindled.herokuapp.com/media/upload/profile_photos/default.png",
+                                "url": "https://unhindled.herokuapp.com/profile/1",
+                                "host": "https://unhindled.herokuapp.com/profile/1",
+                                "id": "https://unhindled.herokuapp.com/profile/1",
+                                "type": "author"
+                            }
+                        ]
+                    }
+                }
+            )
+        })
     def allPosts(self, request):
         """
         Get all posts
@@ -152,7 +244,23 @@ class PostViewSet(viewsets.ViewSet):
         serializer = PostSerializer(posts, many=True)
         return Response(serializer.data)
 
-    @swagger_auto_schema(responses={201:"Created", 400:"Bad request", 401:"Unauthorized"})
+    @swagger_auto_schema(
+        description="Create a post",
+        operation_description="POST /service/author/<author_id>/posts | PUT /service/author/<author_id>/posts/<post_id>",
+        responses={
+            201: openapi.Response(
+                description="Created",
+                examples={"application/json": {"message": "Success"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+        })
     def createPost(self, request, user_id,post_id=None):
         """
         Create a post
@@ -218,7 +326,27 @@ class PostViewSet(viewsets.ViewSet):
 
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(responses={202:"Accepted", 400:"Bad request", 401:"Unauthorized", 404:"Not found"})
+    @swagger_auto_schema(
+        description="Update a post",
+        operation_description="POST ",
+        responses={
+            202: openapi.Response(
+                description="Accepted",
+                examples={"application/json": {"message": "Accepted"}}
+            ),
+            400: openapi.Response(
+                description="Bad request",
+                examples={"application/json": {"message": "Bad request"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            ),
+        })
     def updatePost(self, request, user_id, pk):
         """
         Update a post
@@ -276,7 +404,23 @@ class PostViewSet(viewsets.ViewSet):
             errors["ReceivedData"] = postData
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @swagger_auto_schema(responses={202:"Accepted", 401:"Unauthorized", 404:"Not found"})
+    @swagger_auto_schema(
+        description="Delete a post",
+        operation_description="DELETE",
+        responses={
+            202: openapi.Response(
+                description="Accepted",
+                examples={"application/json": {"message": "Accepted"}}
+            ),
+            401: openapi.Response(
+                description="Unauthorized",
+                examples={"application/json": {"message": "Unauthorized"}}
+            ),
+            404: openapi.Response(
+                description="Not found",
+                examples={"application/json": {"message": "Not found"}}
+            ),
+        })
     def deletePost(self, request, user_id, pk):
         """
         Delete a post
