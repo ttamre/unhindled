@@ -721,7 +721,9 @@ class StreamView(generic.ListView):
 
                 # event_list.append({"repo": repo, "type": type_, "url": url,})
 
-        headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{request.user}/events/public'}
+        username = UserProfile.objects.get(user=request.user).github
+        headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{username}/events/public'}
+        print(headers)
         return render(request, 'unhindled/mystream.html', {"headers": headers})
         # return render(request, 'unhindled/mystream.html', {"event_list": event_list})
 
