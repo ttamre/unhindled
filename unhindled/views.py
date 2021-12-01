@@ -183,11 +183,11 @@ class PostViewSet(viewsets.ViewSet):
                 description="Success",
                 examples={"application/json": {"type": "posts", "page": 1, "size": 2, "items": [EXAMPLE_POST_OBJECT, EXAMPLE_POST_OBJECT]}})
         })
-    def list(self, request, user_id):
+    def list(self, request, id):
         """
         List an author's posts
         """
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(id=id)
         queryset = Post.objects.filter(author=user).order_by('published')
         serializer = PostSerializer(queryset, many=True)
 
@@ -217,11 +217,11 @@ class PostViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             )
         })
-    def retrieve(self, request, user_id, post_id):
+    def retrieve(self, request, id, post_id):
         """
         Get a post
         """
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(id=id)
         try:
             queryset = Post.objects.get(id=post_id)
         except:
@@ -277,7 +277,7 @@ class PostViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Unauthorized"}}
             ),
         })
-    def createPost(self, request, user_id,post_id=None):
+    def createPost(self, request, id,post_id=None):
         """
         Create a post
         """
@@ -287,7 +287,7 @@ class PostViewSet(viewsets.ViewSet):
                 return Response({"Error":"Post id already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
         loggedInUser = request.user
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(id=id)
 
         if user != loggedInUser:
             return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -312,7 +312,7 @@ class PostViewSet(viewsets.ViewSet):
         if ("sent_to" in postData.keys()):
             if (postData["sent_to"] is not None) and postData["sent_to"] != "":
                 try:
-                    send_to = User.objects.get(user_id=user_id)
+                    send_to = User.objects.get(id=id)
                 except:
                     send_to = User.objects.get(pk=postData["sent_to"])
 
@@ -378,12 +378,12 @@ class PostViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             ),
         })
-    def updatePost(self, request, user_id, pk):
+    def updatePost(self, request, id, pk):
         """
         Update a post
         """
         loggedInUser = request.user
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(id=id)
         try:
             postToEdit = Post.objects.get(id=pk)
         except:
@@ -451,12 +451,12 @@ class PostViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             ),
         })
-    def deletePost(self, request, user_id, pk):
+    def deletePost(self, request, id, pk):
         """
         Delete a post
         """
         loggedInUser = request.user
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(id=id)
         try:
             postToDelete = Post.objects.get(id=pk)
         except:
@@ -527,7 +527,7 @@ class UserViewSet(viewsets.ViewSet):
         """
         queryset = UserProfile.objects.all()
         try:
-            user = User.objects.get(user_id=id)
+            user = User.objects.get(id=id)
         except:
             try:
                 user = User.objects.get(pk=int(id))
@@ -647,11 +647,11 @@ class CommentViewSet(viewsets.ViewSet):
                         "post": "https://unhindled.herokuapp.com/admin/articles/44e360ca-20e5-4856-b161-91344c7976e0/comments",
                         "comments": [EXAMPLE_COMMENT_OBJECT, EXAMPLE_COMMENT_OBJECT]}})
         })
-    def list(self, request, user_id, post_id):
+    def list(self, request, id, post_id):
         """
         List comments on a post
         """
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(id=id)
         post = Post.objects.get(id=post_id)
         comments = Comment.objects.filter(post=post)
         serializer = CommentSerializer(comments, many=True)
@@ -666,7 +666,8 @@ class CommentViewSet(viewsets.ViewSet):
         data["type"] = "comments"
         data["page"] = page
         data["size"] = math.ceil(len(serializer.data) / size)
-        data["post"] = host + post.author.user_id + "/posts/" + str(post.id) + "/comments"
+        data["post"] = host + str(post.author.id) + "/posts/" + str(post.id)
+        data["id"] = host + str(post.author.id) + "/posts/" + str(post.id) + "/comments"
         data["comments"] = commentData
         return Response(data)
 
@@ -677,11 +678,11 @@ class CommentViewSet(viewsets.ViewSet):
                 description="Success",
                 examples={"application/json": EXAMPLE_COMMENT_OBJECT})
         })
-    def retrieve(self, request, user_id, post_id, comment_id):
+    def retrieve(self, request, id, post_id, comment_id):
         """
         Get a comment
         """
-        user = User.objects.get(user_id=user_id)
+        user = User.objects.get(id=id)
         post = Post.objects.get(id=post_id)
         comments = Comment.objects.get(id=comment_id)
         serializer = CommentSerializer(comments)
@@ -723,7 +724,7 @@ class CommentViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             )
         })
-    def postComment(self, request, user_id, post_id):
+    def postComment(self, request, id, post_id):
         """
         Post a comment
         """
@@ -783,7 +784,7 @@ class FollowerListViewset (viewsets.ViewSet):
         """
         List an author's followers
         """
-        authorObj = get_object_or_404(User, user_id=author)
+        authorObj = get_object_or_404(User, id=author)
         user = Follower.objects.filter(author=authorObj)
         serializer = FollowerListSerializer(user, many=True)
         return Response(serializer.data)
@@ -811,7 +812,7 @@ class FollowerViewset (viewsets.ViewSet):
         """
         Check if a foreign author is following another
         """
-        authorObj = get_object_or_404(User, username=author)
+        authorObj = get_object_or_404(User, id=author)
         follow = get_object_or_404(Follower, author=authorObj, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
@@ -832,9 +833,9 @@ class FollowerViewset (viewsets.ViewSet):
         """
         Follow a user
         """
-        authorObj = get_object_or_404(User, username=author)
+        authorObj = get_object_or_404(User, id=author)
         Follower.objects.create(author=authorObj, follower=follower)
-        follow = get_object_or_404(Follower, author=author, follower=follower)
+        follow = get_object_or_404(Follower, id=author, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
 
@@ -854,7 +855,7 @@ class FollowerViewset (viewsets.ViewSet):
         """
         Delete a follower
         """
-        authorObj = get_object_or_404(User, username=author)
+        authorObj = get_object_or_404(User, id=author)
         follow = get_object_or_404(Follower, author=authorObj, follower=follower)
         serializer = FollowerSerializer(follow)
         follow.delete()
@@ -913,7 +914,7 @@ class LikeViewSet(viewsets.ViewSet):
                 description="Success",
                 examples={"type": "likes", "items": EXAMPLE_LIKE_OBJECT})
         })
-    def commentList(self, request, user_id, post_id, comment_id):
+    def commentList(self, request, id, post_id, comment_id):
         """
         List the likes on a comment
         """
@@ -940,7 +941,7 @@ class LikeViewSet(viewsets.ViewSet):
                 description="Success",
                 examples={"type": "likes", "items":[EXAMPLE_LIKE_OBJECT, EXAMPLE_LIKE_OBJECT]})
         })
-    def postList(self, request, user_id, post_id):
+    def postList(self, request, id, post_id):
         """
         List the likes on a post
         """
@@ -969,7 +970,7 @@ class LikeViewSet(viewsets.ViewSet):
                     "type":"liked",
                     "items":[EXAMPLE_LIKE_OBJECT, EXAMPLE_LIKE_OBJECT]})
         })
-    def authorList(self, request, user_id):
+    def authorList(self, request, id):
         """
         List public posts an author has liked
         """
@@ -980,7 +981,7 @@ class LikeViewSet(viewsets.ViewSet):
             'request': Request(request),
         }
 
-        author = User.objects.get(user_id=user_id)
+        author = User.objects.get(id=id)
         likes = Like.objects.filter(author=author)
         serializer = LikeSerializer(likes, many=True, context=serializer_context)
 
@@ -1027,7 +1028,7 @@ class LikeViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             )
         })
-    def likePost(self, request, user_id, post_id):
+    def likePost(self, request, id, post_id):
         """
         Like a post
         """
@@ -1094,7 +1095,7 @@ class LikeViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             )
         })
-    def likeComment(self, request, user_id, post_id, comment_id):
+    def likeComment(self, request, id, post_id, comment_id):
         """
         Like a comment
         """
@@ -1200,7 +1201,7 @@ def follow(request):
     return HttpResponseRedirect(next)
 
 def deleteFollowRequest(request):
-    followRequest = FollowRequest.objects.get(author=request.POST["author"],follower=request.user.user_id)
+    followRequest = FollowRequest.objects.get(author=request.POST["author"],follower=request.user.id)
     follow.delete()
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)    
