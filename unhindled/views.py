@@ -912,9 +912,8 @@ class ProfileView(View):
         if type(profile) is dict:
             user = profile['displayName']
             user_post = []
-
         else:
-            profile = UserProfile.objects.get(pk=id)
+            profile = UserProfile.objects.get(user=request.user)
             user = profile.user
             user_post = Post.objects.filter(author=user).order_by('-published')
         

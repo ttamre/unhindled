@@ -56,10 +56,11 @@
             {{ headers|json_script:"headers" }}
 
             <script>
+                events = []
+
                 function fillTable() {
                     // BUG: events has 30 items but events.length = 0
-                    var events = getGithubActivity();
-                    console.log("fillTable() - Events: " + Object.keys(events).length);
+                    console.log("fillTable() - Events: " + events.length);
                     console.log(events);
 
 
@@ -86,8 +87,7 @@
                     }
                 }
                 
-                function getURL(endpoint, auth, callback, backup=null) {
-                    var url;
+                function getURL(endpoint, event, auth, callback, backup=null) {
                     var request = new XMLHttpRequest();
                     request.open("GET", endpoint);
                     request.setRequestHeader('Authorization', auth);
@@ -98,22 +98,20 @@
                                 // Successful request: Public repo (we can get the link)
                                 var data = JSON.parse(request.responseText);
                                 url = data?.['html_url'];
-                                callback(url);
+                                event['url'] = url;
+                                callback(event);
                             }
                             catch(e) {
+                                console.log("getURL() - Error: " + e);
                                 if (backup) {
                                     // Unsuccessful request: Private repo (get the user's profile link instead)
-                                    console.log('getURL() - Private repo (sending profile link)');
-                                    return getURL(backup, auth, function(url) {return url;});
-                                } else {
-                                    // Unsuccessful request: Error
-                                    console.log("getURL() - Error: " + e);
+                                    console.log('getURL() - Attempting to serve profile URL instead');
+                                    getURL(endpoint, event, auth, callback, backup);
                                 }
                             }
                         }
                     }
                     request.send();
-                    return 
                 }
 
                 function getGithubActivity() {
@@ -128,8 +126,6 @@
                         "unknown": "Unknown event",
                         null: "Unknown event"
                     }
-                    
-                    var events = [];
 
                     // Get request headers
                     const headers = JSON.parse(document.getElementById('headers').textContent);
@@ -143,17 +139,16 @@
                             try {
                                 var activityResponse = JSON.parse(activityRequest.responseText);
                                 for (let i = 0; i < activityResponse.length; i++) {
-                                    let event = activityResponse[i]
-                                    var repo = event?.['repo']?.['name']
-                                    var type = GITHUB_EVENTS[event?.['type']]
+                                    let responseData = activityResponse[i]
+                                    var repo = responseData?.['repo']?.['name']
+                                    var type = GITHUB_EVENTS[responseData?.['type']]
 
-                                    var repo_api = event?.['repo']?.['url']
-                                    var user_api = event?.['actor']?.['url']
-                                    var url;
-                                    function callback(url) {
-                                        events.push({"repo": repo, "type": type, "url": url});
-                                    }
-                                    getURL(repo_api, headers['auth'], callback, user_api);
+                                    var repoEndpoint = responseData?.['repo']?.['url']
+                                    var userEndpoint = responseData?.['actor']?.['url']
+                                    var event = {"repo": repo, "type": type, "url": ""};
+                                    
+                                    function addEvent(data) {events.push(data)}
+                                    getURL(repoEndpoint, event, headers['auth'], addEvent, userEndpoint);
 
                                     
                                 }
@@ -168,6 +163,7 @@
                     return events;
                 }
 
+            getGithubActivity();
             fillTable();
             </script>
             </table>
