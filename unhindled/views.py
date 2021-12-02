@@ -45,8 +45,8 @@ from .connect import *
 
 User = get_user_model()
 
-CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
+CLIENT_ID = os.environ.get("CLIENT_ID")
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 GITHUB_AUTH = (CLIENT_ID, CLIENT_SECRET)
 
 GITHUB_EVENTS = {
