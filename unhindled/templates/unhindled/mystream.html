@@ -56,115 +56,136 @@
             {{ headers|json_script:"headers" }}
 
             <script>
-                events = []
-
-                function fillTable() {
-                    // BUG: events has 30 items but events.length = 0
-                    console.log("fillTable() - Events: " + events.length);
-                    console.log(events);
-
-
-                    var table = document.getElementById("github_table")
-                    for (let i = 0; i < Object.keys(events).length; i++) {
-                        let event = events[i];
-
-                        const repo = document.createElement('td')
-                        repo.appendChild(document.createTextNode(event['repo']));
-
-                        const type = document.createElement('td')
-                        type.appendChild(document.createTextNode(event['type']));
-                        
-                        const url = document.createElement('td')
-                        url.appendChild(document.createTextNode(event['url']));
-
-                        const row = document.createElement('tr')
-                        row.appendChild(repo);
-                        row.appendChild(activity);
-                        row.appendChild(link);
-                        table.appendChild(row);
-                        console.log("fillTable() - row:");
-                        console.log(row);
-                    }
+            /*
+            Send HTTP GET request via AJAX to fetch Github activity
+            Params: None
+            Return: None
+            */
+            function getGithubActivity() {
+                GITHUB_EVENTS = {
+                    "CreateEvent": "Created repo/branch",
+                    "DeleteEvent": "Deleted repo/branch",
+                    "PushEvent":   "Pushed code",
+                    "PullEvent":   "Pulled code",
+                    "ForkEvent":   "Forked repo",
+                    "MemberEvent": "Managed organization",
+                    "PullRequestEvent": "Pull request",
+                    "unknown": "Unknown event",
+                    "": "Unknown event",
+                    null: "Unknown event"
                 }
-                
-                function getURL(endpoint, event, auth, callback, backup=null) {
-                    var request = new XMLHttpRequest();
-                    request.open("GET", endpoint);
-                    request.setRequestHeader('Authorization', auth);
 
-                    request.onreadystatechange = function () {
-                        if (request.readyState == 4 && request.status == 200) {
-                            try {
-                                // Successful request: Public repo (we can get the link)
-                                var data = JSON.parse(request.responseText);
-                                url = data?.['html_url'];
-                                event['url'] = url;
-                                callback(event);
+                // Get request headers
+                const headers = JSON.parse(document.getElementById('headers').textContent);
+
+                // AJAX request to get Github activiy data
+                var request = new XMLHttpRequest();
+                request.open('GET', headers['uri']);
+                request.setRequestHeader('Authorization', headers['auth']);
+                request.setRequestHeader('Accept', 'application/vnd.github.v3+json')
+
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        try {
+                            var response = JSON.parse(request.responseText);
+                            for (let i = 0; i < response.length; i++) {
+                                let responseData = response[i]
+                                var repo = responseData?.['repo']?.['name']
+                                var type = GITHUB_EVENTS[responseData?.['type']]
+
+                                var repoEndpoint = responseData?.['repo']?.['url']
+                                var userEndpoint = responseData?.['actor']?.['url']
+                                var event = {"repo": repo, "type": type, "url": ""};
+                                
+                                // Callback function: Pushes dict <data> to global list <events>
+                                function addEvent(data) {events.push(data)}
+                                getURL(repoEndpoint, event, headers['auth'], addEvent, userEndpoint);
                             }
-                            catch(e) {
-                                console.log("getURL() - Error: " + e);
-                                if (backup) {
-                                    // Unsuccessful request: Private repo (get the user's profile link instead)
-                                    console.log('getURL() - Attempting to serve profile URL instead');
-                                    getURL(endpoint, event, auth, callback, backup);
-                                }
+                        }
+                        catch (e) {
+                            console.log('getGithubActivity() - Error: ' + e);
+                        }
+                    }
+                };
+                request.send();
+                return events;
+            }
+
+            /*
+            Send HTTP GET request via AJAX to fetch repo URL. If repo is private, fetch profile URL instead.
+            
+            Params:
+                str:endpoint    Endpoint to send GET request to (repo URL)
+                dict:event      Github event data to pass into callback function
+                str:auth        Authentication headers
+                func:callback   Callback function to be called on successfull request
+                str:backup      Endpoint to reattempt request with if the request fails (profile URL - optional)
+            
+            Return: None
+            */
+            function getURL(endpoint, event, auth, callback, backup=null) {
+                var request = new XMLHttpRequest();
+                request.open("GET", endpoint);
+                request.setRequestHeader('Authorization', auth);
+                request.setRequestHeader('Accept', 'application/vnd.github.v3+json')
+
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        try {
+                            // Successful request: Public repo (we can get the link)
+                            var data = JSON.parse(request.responseText);
+                            url = data?.['html_url'];
+                            event['url'] = url;
+                            callback(event);
+                        }
+                        catch(e) {
+                            console.log("getURL() - Error: " + e);
+                            if (backup) {
+                                // Unsuccessful request: Private repo (get the user's profile link instead)
+                                console.log('getURL() - Attempting to serve profile URL instead');
+                                getURL(backup, event, auth, callback);
                             }
                         }
                     }
-                    request.send();
                 }
+                request.send();
+            }
 
-                function getGithubActivity() {
-                    GITHUB_EVENTS = {
-                        "CreateEvent": "Created repo/branch",
-                        "DeleteEvent": "Deleted repo/branch",
-                        "PushEvent":   "Pushed code",
-                        "PullEvent":   "Pulled code",
-                        "ForkEvent":   "Forked repo",
-                        "MemberEvent": "Managed organization",
-                        "PullRequestEvent": "Pull request",
-                        "unknown": "Unknown event",
-                        null: "Unknown event"
-                    }
+            /*
+            Construct a table of recent Github events using data contained in list <events>
+            Params: None
+            Return: None
+            */
+            function fillTable() {
+                // BUG: events is empty only inside this function
+                console.log("fillTable() length: " + events.length);
+                console.log("fillTable() events: " + events);
 
-                    // Get request headers
-                    const headers = JSON.parse(document.getElementById('headers').textContent);
+                var table = document.getElementById("github_table")
+                for (let i = 0; i < events.length; i++) {
+                    let event = events[i];
 
-                    // AJAX request to get Github activiy data
-                    var activityRequest = new XMLHttpRequest();
-                    activityRequest.open('GET', headers['uri']);
+                    const repo = document.createElement('td')
+                    repo.appendChild(document.createTextNode(event['repo']));
 
-                    activityRequest.onreadystatechange = function () {
-                        if (activityRequest.readyState == 4 && activityRequest.status == 200) {
-                            try {
-                                var activityResponse = JSON.parse(activityRequest.responseText);
-                                for (let i = 0; i < activityResponse.length; i++) {
-                                    let responseData = activityResponse[i]
-                                    var repo = responseData?.['repo']?.['name']
-                                    var type = GITHUB_EVENTS[responseData?.['type']]
+                    const type = document.createElement('td')
+                    type.appendChild(document.createTextNode(event['type']));
+                    
+                    const url = document.createElement('td')
+                    url.appendChild(document.createTextNode(event['url']));
 
-                                    var repoEndpoint = responseData?.['repo']?.['url']
-                                    var userEndpoint = responseData?.['actor']?.['url']
-                                    var event = {"repo": repo, "type": type, "url": ""};
-                                    
-                                    function addEvent(data) {events.push(data)}
-                                    getURL(repoEndpoint, event, headers['auth'], addEvent, userEndpoint);
-
-                                    
-                                }
-                            }
-                            catch (e) {
-                                console.log('getGithubActivity() - Error: ' + e);
-                            }
-                        }
-                    };
-
-                    activityRequest.send();
-                    return events;
+                    const row = document.createElement('tr')
+                    row.appendChild(repo);
+                    row.appendChild(type);
+                    row.appendChild(url);
+                    table.appendChild(row);
                 }
+            }
 
+            events = []
             getGithubActivity();
             fillTable();
+
             </script>
             </table>
         </div>
