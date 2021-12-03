@@ -11,7 +11,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
-from .models import Like, Post, Follower, FollowRequest, UserProfile, Comment
+from .models import Inbox, Like, Post, Follower, FollowRequest, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .forms import *
@@ -1218,6 +1218,11 @@ class CreatePostView(generic.CreateView):
     model = Post
     template_name = "unhindled/create_post.html"
     fields = "__all__"
+    
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super(CreatePostView, self).form_valid(form)
+
 
 # def SharePost(request, user, post_id):
 #     return HttpResponseRedirect(reverse('index'))
@@ -1472,3 +1477,7 @@ def get_foreign_authors(request):
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+class InboxView(generic.ListView):
+    model = Inbox
+    template_name = "unhindled/inbox.html"
+    fields = "__all__"

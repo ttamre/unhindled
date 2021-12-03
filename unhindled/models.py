@@ -46,7 +46,7 @@ class Post(models.Model):
 		('SEND', 'Send to Author')
 	)
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, editable=False)
 	contentType = models.CharField(max_length=20, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
@@ -120,3 +120,35 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
 	instance.profile.save()
+
+class Inbox(models.Model):
+	ITEM_TYPES = (
+		('post', 'post'),
+		('like', 'like'),
+		('follow', 'follow'),
+		('comment', 'comment')
+	)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	inbox_of = models.ForeignKey(User, related_name="inbox_of", on_delete=models.CASCADE)
+	inbox_from = models.ForeignKey(User, related_name="inbox_from", on_delete=models.CASCADE)
+	type = models.CharField(max_length=7, choices=ITEM_TYPES, default=ITEM_TYPES[0][0])
+	link = models.URLField()
+	seen = models.BooleanField(default=False)
+	date = models.DateTimeField(auto_now_add=True)
+
+@receiver(post_save, sender=Post)
+def create_user_profile(sender, instance, created, **kwargs):
+	if created:
+		if (instance.send_to is not None) and instance.visibility == "SEND":
+			link = "http://127.0.0.1:8000"
+			link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
+			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author)
+			inbox.save()
+		
+		else:
+			followers = Follower.objects.filter(author=instance.author)
+			for follower in followers:
+				link = "http://127.0.0.1:8000"
+				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
+				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author)
+				inbox.save()

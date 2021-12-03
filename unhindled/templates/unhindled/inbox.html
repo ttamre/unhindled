@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+{% block content %}
+{% #header user=user %}
+{% /header %}
+
+<div class=inboxHeading>
+    Inbox:
+</div>
+
+<div class=inboxContainer>
+{% if user.is_authenticated %}
+    {% for inbox in object_list %}
+        {% if inbox.type == "post" %}
+        <div class="inbox" onclick="window.location='{{inbox.link}}';">
+            <div class="inboxInfo">
+                <p>{{inbox.inbox_from.username}} sent you a private post</p>
+            </div>
+        </div>
+        {% elif inbox.type == "like" %}
+        <div class="inbox" onclick="window.location='{{inbox.link}}';">
+            <div class="inboxInfo">
+                <p>{{inbox.inbox_from.username}} liked your post</p>
+            </div>
+        </div>
+        {% elif inbox.type == "follow" %}
+        <div class="inbox" onclick="window.location='{{inbox.link}}';">
+            <div class="inboxInfo">
+                <p>{{inbox.inbox_from.username}} sent you a follow request</p>
+            </div>
+        </div>
+        {% elif inbox.type == "comment" %}
+        <div class="inbox" onclick="window.location='{{inbox.link}}';">
+            <div class="inboxInfo">
+                <p>{{inbox.inbox_from.username}} commented on your post</p>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+</div>
+{% endblock %}
