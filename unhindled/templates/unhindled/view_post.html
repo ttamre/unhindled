@@ -38,30 +38,34 @@
     <div class="is-flex">
         <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
 
-        <!-- LOGGED IN: Show like buttons -->
-        {% if user.is_authenticated %}
-            {% if post|post_liked:user %}
-                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
-            {% else %}
-                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
-            {% endif %}
-
         <!-- SHARED POST: Show view original button -->
         {% if post.is_shared_post %}
             <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">View Original</a></span>
-        {% else %}
-
+        
             <!-- ORIGINAL POST -> LOGGED IN -->
-            {% if user.is_authenticated %}
-                <!-- ORIGINAL POST -> LOGGED IN -> POST BELONGS TO USER: Show edit/delete buttons -->
-                {% if user.displayName == post.author.displayName %}
-                    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/edit">Edit</a></span>
-                    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/delete">Delete</a></span>
+        {% elif user.is_authenticated %}            
 
-                <!-- ORIGINAL POST -> LOGGED IN -> POST DOES NOT BELONG TO USER: Show share button -->
+            <!-- *NOTE* Moving code block here causes an error -->
+
+            <!-- ORIGINAL POST -> LOGGED IN -> POST BELONGS TO USER -->
+            {% if user.displayName == post.author.displayName %}
+                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/edit">Edit</a></span>
+                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/delete">Delete</a></span>
+
+                <!-- LOGGED IN -> POST BELONGS TO USER -> ORIGINAL POST -->
+                <!-- *NOTE* Works fine here -->
+                {% if post|post_liked:user %}
+                    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
                 {% else %}
-                    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/share" onclick="return confirm('Are you sure?');">Share</a></span>
+                    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
                 {% endif %}
+
+            <!-- ORIGINAL POST -> LOGGED IN -> POST DOES NOT BELONG TO USER -->
+            {% else %}
+
+                <!-- *NOTE* Duplicating code block here causes an error -->
+                
+                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/share" onclick="return confirm('Are you sure?');">Share</a></span>
             {% endif %}
         {% endif %}
     </div>
@@ -71,9 +75,9 @@
             {% csrf_token %}
             {{ comment_form|crispy }}
             {% if request.user.is_authenticated %}
-            <button class="mt-5">Send</button>
+                <button class="mt-5">Send</button>
             {% else %}
-            <button type="button" disabled>Send</button>
+                <button type="button" disabled>Send</button>
             {% endif %}
         </form>
     </div>
@@ -83,17 +87,14 @@
         <br>
         {% for comment in post.comment.all %}
         <div class="comment-box mb-3">
-            <strong><a href="{% url 'profile' comment.author.id %}">{{comment.author}}</a> -
-                {{comment.published}}</strong>
+            <strong><a href="{% url 'profile' comment.author.id %}">{{comment.author}}</a> - {{comment.published}}</strong>
             <p>{{ comment.comment}}</p>
             <p>{% like_count_comment comment.id %} {% singular_like comment.id %} -
                 {% if user.is_authenticated %}
-                {% if comment|comment_liked:user %}
-                <a href="{% url 'unlikeObject' user.displayName comment.id " comment" %}">{% comment_text comment user
-                    %}</a>
-                {% else %}
-                <a href="{% url 'likeObject' user.displayName comment.id " comment" %}">{% comment_text comment user
-                    %}</a>
+                    {% if comment|comment_liked:user %}
+                        <a href="{% url 'unlikeObject' user.displayName comment.id " comment" %}">{% comment_text comment user %}</a>
+                    {% else %}
+                        <a href="{% url 'likeObject' user.displayName comment.id " comment" %}">{% comment_text comment user %}</a>
                 {% endif %}
                 {% endif %}
             </p>
