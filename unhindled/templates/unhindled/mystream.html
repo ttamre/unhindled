@@ -1,62 +1,193 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
 
-{% block title %}Home{% endblock %}
+<head>
+    <meta charset="utf-8">
+    <title>Unhindled</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'unhindled/style.css' %}" />
+</head>
 
-{% block content %}
+<body>
+    {% #header user=user %}
+    {% /header %}
+    <main>
+        <div>
+            {% if user.is_authenticated %}
+            <p class="non-white-title">My Stream</p>
+            {% if object_list %}
+                {% for post in object_list %}
+                <!-- change this to ID when author and user are matched -->
+                {% if post.author.username == user.username %}
+                    <div class="post">
+                        <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                        By: {{ post.author }} <br>
+                        {{ post.description }}
+                    </div>
+                {% endif %}
+                {% endfor %}
+                <h3>Sent to me</h3>
+                {% for post in object_list %}
+                {% if post.send_to.username == user.username and post.visibility == "send" %}
+                    <div class="post">
+                        <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
+                        By: {{ post.author }} <br>
+                        {{ post.description }}
+                    </div>
+                {% endif %}
+                {% endfor %}
+            {% else %}
+                <p>No Posts to show.</p>
+            {% endif %}
+            {% endif %}
 
-{% #header user=user %}
-{% /header %}
 
-<main>
-  <div>
-    {% if user.is_authenticated %}
-      <p class="non-white-title">My Stream</p>
-      {% if object_list %}
-        {% for post in object_list %}
-          <!-- change this to ID when author and user are matched -->
-          {% if post..author.displayName == user.username %}
-            <div class="post">
-                <a href="{% url 'viewPost' post.author.id post.id %}">{{ post.title }}</a> <br>
-                By: {{ post.author }} <br>
-                {{ post.description }}
-            </div>
-          {% endif %}
-        {% endfor %}
-        <h3>Sent to me</h3>
-        {% for post in object_list %}
-          {% if post.send_to.username == user.username and post.visibility == "send" %}
-            <div class="post">
-                <a href="{% url 'viewPost' post.author.id post.id %}">{{ post.title }}</a> <br>
-                By: {{ post.author }} <br>
-                {{ post.description }}
-            </div>
-          {% endif %}
-        {% endfor %}
-      {% else %}
-          <p>No Posts to show.</p>
-      {% endif %}
-    {% endif %}
+            <!-- Github Activity -->
+            <h3>Github Activity</h3>
+            <table id="github_table">
+                <tr>
+                    <th>Repository</th>
+                    <th>Activity</th>
+                    <th>Link to repo</th>
+                </tr>
+            </table>
 
-    <!-- Github Activity -->
-    <p class="non-white-title">Github Activity</p>
-    {% if event_list %}
-        <table>
-        <tr>
-          <th>Repository</th>
-          <th>Activity</th>
-          <th>Link to repo</th>
-        </tr>
-        {% for event in event_list %}
-            <tr>
-              <td>{{event.repo}}</td>
-              <td>{{event.type}}</td>
-              <td><a href={{event.url}}>Link</a></td>
-            </tr>
-        {% endfor %}
-        </table>
-    {% else %}
-        <p>No activity to show.</p>
-    {% endif %}
-  </div>
-</main>
-{% endblock %}
+            <!-- safely loading request headers from python -->
+            {{ headers|json_script:"headers" }}
+
+            <script>
+            /*
+            Callback function to add a row to <table id="github_table">
+            
+            Params: dict:event  event data to add to table  {"repo":<string>, "type":<string>, "url":<string>}
+            Return: None
+            */
+            function addEvent(event) {
+                const repo = document.createElement('td')
+                const type = document.createElement('td')
+                const url = document.createElement('td')
+
+                repo.appendChild(document.createTextNode(event['repo']));
+                type.appendChild(document.createTextNode(event['type']));
+                url.appendChild(document.createTextNode(event['url']));
+
+                const row = document.createElement('tr')
+                row.appendChild(repo);
+                row.appendChild(type);
+                row.appendChild(url);
+
+                var table = document.getElementById("github_table");
+                table.appendChild(row);
+            }
+
+            /*
+            Send HTTP GET request via AJAX to fetch Github activity. Sends another request on success to fetch URL.
+
+            Params: None
+            Return: None
+            */
+            function getGithubActivity() {
+                // https://docs.github.com/en/developers/webhooks-and-events/events/github-event-types
+                GITHUB_EVENTS = {
+                    "CreateEvent": "Created repo/branch",
+                    "DeleteEvent": "Deleted repo/branch",
+                    "PushEvent":   "Pushed code",
+                    "PullEvent":   "Pulled code",
+                    "ForkEvent":   "Forked repo",
+                    "WatchEvent": "Starred repo",
+                    "CommitCommentEvent": "Commented on a commit",
+                    "IssueCommentEvent": "Commented on an issue",
+                    "PullRequestEvent": "Pull request",
+                    "PullRequestReviewEvent": "Reviewed a PR",
+                    "PullRequestReviewCommentEvent": "Commented on a PR review",
+                    "MemberEvent": "Managed organization",
+                    "GollumEvent": "Wiki page created/updated",
+                    "ReleaseEvent": "Published a release",
+                    "SponsorshipEvent": "Sponsorship activity"
+                }
+
+                // Get request headers from Django json_script
+                const headers = JSON.parse(document.getElementById('headers').textContent);
+
+                // AJAX request to get Github activiy data
+                var request = new XMLHttpRequest();
+                request.open('GET', headers['uri']);
+                request.setRequestHeader('Authorization', headers['auth']);
+                request.setRequestHeader('Accept', 'application/vnd.github.v3+json')
+
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        try {
+                            var response = JSON.parse(request.responseText);
+                            for (let i = 0; i < response.length; i++) {
+                                // Extract repo, event type, and the url from the response into a dict
+                                let responseData = response[i]
+                                var repo = responseData?.['repo']?.['name']
+                                var type = GITHUB_EVENTS[responseData?.['type']] ? GITHUB_EVENTS[responseData?.['type']] : responseData?.['type']
+
+                                var repoEndpoint = responseData?.['repo']?.['url']
+                                var userEndpoint = responseData?.['actor']?.['url']
+                                var event = {"repo": repo, "type": type, "url": ""};
+
+                                // Pass that dict to getURL where it will be added to the table via callback function addEvent
+                                getURL(repoEndpoint, event, headers['auth'], addEvent, userEndpoint);
+                            }
+                        }
+                        catch (e) {
+                            console.log('getGithubActivity() - Error: ' + e);
+                        }
+                    }
+                };
+                request.send();
+            }
+
+            /*
+            Send HTTP GET request via AJAX to fetch repo URL. If repo is private, fetch profile URL instead.
+            
+            Params:
+                str:endpoint    Endpoint to send GET request to (repo URL)
+                dict:event      Github event data to pass into callback function
+                str:auth        Authentication headers
+                func:callback   Callback function to be called on successfull request
+                str:backup      Endpoint to reattempt request with if the request fails (profile URL - optional)
+            
+            Return: None
+            */
+            function getURL(endpoint, event, auth, callback, backup=null) {
+                var request = new XMLHttpRequest();
+                request.open("GET", endpoint);
+                request.setRequestHeader('Authorization', auth);
+                request.setRequestHeader('Accept', 'application/vnd.github.v3+json')
+                
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        try {
+                            // Successful request: Public repo (we can get the link)
+                            var data = JSON.parse(request.responseText);
+                            url = data?.['html_url'];
+                            event['url'] = url;
+                            callback(event);
+                        }
+                        catch(e) {
+                            // Unsuccessful request: 
+                            //  Attempt 1 (backup endpoint) - fetch profile url instead
+                            //  Attempt 2 (no backup endpoint) - log error and continue with no URL
+                            console.log("getURL() - Error: " + e);
+                            if (backup) {
+                                console.log('getURL() - Attempting to serve profile URL instead');
+                                getURL(backup, event, auth, callback);
+                            }
+                        }
+                    }
+                }
+                request.send();
+            }
+
+            
+            getGithubActivity();
+            </script>
+        </div>
+    </main>
+</body>
+
+</html>

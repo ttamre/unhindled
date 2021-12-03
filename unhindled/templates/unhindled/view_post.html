@@ -23,10 +23,9 @@
 </div>
 <p class="non-white-title is-size-4 mb-2">{{post.title}}</p>
 <p>{{post.description}}</p>
-
 <div class="post-box">
-  {% if post.contentType == "md" %}
-    <p>{{post.content | markdown | safe }}</p>
+  {% if post.contentType == "text/markdown" %}
+    {{post.content | markdown | safe }}
   {% else %}
     <p>{{post.content}}</p>
   {% endif %}

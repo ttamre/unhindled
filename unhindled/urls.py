@@ -12,7 +12,7 @@ urlpatterns = [
     path('deleteFollowRequest', views.deleteFollowRequest),
     path('unfollow', views.unfollow),
     path('author/<str:id>', views.ProfileView.as_view(), name='profile'),
-    path('author/<str:id>/edit', views.EditProfileView.as_view(), name='editProfile'),
+    path('author/<str:pk>/edit', views.EditProfileView.as_view(), name='editProfile'),
     path('author/<str:user_id>/posts/<str:id>', views.view_post, name='viewPost'),
     path('author/<str:user_id>/posts/<str:pk>/edit', views.UpdatePostView.as_view(), name='updatePost'),
     path('author/<str:user_id>/posts/<str:pk>/delete', views.DeletePostView.as_view(), name='deletePost'),
