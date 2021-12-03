@@ -46,6 +46,10 @@ from .connect import *
 
 User = get_user_model()
 
+CLIENT_ID = os.environ.get("CLIENT_ID")
+CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
+GITHUB_AUTH = (CLIENT_ID, CLIENT_SECRET)
+
 EXAMPLE_POST_OBJECT = {
     "type": "post",
     "ID": "37d3fa93-a58d-4a38-9536-1792e0bacc0d",
@@ -112,20 +116,6 @@ EXAMPLE_COMMENT_OBJECT = {
         "contentType": "md",
         "published": "2021-11-21T22:35:30.617098-06:00",
         "ID": "e9024d02-6824-4ba3-94d3-be0bc20b9909"}
-
-CLIENT_ID = os.environ.get("GITHUB_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET")
-GITHUB_AUTH = (CLIENT_ID, CLIENT_SECRET)
-
-GITHUB_EVENTS = {
-    "CreateEvent": "Created repository",
-    "PushEvent":   "Pushed code",
-    "PullEvent":   "Pulled code",
-    "ForkEvent":   "Forked repo",
-    "MemberEvent": "Managed organization",
-    "PullRequestEvent": "Pull request",
-    None: "Unknown event"
-}
 
 
 # get id for apis given user
@@ -1134,35 +1124,12 @@ class StreamView(generic.ListView):
     template_name = "unhindled/mystream.html"
     ordering = ['-published']
 
-    def get(self, request, *args, **kwargs):
-        response = requests.get(f'https://api.github.com/users/{request.user}/events/PUBLIC', auth=GITHUB_AUTH)
-        events = response.json()
-        event_list = []
-
-        if response.ok:
-            for event in events:
-                repo = event.get("repo", {}).get("name")
-                type_ = GITHUB_EVENTS.get(event.get("type"))
-
-                repo_api = event.get("repo", {}).get("url")
-                repo_resp = requests.get(repo_api, auth=GITHUB_AUTH)
-                
-                # Public repos
-                if repo_resp.ok:
-                    url = repo_resp.json().get("html_url")
-
-                # Private repos - use profile URL instead
-                else:
-                    user_api = event.get("actor", {}).get("url")
-                    user_resp = requests.get(user_api, auth=GITHUB_AUTH)
-                    if user_resp.ok:
-                        url = user_resp.json().get("html_url")
-                    else:
-                        url = None
-
-                event_list.append({"repo": repo, "type": type_, "url": url,})
-
-        return render(request, 'unhindled/mystream.html', {"event_list": event_list})
+    def get(self, request, **args):
+        # Passes the required headers for Github requests into the DOM and into JS through Django
+        # See: https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#json-script
+        username = UserProfile.objects.get(user=request.user).github
+        headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{username}/events/public'}
+        return render(request, 'unhindled/mystream.html', {"headers": headers})
 
 
 class AccountView(generic.CreateView):
@@ -1349,9 +1316,8 @@ class ProfileView(View):
         if type(profile) is dict:
             user = profile['displayName']
             user_post = []
-
         else:
-            profile = UserProfile.objects.get(pk=id)
+            profile = UserProfile.objects.get(user=request.user)
             user = profile.user
             user_post = Post.objects.filter(author=user).order_by('-published')
         
