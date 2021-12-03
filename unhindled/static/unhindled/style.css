@@ -228,7 +228,9 @@ th {
 
 .inboxHeading {
   font-size: 2em;
-  margin: 1em;
+  margin: 0.5em;
+  border-color: grey;
+  border-bottom: 1px solid;
 }
 
 .inboxContainer {
@@ -256,4 +258,12 @@ th {
 .inboxInfo {
   padding: 2em 0;
   padding-left: 1em;
+  font-size: 1.1em;
+}
+
+.inboxImage {
+  height: 4.5em;
+  margin: 0.5em;
+  margin-right: 1em;
+  float: left;
 }
