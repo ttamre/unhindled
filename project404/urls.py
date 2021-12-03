@@ -50,7 +50,7 @@ urlpatterns = [
     path('service/author/<str:id>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
     path('service/author/<str:id>/posts/', views.PostViewSet.as_view({'get':'list', 'post':'createPost'})),
     path('service/author/<str:id>/posts/<str:post_id>/', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),
-    path('service/author/<str:id>/post/<str:post_id>/comments', views.CommentViewSet.as_view({'get':'list', 'post':'postComment'})),
+    path('service/author/<str:id>/posts/<str:post_id>/comments', views.CommentViewSet.as_view({'get':'list', 'post':'postComment'})),
     path('service/author/<str:id>/post/<str:post_id>/likes', views.LikeViewSet.as_view({'get':'postList', 'post':'likePost'})),
     path('service/author/<str:user_id>/post/<str:post_id>/comments/<str:comment_id>/likes', views.LikeViewSet.as_view({'get':'commentList', 'post':'likeComment'})),
     path('service/author/<str:author>/followers', views.FollowerListViewset.as_view({'get':'list'})), 
@@ -59,6 +59,7 @@ urlpatterns = [
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('foreign_posts', views.get_foreign_posts),
     path('foreign_authors', views.get_foreign_authors),
+    path('foreign_comments', views.get_foreign_comments),
 
     # Redocs
     # path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),

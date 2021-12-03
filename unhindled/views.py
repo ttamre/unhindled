@@ -1471,4 +1471,9 @@ def get_foreign_authors(request):
     else:
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
+def get_foreign_comments(request):
+    if request.method == "GET":
+        foreign_comments = get_foreign_comments_list()
+        return Response({"foreign comments": foreign_comments})
+    else:
+        return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

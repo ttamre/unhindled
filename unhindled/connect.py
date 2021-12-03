@@ -159,3 +159,13 @@ def foreign_add_follower(author, follower):
         else:
             return t15_req.json()
 
+#get foreign comments
+def get_foreign_comments_list(author, post):
+    # foreign comments from team 14
+    if "linkedspace-staging.herokuapp.com" in author and "linkedspace-staging.herokuapp.com" in post:
+        url = author + post + '/comments/'
+        t14_req = requests.get(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t14_req.status_code == 500:
+            return ""
+        else:
+            return t14_req.json()
