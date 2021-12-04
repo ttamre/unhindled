@@ -53,7 +53,7 @@ class Post(models.Model):
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0][0], null=False)
 	send_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='send_to', null=True, blank=True)
 	published = models.DateTimeField(auto_now_add=True)
-	source = models.CharField(max_length=50, default="https://unhindled.herokuapp.com/")
+	source = models.CharField(max_length=50, default="https://unhindled.herokuapp.com/", editable=False)
 	#will need to change
 	content = models.TextField(blank=True)
 	images = models.ImageField(null=True,blank=True, upload_to='images/')
@@ -78,7 +78,9 @@ class Post(models.Model):
 
 	def clean(self):
 		if not (self.images or self.content):
-			raise ValidationError('Invalid Value')
+			raise ValidationError('ERROR: post missing content or image')
+		if self.visibility == "SEND" and self.send_to is None:
+			raise ValidationError("ERROR: Need to specify author when Send to Author is Selected")
 
 class Comment(models.Model):
 	CONTENT_TYPES = (
@@ -130,7 +132,7 @@ class Inbox(models.Model):
 	)
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	inbox_of = models.ForeignKey(User, related_name="inbox_of", on_delete=models.CASCADE)
-	inbox_from = models.ForeignKey(User, related_name="inbox_from", on_delete=models.CASCADE)
+	inbox_from = models.CharField(max_length=200)
 	type = models.CharField(max_length=7, choices=ITEM_TYPES, default=ITEM_TYPES[0][0])
 	link = models.URLField()
 	seen = models.BooleanField(default=False)
@@ -146,7 +148,7 @@ def send_post_to_inbox(sender, instance, created, **kwargs):
 		if (instance.send_to is not None) and instance.visibility == "SEND":
 			link = "http://127.0.0.1:8000"
 			link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
-			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author,post=instance)
+			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author.username,post=instance)
 			inbox.save()
 		
 		else:
@@ -154,7 +156,7 @@ def send_post_to_inbox(sender, instance, created, **kwargs):
 			for follower in followers:
 				link = "http://127.0.0.1:8000"
 				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
-				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author,post=instance)
+				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author.username,post=instance)
 				inbox.save()
 
 @receiver(post_save, sender=Like)

@@ -1128,6 +1128,28 @@ class LikeViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
+class InboxViewSet(viewsets.ViewSet):
+    host = "https://unhindled.herokuapp.com/"
+
+    def post(self, request, id):
+        postData = request.POST
+        user = get_object_or_404(User,id=id)
+        if "type" not in postData.keys():
+            return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
+        
+        if postData["type"].lower() == "post":
+            link = postData["id"].replace(postData["source"], self.host)
+            inbox = Inbox(inbox_of=user,inbox_from=postData["author"]["displayName"], link=link, type="post")
+            inbox.save()
+
+        elif postData["type"].lower() == "like":
+            pass
+
+        elif postData["type"].lower() == "follow":
+            pass
+    
+        elif postData["type"].lower() == "comment":
+            pass
 
 class StreamView(generic.ListView):
     model = Post
