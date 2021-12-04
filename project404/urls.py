@@ -47,6 +47,7 @@ urlpatterns = [
     path('service/allposts/', views.PostViewSet.as_view({'get':'allPosts'})),
     path('service/authors/', views.UserViewSet.as_view({'get':'list'}) ),
     path('service/author/<str:id>/', views.UserViewSet.as_view({'get': 'retrieve', 'post':'authorUpdate'}) ),
+    path('service/author/<str:id>/inbox', views.InboxViewSet.as_view({'post':'post'}) ),
     path('service/author/<str:id>/liked', views.LikeViewSet.as_view({'get':'authorList'})),
     path('service/author/<str:id>/posts/', views.PostViewSet.as_view({'get':'list', 'post':'createPost'})),
     path('service/author/<str:id>/posts/<str:post_id>/', views.PostViewSet.as_view({'get':'retrieve', 'post':'updatePost', 'put':'createPost', 'delete':'deletePost'})),

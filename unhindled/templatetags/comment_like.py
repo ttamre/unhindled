@@ -6,6 +6,7 @@ register = template.Library()
  
 @register.filter(name='comment_liked')
 def comment_liked(comment, author):
+    author = User.objects.get(author=author)
     likes = Like.objects.filter(comment=comment, author=author)
     return len(likes) == 1
 
