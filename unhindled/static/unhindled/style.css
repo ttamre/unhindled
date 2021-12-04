@@ -267,3 +267,7 @@ th {
   margin-right: 1em;
   float: left;
 }
+
+.inboxClear {
+  margin: 1em;
+}

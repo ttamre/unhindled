@@ -37,14 +37,16 @@
 
 <div class="is-flex">
   <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
-{% if user.displayName == post.author.displayName %}
-  {% if user.is_authenticated %}
-    {% if post|post_liked:user %}
-      <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
-    {% else %}
-      <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
-    {% endif %}
+
+{% if user.is_authenticated %}
+  {% if post|post_liked:user %}
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
+  {% else %}
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
   {% endif %}
+{% endif %}
+
+{% if user.id == post.author.id %}
   {% if post.is_shared_post %}
     <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">View Original</a></span>
   {% else %}

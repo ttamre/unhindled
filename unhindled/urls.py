@@ -13,6 +13,7 @@ urlpatterns = [
     path('unfollow', views.unfollow),
     path('author/<str:id>', views.ProfileView.as_view(), name='profile'),
     path('author/<str:id>/inbox', views.InboxView.as_view(), name='inbox'),
+    path('author/<str:id>/inbox/clear', views.clearInbox, name='clearInbox'),
     path('author/<str:id>/edit', views.EditProfileView.as_view(), name='editProfile'),
     path('author/<str:user_id>/posts/<str:id>', views.view_post, name='viewPost'),
     path('author/<str:user_id>/posts/<str:pk>/edit', views.UpdatePostView.as_view(), name='updatePost'),

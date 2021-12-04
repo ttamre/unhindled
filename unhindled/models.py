@@ -4,7 +4,7 @@ from django.db.models.fields import EmailField
 from django.urls import reverse
 from datetime import datetime, date
 from django.core.exceptions import ValidationError
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
@@ -135,14 +135,18 @@ class Inbox(models.Model):
 	link = models.URLField()
 	seen = models.BooleanField(default=False)
 	date = models.DateTimeField(auto_now_add=True)
+	post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+	like = models.ForeignKey(Like, on_delete=models.CASCADE, blank=True, null=True)
+	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
+
 
 @receiver(post_save, sender=Post)
-def create_user_profile(sender, instance, created, **kwargs):
+def send_post_to_inbox(sender, instance, created, **kwargs):
 	if created:
 		if (instance.send_to is not None) and instance.visibility == "SEND":
 			link = "http://127.0.0.1:8000"
 			link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
-			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author)
+			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author,post=instance)
 			inbox.save()
 		
 		else:
@@ -150,5 +154,25 @@ def create_user_profile(sender, instance, created, **kwargs):
 			for follower in followers:
 				link = "http://127.0.0.1:8000"
 				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
-				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author)
+				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author,post=instance)
+				inbox.save()
+
+@receiver(post_save, sender=Like)
+def send_like_to_inbox(sender, instance, created, **kwargs):
+	if created:
+		if instance.post is not None:
+			if instance.post.author != instance.author:
+				link = "http://127.0.0.1:8000"
+				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
+				inbox = Inbox(inbox_of=instance.post.author, type="like",link=link, inbox_from=instance.author,like=instance)
+				inbox.save()
+
+@receiver(post_save, sender=Comment)
+def send_comment_to_inbox(sender, instance, created, **kwargs):
+	if created:
+		if instance.post is not None:
+			if instance.post.author != instance.author:
+				link = "http://127.0.0.1:8000"
+				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
+				inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.author,comment=instance)
 				inbox.save()

@@ -1245,7 +1245,7 @@ class SharePost(generic.View):
         return HttpResponseRedirect(reverse('index'))
   
 def likeObject(request, user_id, id, obj_type):
-    author = User.objects.get(id=user_id)
+    author = request.user
     if obj_type == "comment":
         comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
@@ -1263,7 +1263,7 @@ def likeObject(request, user_id, id, obj_type):
     return HttpResponseRedirect(post.get_absolute_url())
 
 def unlikeObject(request, user_id, id, obj_type):
-    author = User.objects.get(id=user_id)
+    author = request.user
     if obj_type == "comment":
         comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
@@ -1481,3 +1481,13 @@ class InboxView(generic.ListView):
     model = Inbox
     template_name = "unhindled/inbox.html"
     fields = "__all__"
+
+def clearInbox(request, id):
+    user = get_object_or_404(User, id=id)
+    if request.user != user:
+        return HttpResponse('Unauthorized', status=401)
+    else:
+        inboxItems = Inbox.objects.filter(inbox_of=user)
+        inboxItems.delete()
+
+    return HttpResponseRedirect(reverse('inbox', args=[str(user.id)]))
