@@ -20,11 +20,13 @@ CREATE DATABASE unhindled;
 
 
 ## Team Members
-* Ismaeel Mohiuddin: ismaeel
-* Tem Tamre: ttamre
-* Thomas Pham: tpham3
-* Joshua Smith: jds1
-* Zoey Pu: jpu1
+NAME | CCID
+---- | ---- 
+Ismaeel Mohiuddin|ismaeel
+Tem Tamre|ttamre
+Thomas Pham|tpham3
+Joshua Smith|jds1
+Zoey Pu|jpu1
 
 
 ## Reference
