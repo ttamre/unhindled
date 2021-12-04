@@ -1234,20 +1234,34 @@ class SharePost(generic.View):
         return HttpResponseRedirect(reverse('index'))
   
 def likeObject(request, user_id, id, obj_type):
-    author = request.user
-    if obj_type == "comment":
-        comment = Comment.objects.get(id = id)
-        existingLike = Like.objects.filter(comment=comment,author=author)
-        if (len(existingLike) == 0):
-            like = Like(comment=comment,author=author)
-            like.save()
-        post = comment.post
-    elif obj_type == "post":
-        post = Post.objects.get(id = id)
-        existingLike = Like.objects.filter(post=post,author=author)
-        if (len(existingLike) == 0):
-            like = Like(post=post,author=author)
-            like.save()
+
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    author = request.user 
+
+    if type(post) is dict:
+        send_like_object(post["id"],author,post["author"]["id"])
+        post["id"] = post["id"].strip("/")
+        post["author"]["id"] = post["author"]["id"].strip("/")
+        return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
+
+    else:
+        if obj_type == "comment":
+            comment = Comment.objects.get(id = id)
+            existingLike = Like.objects.filter(comment=comment,author=author)
+            if (len(existingLike) == 0):
+                like = Like(comment=comment,author=author)
+                like.save()
+            post = comment.post
+        elif obj_type == "post":
+            post = Post.objects.get(id = id)
+            existingLike = Like.objects.filter(post=post,author=author)
+            if (len(existingLike) == 0):
+                like = Like(post=post,author=author)
+                like.save()
 
     return HttpResponseRedirect(post.get_absolute_url())
 
@@ -1275,6 +1289,8 @@ def view_post(request, user_id, id):
         post = get_json_post(id)
 
     if type(post) is dict:
+        if post['id'].endswith("/"):
+            post['id'] = post['id'][:-1]
         post_id = post['id'].split('/post')[-1]
         post_id = uuid.UUID(post_id.split('s/')[-1])
         comments = Comment.objects.filter(post=post_id).order_by('-published')

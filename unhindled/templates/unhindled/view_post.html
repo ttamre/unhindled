@@ -35,7 +35,7 @@
 {% endif %}
 
 <div class="is-flex">
-  <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
+  <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post %} {% singular_like post %}</p>
 
 {% if user.is_authenticated %}
   {% if post|post_liked:user %}

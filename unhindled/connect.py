@@ -1,5 +1,14 @@
 import requests
 
+from unhindled.serializers import UserSerializer
+
+
+servers = [
+        ('social-dis.herokuapp.com', ('socialdistribution_t03','c404t03')),
+        ('cmput404-socialdist-project.herokuapp.com', ('socialcircleauth','cmput404')),
+        ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14'))
+    ]
+
 def test():
     test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
     # test = requests.get('http://127.0.0.1:8000/service/allposts', auth=('q','q'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -14,6 +23,8 @@ def get_json_post(id):
     for post in get_foreign_posts_list():
         try:
             split = post['id'].split('/')[-1]
+            if split == '':
+                split = post['id'].split('/')[-2]
         except:
             split = ''
         if split == id:
@@ -159,3 +170,41 @@ def foreign_add_follower(author, follower):
         else:
             return t15_req.json()
 
+def get_likes_on_post(post):
+    source = post["source"].strip("/")
+    post["author"]["id"] = post["author"]["id"].strip("/")
+    post["id"] = post["id"].strip("/")
+    author_id = post["author"]["id"].split("/author/")[-1]
+    post_id = post["id"].split("/posts/")[-1]
+    for server in servers:
+        if server[0][:-4] in source:
+            auth = server[1]
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
+            print(endpoint)
+            req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
+            print(req.json())
+            if req.status_code == 500:
+                return ""
+            else:
+                return req.json()
+
+    
+def send_like_object(post, author, post_author):
+    serializer = UserSerializer(author)
+    author_id = post_author.strip("/").split("/author/")[-1]
+    data = {}
+    data["type"] = "like"
+    data["author"] = serializer.data
+    data["object"] = post
+    data["@context"] = "https://www.w3.org/ns/activitystreams"
+    for server in servers:
+        if server[0][:-4] in post:
+            auth = server[1]
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
+            req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            print(endpoint)
+            print(data)
+            if req.status_code == 200:
+                return True
+    
+    return False
