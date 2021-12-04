@@ -1,3 +1,4 @@
+from django.contrib import auth
 import requests
 
 def test():
@@ -18,6 +19,7 @@ def get_json_post(id):
             split = ''
         if split == id:
             found_post = post
+            found_post['uuid'] = split
 
     return found_post
     
@@ -120,7 +122,8 @@ def get_foreign_authors_list():
             #author_list.append(author)
     
     return author_list
- 
+
+
 #get author given author.id NOT CURRENTLY IN USE  
 def foreign_get_author(author):
     #team 3 once implemented
@@ -159,3 +162,21 @@ def foreign_add_follower(author, follower):
         else:
             return t15_req.json()
 
+def like_foreign_object(user_id, object_id, object_type):
+    print("like_foreign_object():", user_id, object_id, object_type)
+
+    headers = {'Referer': "http://127.0.0.1:8000/"}
+    servers = [
+        ('social-dis.herokuapp.com', ('socialdistribution_t03','c404t03')),
+        ('cmput404-socialdist-project.herokuapp.com', ('socialcircleauth','cmput404')),
+        ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14'))
+    ]
+
+    # POST like for this user to all servers, returning the response on first successful request
+    if object_type == "post":
+        for server in servers:
+            endpoint = f'https://{server[0]}/{user_id}/post/{object_id}/likes'
+            request = requests.post(endpoint, auth=server[1], headers=headers)
+
+            if request.status_code == 200:
+                return endpoint

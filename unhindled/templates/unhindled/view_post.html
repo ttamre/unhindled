@@ -37,6 +37,15 @@
 
     <div class="is-flex">
         <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post.id %} {% singular_like post.id %}</p>
+        
+        <!-- LOGGED IN: Show like button -->
+        {% if user.is_authenticated %}
+            {% if post.uuid|post_liked:user %}
+                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post.uuid user %}</a></span>
+            {% else %}
+                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post.uuid user %}</a></span>
+            {% endif %}
+        {% endif %}
 
 <<<<<<< HEAD
         <!-- LOGGED IN: Show like buttons -->
@@ -65,16 +74,15 @@
         {% if post.is_shared_post %}
             <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">View Original</a></span>
         
-            <!-- ORIGINAL POST -> LOGGED IN -->
+        <!-- ORIGINAL POST -> LOGGED IN -->
         {% elif user.is_authenticated %}            
 
-            <!-- *NOTE* Moving code block here causes an error -->
-
-            <!-- ORIGINAL POST -> LOGGED IN -> POST BELONGS TO USER -->
-            {% if user.displayName == post.author.displayName %}
+            <!-- ORIGINAL POST -> LOGGED IN -> POST BELONGS TO USER: Show edit/delete button -->
+            {% if user.id == post.author.id %}
                 <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/edit">Edit</a></span>
                 <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/delete">Delete</a></span>
 
+<<<<<<< HEAD
                 <!-- LOGGED IN -> POST BELONGS TO USER -> ORIGINAL POST -->
                 <!-- *NOTE* Works fine here -->
                 {% if post|post_liked:user %}
@@ -85,10 +93,10 @@
                 {% endif %}
 
             <!-- ORIGINAL POST -> LOGGED IN -> POST DOES NOT BELONG TO USER -->
+=======
+            <!-- ORIGINAL POST -> LOGGED IN -> POST DOES NOT BELONG TO USER: Show share button -->
+>>>>>>> Like buttons showing up properly, like endpoints messed up
             {% else %}
-
-                <!-- *NOTE* Duplicating code block here causes an error -->
-                
                 <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/share" onclick="return confirm('Are you sure?');">Share</a></span>
             {% endif %}
         {% endif %}

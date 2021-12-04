@@ -40,12 +40,13 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = Post
-        fields = ('id', 'author','content', 'contentType', 'title', 'description','visibility', 'published')
+        fields = ('id', 'uuid', 'author','content', 'contentType', 'title', 'description','visibility', 'published')
         depth = 1
 
     def to_representation(self, obj):
         data = super().to_representation(obj)
         data["id"] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
+        data["uuid"] = str(obj.id)
         data['type'] = 'post'
         data['source'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['origin'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
