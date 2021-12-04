@@ -46,6 +46,7 @@ class Post(models.Model):
 		('SEND', 'Send to Author')
 	)
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	uuid = models.UUIDField(primary_key=False, default=uuid.uuid4, editable=False)
 	author = models.ForeignKey(User, on_delete=models.CASCADE)
 	contentType = models.CharField(max_length=20, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
 	title = models.CharField(max_length=200)

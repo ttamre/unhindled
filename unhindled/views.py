@@ -1207,22 +1207,26 @@ class SharePost(generic.View):
         return HttpResponseRedirect(reverse('index'))
   
 def likeObject(request, user_id, id, obj_type):
-    author = User.objects.get(id=user_id)
-    if obj_type == "comment":
-        comment = Comment.objects.get(id = id)
-        existingLike = Like.objects.filter(comment=comment,author=author)
-        if (len(existingLike) == 0):
-            like = Like(comment=comment,author=author)
-            like.save()
-        post = comment.post
-    elif obj_type == "post":
-        post = Post.objects.get(id = id)
-        existingLike = Like.objects.filter(post=post,author=author)
-        if (len(existingLike) == 0):
-            like = Like(post=post,author=author)
-            like.save()
+    try: # Local author
+        author = User.objects.get(id=user_id)
+        if obj_type == "comment":
+            comment = Comment.objects.get(id = id)
+            existingLike = Like.objects.filter(comment=comment,author=author)
+            if (len(existingLike) == 0):
+                like = Like(comment=comment,author=author)
+                like.save()
+            post = comment.post
+        elif obj_type == "post":
+            post = Post.objects.get(id = id)
+            existingLike = Like.objects.filter(post=post,author=author)
+            if (len(existingLike) == 0):
+                like = Like(post=post,author=author)
+                like.save()
+        return HttpResponseRedirect(post.get_absolute_url())
+    except: # Foreign author
+        post_url = like_foreign_object(user_id, id, obj_type)
+        return HttpResponseRedirect(post_url)
 
-    return HttpResponseRedirect(post.get_absolute_url())
 
 def unlikeObject(request, user_id, id, obj_type):
     author = User.objects.get(id=user_id)
