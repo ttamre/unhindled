@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
-from .models import Like, Post, Follower, FollowRequest, UserProfile, Comment
+from .models import Inbox, Like, Post, Follower, FollowRequest, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .forms import *
@@ -1120,6 +1120,28 @@ class LikeViewSet(viewsets.ViewSet):
         else:
             return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
 
+class InboxViewSet(viewsets.ViewSet):
+    host = "https://unhindled.herokuapp.com/"
+
+    def post(self, request, id):
+        postData = request.POST
+        user = get_object_or_404(User,id=id)
+        if "type" not in postData.keys():
+            return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
+        
+        if postData["type"].lower() == "post":
+            link = postData["id"].replace(postData["source"], self.host)
+            inbox = Inbox(inbox_of=user,inbox_from=postData["author"]["displayName"], link=link, type="post")
+            inbox.save()
+
+        elif postData["type"].lower() == "like":
+            pass
+
+        elif postData["type"].lower() == "follow":
+            pass
+    
+        elif postData["type"].lower() == "comment":
+            pass
 
 class StreamView(LoginRequiredMixin, generic.ListView):
     login_url = 'accounts/login/'
@@ -1194,6 +1216,11 @@ class CreatePostView(LoginRequiredMixin, generic.CreateView):
     model = Post
     template_name = "unhindled/create_post.html"
     fields = "__all__"
+    
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super(CreatePostView, self).form_valid(form)
+
 
 # def SharePost(request, user, post_id):
 #     return HttpResponseRedirect(reverse('index'))
@@ -1219,25 +1246,39 @@ class SharePost(LoginRequiredMixin, generic.View):
         return HttpResponseRedirect(reverse('index'))
   
 def likeObject(request, user_id, id, obj_type):
-    author = User.objects.get(id=user_id)
-    if obj_type == "comment":
-        comment = Comment.objects.get(id = id)
-        existingLike = Like.objects.filter(comment=comment,author=author)
-        if (len(existingLike) == 0):
-            like = Like(comment=comment,author=author)
-            like.save()
-        post = comment.post
-    elif obj_type == "post":
-        post = Post.objects.get(id = id)
-        existingLike = Like.objects.filter(post=post,author=author)
-        if (len(existingLike) == 0):
-            like = Like(post=post,author=author)
-            like.save()
+
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    author = request.user 
+
+    if type(post) is dict:
+        send_like_object(post["id"],author,post["author"]["id"])
+        post["id"] = post["id"].strip("/")
+        post["author"]["id"] = post["author"]["id"].strip("/")
+        return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
+
+    else:
+        if obj_type == "comment":
+            comment = Comment.objects.get(id = id)
+            existingLike = Like.objects.filter(comment=comment,author=author)
+            if (len(existingLike) == 0):
+                like = Like(comment=comment,author=author)
+                like.save()
+            post = comment.post
+        elif obj_type == "post":
+            post = Post.objects.get(id = id)
+            existingLike = Like.objects.filter(post=post,author=author)
+            if (len(existingLike) == 0):
+                like = Like(post=post,author=author)
+                like.save()
 
     return HttpResponseRedirect(post.get_absolute_url())
 
 def unlikeObject(request, user_id, id, obj_type):
-    author = User.objects.get(id=user_id)
+    author = request.user
     if obj_type == "comment":
         comment = Comment.objects.get(id = id)
         existingLike = Like.objects.filter(comment=comment,author=author)
@@ -1260,6 +1301,8 @@ def view_post(request, user_id, id):
         post = get_json_post(id)
 
     if type(post) is dict:
+        if post['id'].endswith("/"):
+            post['id'] = post['id'][:-1]
         post_id = post['id'].split('/post')[-1]
         post_id = uuid.UUID(post_id.split('s/')[-1])
         comments = Comment.objects.filter(post=post_id).order_by('-published')
@@ -1458,3 +1501,17 @@ def get_foreign_authors(request):
         return Response({"message": "Method Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
+class InboxView(generic.ListView):
+    model = Inbox
+    template_name = "unhindled/inbox.html"
+    fields = "__all__"
+
+def clearInbox(request, id):
+    user = get_object_or_404(User, id=id)
+    if request.user != user:
+        return HttpResponse('Unauthorized', status=401)
+    else:
+        inboxItems = Inbox.objects.filter(inbox_of=user)
+        inboxItems.delete()
+
+    return HttpResponseRedirect(reverse('inbox', args=[str(user.id)]))
