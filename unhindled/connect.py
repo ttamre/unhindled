@@ -1,5 +1,5 @@
 import requests
-
+import logging
 def test():
     test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
     # test = requests.get('http://127.0.0.1:8000/service/allposts', auth=('q','q'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -118,7 +118,6 @@ def get_foreign_authors_list():
         #js_req_15 = t15_req.json()['items']
         #for author in js_req_15:
             #author_list.append(author)
-    
     return author_list
  
 #get author given author.id NOT CURRENTLY IN USE  
@@ -142,8 +141,19 @@ def foreign_get_author(author):
 
 #sends put request to add one of our authors as a follower NOT CURRENTLY IN USE
 def foreign_add_follower(author, follower):
+    logger = logging.getLogger("log")
+    logger.error(author)
+    logger.error(follower)
     #team 3 once implemented
     if "social-dis.herokuapp.com" in author:
+        url = author +'/followers/'+ follower
+        logger.error(url)
+        t3_req = requests.put(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t3_req.status_code == 500:
+            return ""
+        else:
+            return t3_req.json()
+    if "cmput404-socialdist-project.herokuapp.com" in author:
         url = author +'/followers/'+ follower
         t3_req = requests.put(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
         if t3_req.status_code == 500:
@@ -151,11 +161,11 @@ def foreign_add_follower(author, follower):
         else:
             return t3_req.json()
     #our own heroku for local testing
-    if "unhindled.herokuapp.com" in author:
-        url = author +'/followers/'+ follower
-        t15_req = requests.put(url, auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
-        if t15_req.status_code == 500:
-            return ""
-        else:
-            return t15_req.json()
+    #if "unhindled.herokuapp.com" in author:
+        #url = author +'/followers/'+ follower
+        #t15_req = requests.put(url, auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
+        #if t15_req.status_code == 500:
+           # return ""
+       # else:
+           # return t15_req.json()
 

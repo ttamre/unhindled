@@ -1161,7 +1161,7 @@ def follow(request):
                 if Follower.objects.filter(author=authorId,follower=request.user.id).count() == 0 :
                     Follower.objects.create(author=authorId, follower=request.user.id)
                     # will put to other servers once they are implemented
-                    #x = foreign_add_follower(authorId,  getForeignId(request.user))
+                    x = foreign_add_follower(authorId,  getForeignId(request.user))
            ### will need to send friend request here ###
                     break
     next = request.POST.get('next', '/')
