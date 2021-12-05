@@ -51,7 +51,7 @@ class Post(models.Model):
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0][0], null=False)
-	send_to = models.CharField(max_length=300, null=True, blank=True)
+	send_to = models.CharField(max_length=300, null=True, blank=True, default=None)
 	published = models.DateTimeField(auto_now_add=True)
 	source = models.CharField(max_length=50, default="https://unhindled.herokuapp.com/", editable=False)
 	#will need to change

@@ -61,4 +61,22 @@
         <button class="mt-3" type="submit" value="Submit">Post</button> -->
     </form>
 </main>
+<script>
+    window.onload = function() {
+        if (document.getElementById("id_visibility").value != "SEND") {
+            document.getElementById("div_id_send_to").hidden = true;
+        }
+        document.getElementById("id_send_to").value = null;
+    };
+
+    document.getElementById("id_visibility").onchange = function(){
+        if (this.value == "SEND"){
+            document.getElementById("div_id_send_to").hidden = false;
+        }
+        else{
+            document.getElementById("div_id_send_to").hidden = true;
+            document.getElementById("id_send_to").value = null;
+        }
+    }
+</script>
 {% endblock %}
