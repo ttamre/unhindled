@@ -1328,14 +1328,14 @@ def view_post(request, user_id, id):
             post['id'] = post['id'][:-1]
         post_id = post['id'].split('/post')[-1]
         post_id = uuid.UUID(post_id.split('s/')[-1])
-        comments = Comment.objects.filter(post=post_id).order_by('-published')
+        source = post['source']
+        comments = get_foreign_comments_list(source, user_id, id)
         if request.method == 'POST':
             form_comment = FormComment(request.POST or None)
             if form_comment.is_valid():
                 comment = request.POST.get('comment')
-                comm = Comment.objects.create(post=post, author=request.user, comment=comment)
-                comm.save()
-                return HttpResponseRedirect(post.get_absolute_url())
+                post_foreign_comments(request, comment, post)
+                return HttpResponseRedirect(request.path)
         else:
             form_comment= FormComment()
     else:
@@ -1353,7 +1353,8 @@ def view_post(request, user_id, id):
     context = {
         'post': post,
         'comments': comments,
-        'comment_form': form_comment
+        'comment_form': form_comment,
+        'comment_size': len(comments)
     }
     return render(request, 'unhindled/view_post.html', context)
 
