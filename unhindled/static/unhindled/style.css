@@ -35,7 +35,7 @@ body {
   margin: 0;
 }
 
-button {
+.button {
   /* source: https://www.w3schools.com/css/css3_buttons.asp */
   border-radius: 2rem;
   background-color: #3AAFA9;
@@ -46,12 +46,55 @@ button {
   text-decoration: none;
   display: inline-block;
   font-size: 14px;
+  width: 6.5rem;
+  height: 41px;
 }
 
-button:hover {
+.button:hover {
   cursor: pointer;
   background-color: #2B7A78;
 }
+
+.cancel-button {
+  /* source: https://www.w3schools.com/css/css3_buttons.asp */
+  border-radius: 2rem;
+  background-color: #f03a5f;
+  border: none;
+  color: #FEFFFF;
+  padding: 12px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  width: 6.5rem;
+  height: 41px;
+}
+
+.cancel-button:hover {
+  cursor: pointer;
+  background-color: #99253d;
+  border-color: transparent;
+  color: #fff;
+}
+
+.follow-button {
+  border-radius: .75rem;
+  background-color: #3AAFA9;
+  border: none;
+  color: #FEFFFF;
+  padding: 8px 12px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  width: 8rem;
+}
+
+.follow-button:hover {
+  cursor: pointer;
+  background-color: #2B7A78;
+}
+
 
 .centered {
   margin: 0 auto;
@@ -127,9 +170,35 @@ a.white-text:hover {
 
 .dropdown:hover .dropdown-content {display: block;}
 
-/* Login Page */
+/* Login/Register Page */
 .login-page {
   margin: auto;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 300px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 8px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 
 /* Home Page */
@@ -165,6 +234,47 @@ a.white-text:hover {
   border: 1px solid #17252A;
   padding: 8px;
   border-radius: 5px;
+}
+
+/* Form */
+.errorlist li {
+  color: #f03a5f;
+  font-size: 12px;
+}
+
+.textinput {
+  width: 20rem;
+  height: 2rem;
+  font-size: 16px;
+  border:none;
+  border-bottom: 1px solid #1890ff;
+  padding: 5px 10px;
+  outline: none;
+}
+
+.disabled-input {
+  width: 20rem;
+  height: 2rem;
+  font-size: 16px;
+  border:none;
+  padding: 5px 10px;
+  outline: none;
+  color: #4a4a4a;
+}
+
+.label-field {
+  width: 7rem;
+  margin: auto 0;
+}
+
+.dateinput {
+  width: 20rem;
+  height: 2rem;
+  font-size: 16px;
+  border:none;
+  border-bottom: 1px solid #1890ff;
+  padding: 5px 10px;
+  outline: none;
 }
 
 /* 'Components' Page */
@@ -231,9 +341,8 @@ th {
 /* Inbox Page */
 
 .inboxHeading {
-  font-size: 2em;
-  margin: 0.5em;
-  border-color: grey;
+  display: flex;
+  margin-bottom: 1rem;
   border-bottom: 1px solid;
 }
 
@@ -273,5 +382,5 @@ th {
 }
 
 .inboxClear {
-  margin: 1em;
+  margin: 1.75rem 0 0 auto;
 }

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Log In{% endblock %}
 
 {% block content %}
 {% load crispy_forms_tags %}
@@ -10,15 +10,19 @@
       <p class="non-white-title">Log In</p>
       <form method="post">
         {% csrf_token %}
+        <!-- {{ form | crispy }} -->
         <div class="mt-3">
           <label for="{{ form.username.id_for_label }}">Username: </label>
-          {{ form.username }}
         </div>
+        {{ form.username }}
+        {{ form.username.errors }}
         <div class="mt-3">
           <label class="mr-1" for="{{ form.password.id_for_label }}">Password: </label>
-          {{ form.password }}
         </div>
-        <button class="mt-5" type="submit">Log In</button>
+        {{ form.password }}
+        {{ form.password.errors }}
+        <p></p>
+        <input type="submit" value="Log In" class="button mt-5">
       </form>
     </div>
   {% else %}

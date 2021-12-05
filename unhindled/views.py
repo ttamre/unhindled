@@ -1394,7 +1394,7 @@ class EditProfileView(LoginRequiredMixin, generic.UpdateView):
     login_url = 'accounts/login/'
     redirect_field_name = 'redirect_to'
     model = UserProfile
-    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
+    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info', 'profileImage'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
     template_name = 'unhindled/edit_profile.html'
     
     def get_success_url(self):

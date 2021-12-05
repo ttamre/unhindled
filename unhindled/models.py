@@ -112,7 +112,7 @@ class UserProfile(models.Model):
 	location = models.CharField(max_length=100, default="", blank=True, null=True)
 	more_info = models.TextField(max_length=500, default="", blank=True)
 	github = models.CharField(max_length=100, default="", blank=True, null=True)
-	profileImage = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png', blank=True)
+	profileImage = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png')
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
