@@ -17,7 +17,7 @@
                 {% if user.is_authenticated %}
                     {% if user.id == profile.user.id %}
                         <!-- add back in once we figure out getting users -->
-                        <a href="{% url 'editProfile' profile.pk %}">EDIT PROFILE {{profile.user.id}}</a>
+                        <a href="{% url 'editProfile' profile.pk %}">EDIT PROFILE</a>
                     {% endif %}
                 {% endif %}    
             </span>
