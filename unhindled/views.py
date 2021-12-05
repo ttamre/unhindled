@@ -1255,9 +1255,8 @@ def view_post(request, user_id, id):
             form_comment = FormComment(request.POST or None)
             if form_comment.is_valid():
                 comment = request.POST.get('comment')
-                comm = Comment.objects.create(post=post, author=request.user, comment=comment)
-                comm.save()
-                return HttpResponseRedirect(post.get_absolute_url())
+                print(post_foreign_comments(request, comment, post))
+                return HttpResponseRedirect(request.path)
         else:
             form_comment= FormComment()
     else:

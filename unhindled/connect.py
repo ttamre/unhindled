@@ -1,3 +1,8 @@
+import json
+from logging import raiseExceptions
+from django.contrib import auth
+from .models import User
+from .serializers import UserSerializer
 import requests
 
 def test():
@@ -58,15 +63,15 @@ def get_foreign_posts_list():
             post_list.append(post)
 
        
-    #foreign posts from team 5
-    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=10000', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
+    # #foreign posts from team 5
+    # t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=10000', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
 
-    if t5_req.status_code == 500:
-        pass
-    else:
-        js_req_5 = t5_req.json()
-        for post in js_req_5:
-            post_list.append(post)
+    # if t5_req.status_code == 500:
+    #     pass
+    # else:
+    #     js_req_5 = t5_req.json()
+    #     for post in js_req_5:
+    #         post_list.append(post)
 
     #foreign posts from team 14
     t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts?size=10000', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -159,13 +164,68 @@ def foreign_add_follower(author, follower):
         else:
             return t15_req.json()
 
-#get foreign comments
-def get_foreign_comments_list(author, post):
-    # foreign comments from team 14
-    if "linkedspace-staging.herokuapp.com" in author and "linkedspace-staging.herokuapp.com" in post:
-        url = author + post + '/comments/'
-        t14_req = requests.get(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
+# #get foreign comments
+# def get_foreign_comments_list(author, post):
+#     # foreign comments from team 14
+#     if "linkedspace-staging.herokuapp.com" in author and "linkedspace-staging.herokuapp.com" in post:
+#         url = author + post + '/comments/'
+#         t14_req = requests.get(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
+#         if t14_req.status_code == 500:
+#             return ""
+#         else:
+#             return t14_req.json()
+
+def post_foreign_comments(request, comm, postJson):
+    print(request.user.id)
+    author = UserSerializer(User.objects.get(id=request.user.id)).data
+    print('comm:\n\n', comm)
+    print(postJson['id'])
+
+    #post comment on team 14
+    if "linkedspace-staging.herokuapp.com" in postJson['id']:
+        print('team 14\n\n\n')
+        payload = {'Post_pk': postJson['comments'], 
+                    'auth_pk': request.user.pk, 
+                    'contentType': 'text/plain',
+                    'text': comm
+                    }
+        t14_req = requests.post(postJson['comments'], auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"}, data=payload)
         if t14_req.status_code == 500:
             return ""
         else:
+            print(t14_req.json())
             return t14_req.json()
+
+    #post comment on team 3
+    if "social-dis.herokuapp.com" in postJson['id']:
+        print('team 3\n\n\n')
+
+        payload = { "type": "comments",
+                    "author": author,
+                    "comment": comm,
+                    "contentType": "text/plain",
+                    "published": 0,
+                    "id": postJson['id'].split('/')[-1]
+                }
+        print(payload)
+        print(postJson['id']+"/comments")
+        t3_req = requests.post(postJson['id']+"/comments", auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"}, data=payload)
+        
+        if t3_req.status_code == 500:
+            print(t3_req)
+            return ""
+        else:
+            print(t3_req.json())
+            return t3_req.json()
+
+    #post comment on team 5
+    if "cmput404-socialdist-project.herokuapp.com" in postJson['id']:
+        print('team 5\n\n\n')
+        raise Exception
+        url = author +'/followers/'+ follower
+        raise Exception
+        t5_req = requests.put(url, auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t5_req.status_code == 500:
+            return ""
+        else:
+            return t5_req.json()
