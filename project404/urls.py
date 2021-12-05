@@ -60,7 +60,6 @@ urlpatterns = [
     path('service/auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('foreign_posts', views.get_foreign_posts),
     path('foreign_authors', views.get_foreign_authors),
-    path('foreign_comments', views.get_foreign_comments),
 
     # Redocs
     # path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
