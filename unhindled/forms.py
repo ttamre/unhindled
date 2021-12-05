@@ -36,4 +36,4 @@ class CreatePostForm(forms.ModelForm):
                 human_text = author["displayName"] + " from " + author["host"]
                 choices.append((data, human_text))
 
-        self.fields['send_to'] = forms.ChoiceField(choices=choices)
+        self.fields['send_to'] = forms.ChoiceField(choices=choices,required=False)
