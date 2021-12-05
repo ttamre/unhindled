@@ -226,6 +226,7 @@ a.white-text:hover {
   padding: 16px;
   margin: 16px 0;
   border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 
 .comment-box {
@@ -234,12 +235,34 @@ a.white-text:hover {
   border: 1px solid #17252A;
   padding: 8px;
   border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 
 /* Form */
 .errorlist li {
   color: #f03a5f;
   font-size: 12px;
+}
+
+.select {
+  width: 10rem;
+  background-color: #feffff;
+  border-color: #dbdbdb;
+  color: #363636;
+  font-size: 16px;
+  cursor: pointer;
+  padding-left: 4px;
+  max-width: 100%;
+  outline: 0;
+  border:none;
+}
+
+.clearablefileinput {
+  border-color: #dbdbdb;
+  color: #363636;
+  font-size: 14px;
+  cursor: pointer;
+  max-width: 100%;
 }
 
 .textinput {
@@ -288,6 +311,7 @@ a.white-text:hover {
   padding: 8px 12px;
   border: 1px solid #17252A;
   border-radius: 6px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 
 .source-text {

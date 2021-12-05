@@ -64,7 +64,7 @@
     <form method = 'post'>
       {% csrf_token %}
       {{ comment_form|crispy }}
-        <input class="mt-5 button" value="Send">
+        <input type="submit" class="mt-5 button" value="Send">
     </form>
   </div>
 {% else %}
