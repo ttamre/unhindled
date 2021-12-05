@@ -144,7 +144,8 @@ class Inbox(models.Model):
 
 
 @receiver(post_save, sender=Post)
-def send_post_to_inbox(sender, instance, created, **kwargs):
+def send_post_to_local_inbox(sender, instance, created, **kwargs):
+	from unhindled.connect import send_post_to_inbox
 	if created:
 		if (instance.send_to is not None) and instance.visibility == "SEND":
 			if str(instance.send_to).startswith("http"):
@@ -166,7 +167,7 @@ def send_post_to_inbox(sender, instance, created, **kwargs):
 				inbox.save()
 
 @receiver(post_save, sender=Like)
-def send_like_to_inbox(sender, instance, created, **kwargs):
+def send_like_to_local_inbox(sender, instance, created, **kwargs):
 	if created:
 		if instance.post is not None:
 			if instance.post.author != instance.author:
@@ -176,7 +177,7 @@ def send_like_to_inbox(sender, instance, created, **kwargs):
 				inbox.save()
 
 @receiver(post_save, sender=Comment)
-def send_comment_to_inbox(sender, instance, created, **kwargs):
+def send_comment_to_local_inbox(sender, instance, created, **kwargs):
 	if created:
 		if instance.post is not None:
 			if instance.post.author != instance.author:

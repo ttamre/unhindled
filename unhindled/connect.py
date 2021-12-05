@@ -196,9 +196,7 @@ def get_likes_on_post(post):
         if server[0][:-4] in source:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
-            print(endpoint)
             req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
-            print(req.json())
             if req.status_code == 500:
                 return ""
             else:
@@ -209,17 +207,16 @@ def send_like_object(post, author, post_author):
     serializer = UserSerializer(author)
     author_id = post_author.strip("/").split("/author/")[-1]
     data = {}
-    data["type"] = "like"
+    data["type"] = "Like"
     data["author"] = serializer.data
     data["object"] = post
     data["@context"] = "https://www.w3.org/ns/activitystreams"
+    data["summary"] = str(author.username) + " likes your post"
     for server in servers:
         if server[0][:-4] in post:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
             req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
-            print(endpoint)
-            print(data)
             if req.status_code == 200:
                 return True
     
