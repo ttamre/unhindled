@@ -147,7 +147,7 @@ class Inbox(models.Model):
 def send_post_to_inbox(sender, instance, created, **kwargs):
 	if created:
 		if (instance.send_to is not None) and instance.visibility == "SEND":
-			link = "http://127.0.0.1:8000"
+			link = "https://unhindled.herokuapp.com/"
 			link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
 			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author.username,post=instance)
 			inbox.save()
@@ -155,7 +155,7 @@ def send_post_to_inbox(sender, instance, created, **kwargs):
 		else:
 			followers = Follower.objects.filter(author=instance.author)
 			for follower in followers:
-				link = "http://127.0.0.1:8000"
+				link = "https://unhindled.herokuapp.com/"
 				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
 				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author.username,post=instance)
 				inbox.save()
@@ -165,7 +165,7 @@ def send_like_to_inbox(sender, instance, created, **kwargs):
 	if created:
 		if instance.post is not None:
 			if instance.post.author != instance.author:
-				link = "http://127.0.0.1:8000"
+				link = "https://unhindled.herokuapp.com/"
 				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
 				inbox = Inbox(inbox_of=instance.post.author, type="like",link=link, inbox_from=instance.author,like=instance)
 				inbox.save()
@@ -175,7 +175,7 @@ def send_comment_to_inbox(sender, instance, created, **kwargs):
 	if created:
 		if instance.post is not None:
 			if instance.post.author != instance.author:
-				link = "http://127.0.0.1:8000"
+				link = "https://unhindled.herokuapp.com/"
 				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
 				inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.author,comment=instance)
 				inbox.save()
