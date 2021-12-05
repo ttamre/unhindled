@@ -297,7 +297,7 @@ def send_like_object(post, author, post_author):
         if server[0][:-4] in post:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
-            req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
             if req.status_code == 200:
                 return True
     
