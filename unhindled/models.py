@@ -4,7 +4,7 @@ from django.db.models.fields import EmailField
 from django.urls import reverse
 from datetime import datetime, date
 from django.core.exceptions import ValidationError
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
@@ -46,14 +46,14 @@ class Post(models.Model):
 		('SEND', 'Send to Author')
 	)
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, editable=False)
 	contentType = models.CharField(max_length=20, choices=CONTENT_TYPES, default=CONTENT_TYPES[1][0],null=False)
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0][0], null=False)
 	send_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='send_to', null=True, blank=True)
 	published = models.DateTimeField(auto_now_add=True)
-	source = models.CharField(max_length=50, default="https://unhindled.herokuapp.com/")
+	source = models.CharField(max_length=50, default="https://unhindled.herokuapp.com/", editable=False)
 	#will need to change
 	content = models.TextField(blank=True)
 	images = models.ImageField(null=True,blank=True, upload_to='images/')
@@ -78,7 +78,9 @@ class Post(models.Model):
 
 	def clean(self):
 		if not (self.images or self.content):
-			raise ValidationError('Invalid Value')
+			raise ValidationError('ERROR: post missing content or image')
+		if self.visibility == "SEND" and self.send_to is None:
+			raise ValidationError("ERROR: Need to specify author when Send to Author is Selected")
 
 class Comment(models.Model):
 	CONTENT_TYPES = (
@@ -99,7 +101,8 @@ class Like(models.Model):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
 	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
-	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+	foreign_author = models.URLField(blank=True,null=True)
 
 class UserProfile(models.Model):
 	user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
@@ -109,7 +112,7 @@ class UserProfile(models.Model):
 	location = models.CharField(max_length=100, default="", blank=True, null=True)
 	more_info = models.TextField(max_length=500, default="", blank=True)
 	github = models.CharField(max_length=100, default="", blank=True, null=True)
-	profileImage = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png', blank=True)
+	profileImage = models.ImageField(upload_to='upload/profile_photos/', default='upload/profile_photos/default.png')
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -120,3 +123,59 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
 	instance.profile.save()
+
+class Inbox(models.Model):
+	ITEM_TYPES = (
+		('post', 'post'),
+		('like', 'like'),
+		('follow', 'follow'),
+		('comment', 'comment')
+	)
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	inbox_of = models.ForeignKey(User, related_name="inbox_of", on_delete=models.CASCADE)
+	inbox_from = models.CharField(max_length=200)
+	type = models.CharField(max_length=7, choices=ITEM_TYPES, default=ITEM_TYPES[0][0])
+	link = models.URLField()
+	seen = models.BooleanField(default=False)
+	date = models.DateTimeField(auto_now_add=True)
+	post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+	like = models.ForeignKey(Like, on_delete=models.CASCADE, blank=True, null=True)
+	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
+
+
+@receiver(post_save, sender=Post)
+def send_post_to_inbox(sender, instance, created, **kwargs):
+	if created:
+		if (instance.send_to is not None) and instance.visibility == "SEND":
+			link = "http://127.0.0.1:8000"
+			link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
+			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author.username,post=instance)
+			inbox.save()
+		
+		else:
+			followers = Follower.objects.filter(author=instance.author)
+			for follower in followers:
+				link = "http://127.0.0.1:8000"
+				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
+				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author.username,post=instance)
+				inbox.save()
+
+@receiver(post_save, sender=Like)
+def send_like_to_inbox(sender, instance, created, **kwargs):
+	if created:
+		if instance.post is not None:
+			if instance.post.author != instance.author:
+				link = "http://127.0.0.1:8000"
+				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
+				inbox = Inbox(inbox_of=instance.post.author, type="like",link=link, inbox_from=instance.author,like=instance)
+				inbox.save()
+
+@receiver(post_save, sender=Comment)
+def send_comment_to_inbox(sender, instance, created, **kwargs):
+	if created:
+		if instance.post is not None:
+			if instance.post.author != instance.author:
+				link = "http://127.0.0.1:8000"
+				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
+				inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.author,comment=instance)
+				inbox.save()

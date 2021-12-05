@@ -11,7 +11,8 @@
               <img class="pfp" src="{{ user.profile.profileImage.url }}" width="40px" height="40px" />
               <div class="dropdown-content">
                 <a class="white-text" href="{% url 'profile' user.pk %}">Profile</a>
-                <a class="white-text" href="{% url 'friends' user.pk %}">Manage Friends</a>
+                <a class="white-text" href="{% url 'inbox' user.pk %}">Inbox</a>
+                <a class="white-text" href="{% url 'friends' user.pk %}">Friends</a>
                 <a class="white-text" href="{% url 'logout' %}">Log Out</a>
               </div>
             </div>

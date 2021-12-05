@@ -13,9 +13,50 @@
     <p class="non-white-title">Edit Post</p>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form|crispy }}
-        <input type="submit" value="Confirm" />
-        <input type="submit" name="Cancel" value="Cancel" />
+        <!-- {{ form | crispy }} -->
+        <div class="mt-3">
+            <label class="mr-2" for="{{ form.author.id_for_label }}">Title: </label>
+        </div>
+        {{ form.title }}
+        {{ form.title.errors }}
+        <div class="mt-3">
+            <label class="mt-1 mr-2" for="{{ form.contentType.id_for_label }}">Content Type: </label>
+        </div>
+        {{ form.contentType }}
+        {{ form.contentType.errors }}
+        <div class="mt-3">
+            <label class="mt-1 mr-2" for="{{ form.visibility.id_for_label }}">Visibility: </label>
+        </div>
+        {{ form.visibility }}
+        {{ form.visibility.errors }}
+        <div class="mt-3">
+            <label class="mt-1 mr-2" for="{{ form.send_to.id_for_label }}">Send To: </label>
+        </div>
+        {{ form.send_to }}
+        {{ form.send_to.errors }}
+        <div class="mt-3">
+            <label for="{{ form.description.id_for_label }}">Description: </label>
+        </div>
+        {{ form.description }}
+        {{ form.description.errors }}
+        <div class="mt-3">
+            <label class="mt-1 mr-2" for="{{ form.content.id_for_label }}">Content: </label>
+        </div>
+        {{ form.content }}
+        {{ form.content.errors }}
+        <div class="mt-3">
+            <label class="mr-1" for="{{ form.image.id_for_label }}">Image:<br></label>
+            {{ form.images }}
+            {{ form.errors }}
+        </div>
+        <div class="mt-3">
+            <label class="mr-1" for="{{ form.unlisted.id_for_label }}">Unlisted: </label>
+            {{ form.unlisted }}
+        </div>
+        <div class="flex my-5">
+            <input type="submit" value="Update" class="button mr-4">
+            <input type="cancel" value="Cancel" class="cancel-button">
+        </div>
     </form>
 </main>
 {% endblock %}

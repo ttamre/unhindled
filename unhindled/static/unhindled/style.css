@@ -35,7 +35,7 @@ body {
   margin: 0;
 }
 
-button {
+.button {
   /* source: https://www.w3schools.com/css/css3_buttons.asp */
   border-radius: 2rem;
   background-color: #3AAFA9;
@@ -46,11 +46,58 @@ button {
   text-decoration: none;
   display: inline-block;
   font-size: 14px;
+  width: 6.5rem;
+  height: 41px;
 }
 
-button:hover {
+.button:hover {
   cursor: pointer;
   background-color: #2B7A78;
+}
+
+.cancel-button {
+  /* source: https://www.w3schools.com/css/css3_buttons.asp */
+  border-radius: 2rem;
+  background-color: #f03a5f;
+  border: none;
+  color: #FEFFFF;
+  padding: 12px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  width: 6.5rem;
+  height: 41px;
+}
+
+.cancel-button:hover {
+  cursor: pointer;
+  background-color: #99253d;
+  border-color: transparent;
+  color: #fff;
+}
+
+.follow-button {
+  border-radius: .75rem;
+  background-color: #3AAFA9;
+  border: none;
+  color: #FEFFFF;
+  padding: 8px 12px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  width: 8rem;
+}
+
+.follow-button:hover {
+  cursor: pointer;
+  background-color: #2B7A78;
+}
+
+
+.centered {
+  margin: 0 auto;
 }
 
 /* Header */
@@ -72,7 +119,7 @@ a.white-title:hover {
 
 .non-white-title {
   margin: 1rem 0;
-  font-size: 2rem;
+  font-size: 1.75rem;
   color: #17252A;
   font-weight: 900;
 }
@@ -123,9 +170,35 @@ a.white-text:hover {
 
 .dropdown:hover .dropdown-content {display: block;}
 
-/* Login Page */
+/* Login/Register Page */
 .login-page {
   margin: auto;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 300px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 8px;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 
 /* Home Page */
@@ -153,6 +226,7 @@ a.white-text:hover {
   padding: 16px;
   margin: 16px 0;
   border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 
 .comment-box {
@@ -161,6 +235,69 @@ a.white-text:hover {
   border: 1px solid #17252A;
   padding: 8px;
   border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+
+/* Form */
+.errorlist li {
+  color: #f03a5f;
+  font-size: 12px;
+}
+
+.select {
+  width: 10rem;
+  background-color: #feffff;
+  border-color: #dbdbdb;
+  color: #363636;
+  font-size: 16px;
+  cursor: pointer;
+  padding-left: 4px;
+  max-width: 100%;
+  outline: 0;
+  border:none;
+}
+
+.clearablefileinput {
+  border-color: #dbdbdb;
+  color: #363636;
+  font-size: 14px;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.textinput {
+  width: 20rem;
+  height: 2rem;
+  font-size: 16px;
+  border:none;
+  border-bottom: 1px solid #1890ff;
+  padding: 5px 10px;
+  outline: none;
+}
+
+.disabled-input {
+  width: 20rem;
+  height: 2rem;
+  font-size: 16px;
+  border:none;
+  padding: 5px 10px;
+  outline: none;
+  color: #4a4a4a;
+}
+
+.label-field {
+  width: 7rem;
+  margin: auto 0;
+}
+
+.dateinput {
+  width: 20rem;
+  height: 2rem;
+  font-size: 16px;
+  border:none;
+  border-bottom: 1px solid #1890ff;
+  padding: 5px 10px;
+  outline: none;
 }
 
 /* 'Components' Page */
@@ -174,6 +311,7 @@ a.white-text:hover {
   padding: 8px 12px;
   border: 1px solid #17252A;
   border-radius: 6px;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 }
 
 .source-text {
@@ -222,4 +360,51 @@ th {
     margin: 0 auto;
     width: 60%;
   }
+}
+
+/* Inbox Page */
+
+.inboxHeading {
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid;
+}
+
+.inboxContainer {
+  margin-top: 2em;
+}
+
+.inbox {
+  /* Add shadows to create the "card" effect */
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  background-color: white;
+  margin-left: 2em;
+  margin-right: 2em;
+  margin-bottom: 1em;
+  border-radius: 10px;
+}
+
+/* On mouse-over, add a deeper shadow */
+.inbox:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+
+/* Add some padding inside the card container */
+.inboxInfo {
+  padding: 2em 0;
+  padding-left: 1em;
+  font-size: 1.1em;
+}
+
+.inboxImage {
+  height: 4.5em;
+  margin: 0.5em;
+  margin-right: 1em;
+  float: left;
+}
+
+.inboxClear {
+  margin: 1.75rem 0 0 auto;
 }

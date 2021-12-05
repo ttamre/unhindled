@@ -20,11 +20,13 @@ CREATE DATABASE unhindled;
 
 
 ## Team Members
-* Ismaeel Mohiuddin: ismaeel
-* Tem Tamre: ttamre
-* Thomas Pham: tpham3
-* Joshua Smith: jds1
-* Zoey Pu: jpu1
+NAME | CCID
+---- | ---- 
+Ismaeel Mohiuddin|ismaeel
+Tem Tamre|ttamre
+Thomas Pham|tpham3
+Joshua Smith|jds1
+Zoey Pu|jpu1
 
 
 ## Reference
@@ -43,6 +45,7 @@ CREATE DATABASE unhindled;
 * Checking array elements safely https://stackoverflow.com/questions/28263773/safe-way-to-check-if-array-element-exists
 * Safe variable passing from Django to DOM https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#json-script
 * Python dict comprehension: https://discuss.python.org/t/copy-a-dictionary-except-some-keys/2559/3
+* Basic tooltip: https://www.w3schools.com/css/css_tooltip.asp
 
 ## Project Part 1 Stories Complete (20/43) 
 PROJ-1 UI - UI is complete for all implemented stories (custom)\
