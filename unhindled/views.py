@@ -1206,7 +1206,7 @@ def unfollow(request):
 class CreatePostView(generic.CreateView):
     model = Post
     template_name = "unhindled/create_post.html"
-    fields = "__all__"
+    form_class = CreatePostForm
     
     def form_valid(self, form):
         form.instance.author = self.request.user
