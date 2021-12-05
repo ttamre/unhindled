@@ -51,7 +51,7 @@ class Post(models.Model):
 	title = models.CharField(max_length=200)
 	description = models.CharField(max_length=500)
 	visibility = models.CharField(max_length=14, choices=VISIBILITY, default=VISIBILITY[0][0], null=False)
-	send_to = models.ForeignKey(User, on_delete=models.CASCADE, related_name='send_to', null=True, blank=True)
+	send_to = models.CharField(max_length=300, null=True, blank=True, default=None)
 	published = models.DateTimeField(auto_now_add=True)
 	source = models.CharField(max_length=50, default="https://unhindled.herokuapp.com/", editable=False)
 	#will need to change
@@ -144,38 +144,44 @@ class Inbox(models.Model):
 
 
 @receiver(post_save, sender=Post)
-def send_post_to_inbox(sender, instance, created, **kwargs):
+def send_post_to_local_inbox(sender, instance, created, **kwargs):
+	from unhindled.connect import send_post_to_inbox
 	if created:
 		if (instance.send_to is not None) and instance.visibility == "SEND":
-			link = "http://127.0.0.1:8000"
-			link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
-			inbox = Inbox(inbox_of=instance.send_to, type="post",link=link, inbox_from=instance.author.username,post=instance)
-			inbox.save()
+			if str(instance.send_to).startswith("http"):
+				send_post_to_inbox(instance.send_to, instance)
+			else:
+				link = "https://unhindled.herokuapp.com/"
+				link += "author/" + str(instance.author.id) + "/posts/" + str(instance.id)
+				id = uuid.UUID(instance.send_to)
+				receiver = User.objects.get(id=id)
+				inbox = Inbox(inbox_of=receiver, type="post",link=link, inbox_from=instance.author.username,post=instance)
+				inbox.save()
 		
 		else:
 			followers = Follower.objects.filter(author=instance.author)
 			for follower in followers:
-				link = "http://127.0.0.1:8000"
-				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
+				link = "https://unhindled.herokuapp.com/"
+				link += "author/" + str(instance.author.username) + "/posts/" + str(instance.id)
 				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author.username,post=instance)
 				inbox.save()
 
 @receiver(post_save, sender=Like)
-def send_like_to_inbox(sender, instance, created, **kwargs):
+def send_like_to_local_inbox(sender, instance, created, **kwargs):
 	if created:
 		if instance.post is not None:
 			if instance.post.author != instance.author:
-				link = "http://127.0.0.1:8000"
-				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
+				link = "https://unhindled.herokuapp.com/"
+				link += "author/" + str(instance.post.author.username) + "/posts/" + str(instance.post.id)
 				inbox = Inbox(inbox_of=instance.post.author, type="like",link=link, inbox_from=instance.author,like=instance)
 				inbox.save()
 
 @receiver(post_save, sender=Comment)
-def send_comment_to_inbox(sender, instance, created, **kwargs):
+def send_comment_to_local_inbox(sender, instance, created, **kwargs):
 	if created:
 		if instance.post is not None:
 			if instance.post.author != instance.author:
-				link = "http://127.0.0.1:8000"
-				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
+				link = "https://unhindled.herokuapp.com/"
+				link += "author/" + str(instance.post.author.username) + "/posts/" + str(instance.post.id)
 				inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.author,comment=instance)
 				inbox.save()
