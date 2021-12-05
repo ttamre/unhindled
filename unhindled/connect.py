@@ -198,21 +198,23 @@ def post_foreign_comments(request, comm, postJson):
     #print(request.user.id)
     author = User.objects.get(id=request.user.id)
     author = UserSerializer(author).data
-    # author['id'] = "https://unhindled.herokuapp.com/author/6df35421-3d26-40ae-9f99-aa704f9ed538"
-    # author['url'] = "https://unhindled.herokuapp.com/author/6df35421-3d26-40ae-9f99-aa704f9ed538"
+    # author['id'] = "https://unhindled.herokuapp.com/author/35fc41c5-7f34-4d5b-aae4-5310b23d2b02"
+    # author['url'] = "https://unhindled.herokuapp.com/author/35fc41c5-7f34-4d5b-aae4-5310b23d2b02"
     #print('comm:\n\n', comm)
     #print(postJson['id'])
     print('team 14\n\n\n')
     #post comment on team 14
     if "linkedspace-staging.herokuapp.com" in postJson['id']:
         
-        payload = {'Post_pk': postJson['comments'], 
-                    'auth_pk': request.user.pk, 
+        payload = {'Post_pk': postJson['comments'].replace('/comments', '').replace("/author/", "/api/author/"), 
+                    'auth_pk': str(request.user.pk), 
                     'contentType': 'text/plain',
                     'text': comm
                     }
         print(payload)
-        t14_req = requests.post(postJson['comments'], auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"}, data=payload)
+        api_url = postJson["comments"].replace("/author/", "/api/author/")
+        t14_req = requests.post(api_url, auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"}, json=payload)
+        print(api_url)
         if t14_req.status_code == 200:
             pass    
         else: 
@@ -223,7 +225,7 @@ def post_foreign_comments(request, comm, postJson):
         print('team 3\n\n\n')
        
         payload = { "type": "comments",
-                    "author": author,
+                    "author": json.dumps(author),
                     "comment": comm,
                     "contentType": "text/plain",
                     "published": str(datetime.now()),
@@ -231,7 +233,7 @@ def post_foreign_comments(request, comm, postJson):
                 }
         print(payload)
         print(postJson['id']+"/comments")
-        t3_req = requests.post(postJson['id']+"/comments", auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"}, data=payload)
+        t3_req = requests.post(postJson['id']+"/comments", auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"}, json=payload)
         
         if t3_req.status_code == 200:
             pass
