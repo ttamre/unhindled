@@ -49,6 +49,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         data['type'] = 'post'
         data['source'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['origin'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
+        data['comments'] = data["id"] + "/comments"
         return data
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
