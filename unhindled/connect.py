@@ -19,7 +19,6 @@ def get_json_post(id):
             split = ''
         if split == id:
             found_post = post
-            found_post['uuid'] = split
 
     return found_post
     
