@@ -8,13 +8,12 @@
 {% #header user=user %}
 {% /header %}
 <main>
-    <p class="non-white-title">Create Post</h1>
+    <p class="non-white-title">Delete Post</h1>
 
     <form method="POST">
         {% csrf_token %}
         <strong>Are you sure you want to delete this post?</strong>
         <input type="submit" value="Confirm" />
-        <input type="cancel" name="Cancel" value="Cancel" />
     </form>
 </main>
 {% endblock %}
