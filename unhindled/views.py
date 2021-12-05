@@ -658,8 +658,8 @@ class CommentViewSet(viewsets.ViewSet):
         data["type"] = "comments"
         data["page"] = page
         data["size"] = math.ceil(len(serializer.data) / size)
-        data["post"] = host + str(post.author.id) + "/posts/" + str(post.id)
-        data["id"] = host + str(post.author.id) + "/posts/" + str(post.id) + "/comments"
+        data["post"] = host + "author/" + str(post.author.id) + "/posts/" + str(post.id)
+        data["id"] = host + "author/" + str(post.author.id) + "/posts/" + str(post.id) + "/comments"
         data["comments"] = commentData
         return Response(data)
 
