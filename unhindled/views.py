@@ -1378,12 +1378,12 @@ class ProfileView(LoginRequiredMixin, View):
             user = profile['displayName']
             user_post = []
         else:
-            profile = UserProfile.objects.get(user=request.user)
-            user = profile.user
+            user = User.objects.get(id=id)
+            profile = UserProfile.objects.get(user=user)
             user_post = Post.objects.filter(author=user).order_by('-published')
         
         context = {
-            'user': user,
+            'author': user,
             'profile': profile,
             'posts': user_post,
         }
@@ -1399,7 +1399,7 @@ class EditProfileView(LoginRequiredMixin, generic.UpdateView):
     
     def get_success_url(self):
         pk = self.kwargs['pk']
-        return reverse_lazy('profile', kwargs={'pk': pk})
+        return reverse_lazy('profile', kwargs={'id': pk})
     
     def test_func(self):
         profile = self.get_object()
