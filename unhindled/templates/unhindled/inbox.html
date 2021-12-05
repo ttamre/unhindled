@@ -7,48 +7,51 @@
 
 <main>
 <div class=inboxHeading>
-    Inbox:
+    <p class="non-white-title mb-1">Inbox</p>
+    {% if object_list %}
+        <div class=inboxClear>
+            <a href="{% url 'clearInbox' user.id %}" onclick="return confirm('Are you sure you want to clear your inbox?');">Clear Inbox</a>
+        </div>
+    {% endif %}
 </div>
-
 {% if user.is_authenticated %}
-
-    <div class=inboxClear>
-        <a href="{% url 'clearInbox' user.id %}" onclick="return confirm('Are you sure you want to clear your inbox?');">Clear Inbox</a>
-    </div>
-    <div class=inboxContainer></div>
-    {% for inbox in object_list %}
-        {% if user.id == inbox.inbox_of.id %}
-            {% if inbox.type == "post" %}
-            <div class="inbox" onclick="window.location='{{inbox.link}}';">
-                <img class="inboxImage" src="{{ MEDIA_URL }}/images/messageInbox.png"></img>
-                <div class="inboxInfo">
-                    <p>{{inbox.inbox_from}} uploaded a new post</p>
+    {% if object_list %}
+        {% for inbox in object_list %}
+            {% if user.id == inbox.inbox_of.id %}
+                {% if inbox.type == "post" %}
+                <div class="inbox" onclick="window.location='{{inbox.link}}';">
+                    <img class="inboxImage" src="{{ MEDIA_URL }}/images/messageInbox.png"></img>
+                    <div class="inboxInfo">
+                        <p>{{inbox.inbox_from}} uploaded a new post</p>
+                    </div>
                 </div>
-            </div>
-            {% elif inbox.type == "like" %}
-            <div class="inbox" onclick="window.location='{{inbox.link}}';">
-                <img class="inboxImage" src="{{ MEDIA_URL }}/images/likeInbox.png"></img>
-                <div class="inboxInfo">
-                    <p>{{inbox.inbox_from}} liked your post</p>
+                {% elif inbox.type == "like" %}
+                <div class="inbox" onclick="window.location='{{inbox.link}}';">
+                    <img class="inboxImage" src="{{ MEDIA_URL }}/images/likeInbox.png"></img>
+                    <div class="inboxInfo">
+                        <p>{{inbox.inbox_from}} liked your post</p>
+                    </div>
                 </div>
-            </div>
-            {% elif inbox.type == "follow" %}
-            <div class="inbox" onclick="window.location='{{inbox.link}}';">
-                <img class="inboxImage" src="{{ MEDIA_URL }}/images/followInbox.png"></img>
-                <div class="inboxInfo">
-                    <p>{{inbox.inbox_from}} sent you a follow request</p>
+                {% elif inbox.type == "follow" %}
+                <div class="inbox" onclick="window.location='{{inbox.link}}';">
+                    <img class="inboxImage" src="{{ MEDIA_URL }}/images/followInbox.png"></img>
+                    <div class="inboxInfo">
+                        <p>{{inbox.inbox_from}} sent you a follow request</p>
+                    </div>
                 </div>
-            </div>
-            {% elif inbox.type == "comment" %}
-            <div class="inbox" onclick="window.location='{{inbox.link}}';">
-                <img class="inboxImage" src="{{ MEDIA_URL }}/images/commentInbox.png"></img>
-                <div class="inboxInfo">
-                    <p>{{inbox.inbox_from}} commented on your post</p>
+                {% elif inbox.type == "comment" %}
+                <div class="inbox" onclick="window.location='{{inbox.link}}';">
+                    <img class="inboxImage" src="{{ MEDIA_URL }}/images/commentInbox.png"></img>
+                    <div class="inboxInfo">
+                        <p>{{inbox.inbox_from}} commented on your post</p>
+                    </div>
                 </div>
-            </div>
+                {% endif %}
             {% endif %}
-        {% endif %}
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <p class="is-italic ml-3">Your inbox is empty.</p>
+    {% endif %}
     </div>
 {% endif %}
 </main>

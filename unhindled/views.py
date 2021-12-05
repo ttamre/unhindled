@@ -8,6 +8,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
@@ -267,6 +268,7 @@ class PostViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Unauthorized"}}
             ),
         })
+
     def createPost(self, request, id,post_id=None):
         """
         Create a post
@@ -1164,7 +1166,10 @@ class InboxViewSet(viewsets.ViewSet):
         elif postData["type"].lower() == "comment":
             pass
 
-class StreamView(generic.ListView):
+class StreamView(LoginRequiredMixin, generic.ListView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
+
     model = Post
     template_name = "unhindled/mystream.html"
     ordering = ['-published']
@@ -1183,7 +1188,9 @@ class AccountView(generic.CreateView):
     fields = "__all__"
 
 
-class ManageFriendView(generic.ListView):
+class ManageFriendView(LoginRequiredMixin, generic.ListView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = Follower
     template_name = "unhindled/friends.html"
     fields = "__all__"
@@ -1226,7 +1233,9 @@ def unfollow(request):
     return HttpResponseRedirect(next)
 
 
-class CreatePostView(generic.CreateView):
+class CreatePostView(LoginRequiredMixin, generic.CreateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = Post
     template_name = "unhindled/create_post.html"
     form_class = CreatePostForm
@@ -1240,7 +1249,10 @@ class CreatePostView(generic.CreateView):
 #     return HttpResponseRedirect(reverse('index'))
 
 
-class SharePost(generic.View):
+class SharePost(LoginRequiredMixin, generic.View):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
+
     def get(self, request, user, id):
         post_object = get_object_or_404(Post, pk=id)
         current_user = request.user
@@ -1346,7 +1358,9 @@ def view_post(request, user_id, id):
     return render(request, 'unhindled/view_post.html', context)
 
 
-class UpdatePostView(generic.UpdateView):
+class UpdatePostView(LoginRequiredMixin, generic.UpdateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = Post
     template_name = "unhindled/edit_post.html"
     fields = "__all__"
@@ -1358,7 +1372,9 @@ class UpdatePostView(generic.UpdateView):
             return super(UpdatePostView, self).post(request, *args, **kwargs)
 
 
-class DeletePostView(generic.DeleteView):
+class DeletePostView(LoginRequiredMixin, generic.DeleteView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = Post
     template_name = "unhindled/delete_post.html"
     success_url = reverse_lazy('index')
@@ -1370,7 +1386,9 @@ class DeletePostView(generic.DeleteView):
             return super(DeletePostView, self).post(request, *args, **kwargs)
 
 
-class ProfileView(View):
+class ProfileView(LoginRequiredMixin, View):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
     def get(self, request, id, *args, **kwargs):
 
         try:
@@ -1395,9 +1413,11 @@ class ProfileView(View):
         return render(request, 'unhindled/profile.html', context)
 
 
-class EditProfileView(generic.UpdateView):
+class EditProfileView(LoginRequiredMixin, generic.UpdateView):
+    login_url = 'accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = UserProfile
-    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
+    fields = ['displayName', 'date_of_birth',  'location', 'github', 'more_info', 'profileImage'] #'profileImage' removing profileImage for now b/c clearing image breaks the site
     template_name = 'unhindled/edit_profile.html'
     
     def get_success_url(self):

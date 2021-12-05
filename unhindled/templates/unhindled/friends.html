@@ -11,12 +11,12 @@
 <main>
 <p class="non-white-title">Manage Friends</p>
 
-<form action="/follow" method="POST">
+<form class="mb-5" action="/follow" method="POST">
 	{% csrf_token %}
-	<label for="author">Friends Display Name: </label>
-	<input id="author" type="text" name="author" value="">
+	<label for="author">Friend's Display Name: </label>
+	<input id="author" type="text" name="author" class="textinput">
 	<input type="hidden" name="next" value="{{ request.path }}">
-    	<input type="submit" value="OK">
+    	<input type="submit" class="follow-button" value="Send Follow">
 </form>
 {% if object_list %}
 	{% for follow in object_list %}
@@ -35,7 +35,7 @@
 	</ul>
 	{% endfor %}
 {% else %}
-	<p>You are not following anyone.</p>
+	<p class="is-italic">You are not following anyone.</p>
 {% endif %}
 </main>
 {% endblock %}
