@@ -11,55 +11,48 @@
 <div class="container my-5">
     <div >
         <div >
-            <img class="my-3 pfp mr-3" src="{% image_exists profile.profileImage.url %}" width="100" height="100" >
-            <br>
-            <span>
-                {% if user.id == profile.user.id %}
-                    <!-- add back in once we figure out getting users -->
-                    <!-- a href="{% url 'editProfile' profile.pk %}">EDIT PROFILE</a -->
-                {% endif %}
-            </span>
+            <div class="is-flex">
+                <img class="my-3 pfp mr-3" src="{% image_exists profile.profileImage.url %}" width="100" height="100" >
+                <br>
+                <span class="ml-auto">
+                    {% if user.is_authenticated %}
+                        {% if user.id == profile.user.id %}
+                            <a href="{% url 'editProfile' profile.pk %}">
+                                <img class="my-3 mr-3" src="{{ MEDIA_URL }}/images/edit.png" width="20" height="20">
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </span>
+            </div>
 
             <div class="flex mt-3">
-                <p class="mr-2 has-text-weight-bold">Username: </p>
-                {% if profile.displayName %}
-                    <p> {{ profile.displayName }}</p>
-                {% else %}
-                    <p>{{ user.displayName }}</p>
-                {% endif %}
+                <p class="label-field has-text-weight-bold">Username: </p>
+                <input class="disabled-input" disabled value="{% if profile.displayName %} {{ profile.displayName }} {% endif %}">
             </div>
             <!-- TODO: password change? -->
 
             <div class="flex mt-3">
-                <p class="mr-2 has-text-weight-bold">Birthday:</p>
-                {% if profile.date_of_birth %}
-                <p>{{ profile.date_of_birth }}</p>
-                {% endif %}
+                <p class="label-field has-text-weight-bold">Date of Birth:</p>
+                <input class="disabled-input" disabled value="{% if profile.date_of_birth %} {{ profile.date_of_birth }} {% endif %}">
             </div>
 
             <div class="flex mt-3">
-                <p class="mr-2 has-text-weight-bold">Location:</p>
-                {% if profile.location %}
-                <p>{{ profile.location }}</p>
-                {% endif %}
+                <p class="label-field has-text-weight-bold">Location:</p>
+                <input class="disabled-input" disabled value="{% if profile.location %} {{ profile.location }} {% endif %}">
             </div>
 
             <div class="flex mt-3">
-                <p class="mr-2 has-text-weight-bold">Github:</p>
-                {% if profile.github %}
-                <p>{{ profile.github }}</p>
-                {% endif %}
+                <p class="label-field has-text-weight-bold">Github:</p>
+                <input class="disabled-input" disabled value="{% if profile.github %} {{ profile.github }} {% endif %}">
             </div>
 
             <div class="flex mt-3">
-                <p class="mr-2 has-text-weight-bold">More Info:</p>
-                {% if profile.more_info %}
-                <p>{{ profile.more_info }}</p>
-                {% endif %}
+                <p class="label-field has-text-weight-bold">More Info:</p>
+                <input class="disabled-input" disabled value="{% if profile.more_info %} {{ profile.more_info }} {% endif %}">
             </div>
 
         </div>
-        <p class="non-white-title is-size-6">Posts: </p>
+        <p class="non-white-title is-size-5">Posts </p>
         {% if posts %}
             {% for post in posts %}
             <div class="comment-box mt-3">
