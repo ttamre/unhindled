@@ -14,10 +14,12 @@
             <img class="my-3 pfp mr-3" src="{% image_exists profile.profileImage.url %}" width="100" height="100" >
             <br>
             <span>
-                {% if user.id == profile.user.id %}
-                    <!-- add back in once we figure out getting users -->
-                    <!-- a href="{% url 'editProfile' profile.pk %}">EDIT PROFILE</a -->
-                {% endif %}
+                {% if user.is_authenticated %}
+                    {% if user.id == profile.user.id %}
+                        <!-- add back in once we figure out getting users -->
+                        <a href="{% url 'editProfile' profile.pk %}">EDIT PROFILE {{profile.user.id}}</a>
+                    {% endif %}
+                {% endif %}    
             </span>
 
             <div class="flex mt-3">
@@ -25,7 +27,7 @@
                 {% if profile.displayName %}
                     <p> {{ profile.displayName }}</p>
                 {% else %}
-                    <p>{{ user.displayName }}</p>
+                    <p>{{ author.displayName }}</p>
                 {% endif %}
             </div>
             <!-- TODO: password change? -->
