@@ -5,7 +5,6 @@
 {% block content %}
 {% load friend_check %}
 {% load url_check %}
-{% load date_helper %}
 
 {% #header user=user %}
 {% /header %}
@@ -13,7 +12,7 @@
 <main>
 <div class="mb-5">
     {% if user.is_authenticated %}
-        <p class="non-white-title">Home</p>
+        <!-- <p class="non-white-title">Home</p> -->
         {% if object_list %}
             {% for post in object_list %}
                 {% with post.author.id|addstr:" "|addstr:user.id as ids %}
@@ -46,7 +45,7 @@
             <p>No Posts to Show.</p>
         {% endif %}
     {% else %}
-        <p class="non-white-title">Home</p>
+        <!-- <p class="non-white-title">Home</p> -->
         {% if object_list %}
             {% for post in object_list %}
                 {% if post.visibility == "PUBLIC" %}

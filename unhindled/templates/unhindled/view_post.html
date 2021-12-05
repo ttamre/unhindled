@@ -8,6 +8,7 @@
 
 {% load markdown_extras %}
 {% load url_check %}
+{% load len_check %}
 {% load comment_like %}
 {% load post_like %}
 
@@ -29,10 +30,11 @@
   {% else %}
     <p>{{post.content}}</p>
   {% endif %}
+  {% if post.images %}
+    <img src="{{post.images.url}}">
+  {% endif %}
 </div>
-{% if post.images %}
-<img src="{{post.images.url}}">
-{% endif %}
+
 
 <div class="is-flex">
   <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post %} {% singular_like post %}</p>
@@ -57,17 +59,18 @@
 {% endif %}
 </div>
 
-<div class="mt-2">
-  <form method = 'post'>
-    {% csrf_token %}
-    {{ comment_form|crispy }}
-    {% if request.user.is_authenticated %}
-      <button class="mt-5">Send</button>
-      {% else %}
-      <button type="button" disabled>Send</button>
-    {% endif %}
-  </form>
-</div>
+{% if request.user.is_authenticated %}
+  <div class="mt-2">
+    <form method = 'post'>
+      {% csrf_token %}
+      {{ comment_form|crispy }}
+        <input type="submit" class="mt-5 button" value="Send">
+    </form>
+  </div>
+{% else %}
+  <p class="is-italic has-text-centered">Log In to Comment</p>
+{% endif %}
+
 
 <div class="mt-5 mb-5">
   <p class="mt-3">{{ comment_size}} Comment{{ comment_size|pluralize}}</p>

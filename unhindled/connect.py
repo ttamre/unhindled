@@ -53,6 +53,8 @@ def get_json_authors(id):
     for authors in get_foreign_authors_list():
         try:
             split = authors['id'].split('/')[-1]
+            if split == '':
+                split = authors['id'].split('/')[-2]
         except:
             split = ''
         if split == id:

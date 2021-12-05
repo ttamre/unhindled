@@ -8,11 +8,9 @@
 {% #header user=user %}
 {% /header %}
 
+<main>
 <div class="container">
     <div >
-        <div >
-            <a href="{% url 'profile' object.pk %}" >Back to Profile</a>
-        </div>
     </div>
     <div >
         <div>
@@ -23,12 +21,44 @@
         <div>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                {{ form | crispy }}
-                <div >
-                    <button class="mt-5 mb-5">Update</button>
+                <!-- {{ form | crispy }} -->
+                <div class="mt-3">
+                    <label class="mr-2" for="{{ form.displayName.id_for_label }}">Display Name: </label>
+                </div>
+                {{ form.displayName }}
+                {{ form.displayName.errors }}
+                <div class="mt-3">
+                    <label class="mr-2" for="{{ form.date_of_birth.id_for_label }}">Date of Birth (MM/DD/YYYY): </label>
+                </div>
+                {{ form.date_of_birth }}
+                {{ form.date_of_birth.errors }}
+                <div class="mt-3">
+                    <label class="mr-2" for="{{ form.location.id_for_label }}">Location: </label>
+                </div>
+                {{ form.location }}
+                {{ form.location.errors }}
+                <div class="mt-3">
+                    <label class="mr-2" for="{{ form.github.id_for_label }}">Github URL: </label>
+                </div>
+                {{ form.github }}
+                {{ form.github.errors }}
+                <div class="mt-3">
+                    <label class="mr-2" for="{{ form.more_info.id_for_label }}">More Information: </label>
+                </div>
+                {{ form.more_info }}
+                {{ form.more_info.errors }}
+                <div class="mt-3">
+                    <label class="mr-2" for="{{ form.more_info.id_for_label }}">Profile Picture: </label>
+                </div>
+                {{ form.profileImage }}
+                {{ form.profileImage.errors }}
+                <div class="my-5">
+                    <input type="submit" value="Update" class="button mr-4">
+                    <input type="cancel" value="Cancel" class="cancel-button">
                 </div>
             </form>
         </div>
     </div>
 </div>
+</main>
 {% endblock content %}
