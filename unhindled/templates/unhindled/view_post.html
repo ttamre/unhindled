@@ -40,15 +40,15 @@
         
         <!-- LOGGED IN: Show like button -->
         {% if user.is_authenticated %}
-            <!-- Team 3 like/unlike endpoints -->
-            {% if post.origin == "https://social-dis.herokuapp.com/"}
-                span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/post/{% valid_url_profile post.id %}/like">{% post_text post.id user %}</a></span>
-            {% else %}
+            {% if post.author.host == "https://social-dis.herokuapp.com" %}
+                <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/post/{% valid_url_profile post.id %}/like">{% post_text post.id user %}</a></span>
+            { % else %}
                 {% if post.id|post_liked:user %}
                     <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post.id user %}</a></span>
                 {% else %}
                     <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post.id user %}</a></span>
                 {% endif %}
+            {% endif %}
         {% endif %}
 
         <!-- SHARED POST: Show view original button -->
