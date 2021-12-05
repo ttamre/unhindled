@@ -8,6 +8,7 @@
 
 {% load markdown_extras %}
 {% load url_check %}
+{% load len_check %}
 {% load comment_like %}
 {% load post_like %}
 
@@ -29,10 +30,11 @@
   {% else %}
     <p>{{post.content}}</p>
   {% endif %}
+  {% if post.images %}
+    <img src="{{post.images.url}}">
+  {% endif %}
 </div>
-{% if post.images %}
-<img src="{{post.images.url}}">
-{% endif %}
+
 
 <div class="is-flex">
   <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post %} {% singular_like post %}</p>

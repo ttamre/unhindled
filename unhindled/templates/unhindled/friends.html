@@ -11,7 +11,7 @@
 <main>
 <p class="non-white-title">Manage Friends</p>
 
-<form action="/follow" method="POST">
+<form class="mb-5" action="/follow" method="POST">
 	{% csrf_token %}
 	<label for="author">Friends Display Name: </label>
 	<input id="author" type="text" name="author" value="">
