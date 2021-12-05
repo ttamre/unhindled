@@ -1133,9 +1133,32 @@ class InboxViewSet(viewsets.ViewSet):
             link = postData["id"].replace(postData["source"], self.host)
             inbox = Inbox(inbox_of=user,inbox_from=postData["author"]["displayName"], link=link, type="post")
             inbox.save()
+            return Response({"status": "Post received in inbox"}, status.HTTP_201_CREATED)
 
         elif postData["type"].lower() == "like":
-            pass
+            foreign_author = postData["author"]["id"]
+            obj = postData["object"]
+            if "comment" in obj:
+                comment_id = obj.strip("/").split("/")[-1]
+                comment = get_object_or_404(Comment, id=comment_id)
+                likes = Like.objects.filter(comment=comment, foreign_author=foreign_author)
+                if len(likes) < 1:
+                    newLike = Like(comment=comment,foreign_author=foreign_author)
+                    newLike.save()
+                    return Response({"status": "Comment like received in inbox"}, status.HTTP_201_CREATED)
+                else:
+                    return Response({"status": "Comment already liked by user"}, status.HTTP_208_ALREADY_REPORTED)
+            else:
+                post_id = obj.strip("/").split("/")[-1]
+                post = get_object_or_404(Post, id=post_id)
+                likes = Like.objects.filter(post=post, foreign_author=foreign_author)
+                if len(likes) < 1:
+                    newLike = Like(post=post,foreign_author=foreign_author)
+                    newLike.save()
+                    return Response({"status": "Post like received in inbox"}, status.HTTP_201_CREATED)
+                else:
+                    return Response({"status": "Post already liked by user"}, status.HTTP_208_ALREADY_REPORTED)
+
 
         elif postData["type"].lower() == "follow":
             pass
@@ -1215,7 +1238,7 @@ class CreatePostView(LoginRequiredMixin, generic.CreateView):
     redirect_field_name = 'redirect_to'
     model = Post
     template_name = "unhindled/create_post.html"
-    fields = "__all__"
+    form_class = CreatePostForm
     
     def form_valid(self, form):
         form.instance.author = self.request.user

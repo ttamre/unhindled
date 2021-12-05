@@ -67,12 +67,7 @@ def post_text(post, author):
 
 @register.simple_tag
 def like_count_post(post):
-    # if 'https://' in str(post):
-    #     post = post.split('/')[-1]
-    #     post = uuid.UUID(post)
-    # elif 'http://' in str(post):
-    #     post = post.split('/')[-1]
-    #     post = uuid.UUID(post)
+
 
     likes = ""
     if type(post) != dict:
@@ -89,12 +84,7 @@ def like_count_post(post):
 
 @register.simple_tag
 def singular_like(post):
-    # if 'https://' in str(post):
-    #     post = post.split('/')[-1]
-    #     post = uuid.UUID(post)
-    # elif 'http://' in str(post):
-    #     post = post.split('/')[-1]
-    #     post = uuid.UUID(post)
+    
     likes = ""
     if type(post) != dict:
         likes = Like.objects.filter(post=post)
