@@ -14,7 +14,57 @@
 <div class="mb-5">
     {% if user.is_authenticated %}
         <p class="non-white-title">Home</p>
-        {% if object_list %}
+        <script>
+        /*
+        Send an GET request to all connecting APIs to fetch all posts
+        Params: None
+        Return: list<dict>:posts    List of posts
+        */
+        function getPosts() {
+            var endpoints = {  // Local, team 3, team 5, team 13
+                'http://127.0.0.1:8000/service/allposts': 'connectionsuperuser:404connection',
+                'https://social-dis.herokuapp.com/posts?size=10000': 'socialdistribution_t03:c404t03',
+                'https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=10000': 'socialcircleauth:cmput404',
+                'https://linkedspace-staging.herokuapp.com/api/posts?size=10000': 'socialdistribution_t14:c404t14'
+            }
+
+            for (var endpoint in endpoints) {
+                var posts = []
+                var request = new XMLHttpRequest();
+                request.open('GET', endpoint);
+                request.setRequestHeader('Authorization', endpoints[endpoint]);
+                request.setRequestHeader('Content-Type', 'application/json');
+                // request.setRequestHeader('Referer', 'https://unhindled.herokuapp.com/');
+                // ISSUE: Can't send cross-origin requests with AJAX without a permitting 'Access-Control-Allow-Origin' response header
+                
+                request.onreadystatechange = function() {
+                    if (request.readyState == 4 && request.status == 200) {
+                        try {
+                            var respose = JSON.parse(request.responseText);
+                            console.log(response);
+                            if (endpoint == 'https://social-dis.herokuapp.com/posts?size=10000') {
+                                response = response['items'];  // Team 3
+                            }
+                            
+                            for (var post in response) {
+                                posts.push(post);
+                            }
+                        }
+                        catch (e) {
+                            console.log("index.html getPosts(): " + e);
+                        }
+                    }
+                }
+                request.send();
+            }
+            // Sorting posts by creation date
+            // Source: https://stackoverflow.com/a/10124053/7339521
+            posts.sort(function(post1, post2) {return new Date(post2.created_on) - new Date(post1.created_on)});
+            return posts
+        }
+
+        </script>
+        <!-- {% if object_list %}
             {% for post in object_list %}
                 {% with post.author.id|addstr:" "|addstr:user.id as ids %}
                 {% if post.visibility == "FRIENDS" and ids|friend_check or post.visibility == "PUBLIC" %}
@@ -42,12 +92,12 @@
                 {% endif %}
                 {% endwith %}
             {% endfor %}
-        {% else %}
+        {% else %} -->
             <p>No Posts to Show.</p>
         {% endif %}
     {% else %}
         <p class="non-white-title">Home</p>
-        {% if object_list %}
+        <!-- {% if object_list %}
             {% for post in object_list %}
                 {% if post.visibility == "PUBLIC" %}
                 <div class="post">
@@ -69,7 +119,7 @@
                     <p>{{ post.description }}</p>
                 </div>
                 {% endif %}
-            {% endfor %}
+            {% endfor %} -->
         {% else %}
             <p>No Posts to show.</p>
         {% endif %}

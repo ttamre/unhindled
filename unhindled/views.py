@@ -150,6 +150,7 @@ class HomeView(generic.ListView):
         context = super(HomeView, self).get_context_data(**kwargs)
         original = context['object_list']
         context['object_list'] = chain(get_foreign_posts_list(), original)
+        print(context.keys())
         return context
 
 class SignUpView(generic.CreateView):
