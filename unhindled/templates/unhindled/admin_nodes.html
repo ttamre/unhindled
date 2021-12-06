@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+{% block content %}
+{% #header user=user %}
+{% /header %}
+
+{% load image_helper %}
+{% load url_check %}
+
+<main>
+    {% if request.user.is_superuser %}
+        <div class="non-white-title">Connected Nodes</div>
+        <table id="nodes_table">
+            <tr>
+                <th class="white-text">Endpoint</th>
+                <th class="white-text">Authentication</th>
+            </tr>
+        
+        {% for node in nodes %}
+            <tr>
+                <td ><a href={{ node.endpoint }}>{{ node.endpoint }}</td>
+                <td>{{ node.authentication }}</td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+        <div class="non-white-title">Unauthorized</div>
+    {% endif %}
+</main>
+{% endblock content %}
