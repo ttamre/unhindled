@@ -174,9 +174,9 @@ def send_post_to_inbox(author, post):
 
     return False
 
-#get author given author.id NOT CURRENTLY IN USE  
+#get author given author.id   
 def foreign_get_author(author):
-    #team 3 once implemented
+    #team 3 
     if "social-dis.herokuapp.com" in author:
         author = author.split("/")[4]
         url = "https://social-dis.herokuapp.com/connection/author-detail/"+author
@@ -185,6 +185,25 @@ def foreign_get_author(author):
             return ""
         else:
             return t3_req.json()
+    #team 14
+    if "linkedspace-staging.herokuapp.com" in author:
+        author = author.split("/")[4]
+        url = "https://linkedspace-staging.herokuapp.com/api/author/"+author
+        t14_req = requests.get(url, auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t14_req.status_code == 500:
+            return ""
+        else:
+            return t14_req.json()
+    #team 17
+    if "cmput404f21t17.herokuapp.com" in author:
+        author = author.split("/")[4]
+        url = "https://cmput404f21t17.herokuapp.com/service/author/"+author
+        t17_req = requests.get(url, auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t17_req.status_code == 500:
+            return ""
+        else:
+            return t17_req.json()
+    
 def foreign_send_friend_request(author, follower):
     #team 3 once implemented
     if "social-dis.herokuapp.com" in author:
