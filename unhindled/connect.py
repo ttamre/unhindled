@@ -286,14 +286,13 @@ def post_foreign_comments(request, comm, postJson):
     author = UserSerializer(author).data
     # author['id'] = "https://unhindled.herokuapp.com/author/35fc41c5-7f34-4d5b-aae4-5310b23d2b02"
     # author['url'] = "https://unhindled.herokuapp.com/author/35fc41c5-7f34-4d5b-aae4-5310b23d2b02"
-    #print('comm:\n\n', comm)
-    #print(postJson['id'])
+
     print('team 14\n\n\n')
     #post comment on team 14
     if "linkedspace-staging.herokuapp.com" in postJson['id']:
         
-        payload = {'Post_pk': postJson['comments'].replace('/comments', '').replace("/author/", "/api/author/"), 
-                    'auth_pk': str(request.user.pk), 
+        payload = {'Post_pk': postJson['id'].split('/')[-1], 
+                    'auth_pk': author['id'], 
                     'contentType': 'text/plain',
                     'text': comm
                     }
@@ -322,22 +321,20 @@ def post_foreign_comments(request, comm, postJson):
         else:
             return t3_req.json()
 
-    #print('team 14\n\n\n')
-    #post comment on team 14
-    if "linkedspace-staging.herokuapp.com" in postJson['id']:
+    print('team 17\n\n\n')
+    #post comment on team 17
+    # if "cmput404f21t17.herokuapp.com/service" in postJson['id']:
         
-        payload = {'Post_pk': postJson['comments'].replace('/comments', '').replace("/author/", "/api/author/"), 
-                    'auth_pk': str(request.user.pk), 
-                    'contentType': 'text/plain',
-                    'text': comm
-                    }
-        # print(payload)
-        api_url = postJson["comments"].replace("/author/", "/api/author/")
-        t14_req = requests.post(api_url, auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"}, json=payload)
-        if t14_req.status_code == 200:
-            pass    
-        else: 
-            return t14_req.json()
+    #     payload = {"author": json.dumps(author),
+    #                "text": comm,
+    #                 }
+    #     print(payload)
+    #     api_url = postJson["comments"]
+    #     t17_req = requests.post(api_url, auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"}, json=payload)
+    #     if t17_req.status_code == 200:
+    #         pass    
+    #     else: 
+    #         return t17_req.json()
 
     #post comment on team 5
     # if "cmput404-socialdist-project.herokuapp.com" in postJson['id']:
