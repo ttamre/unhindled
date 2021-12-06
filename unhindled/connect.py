@@ -53,42 +53,55 @@ def get_foreign_posts_list():
 
     # foreign posts from team 3
     t3_req = requests.get('https://social-dis.herokuapp.com/posts?size=10000', auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t3_req.status_code == 500:
+    try:
+        if t3_req.status_code == 500:
+            pass
+        else:
+            js_req_3 = t3_req.json()['items']
+            for post in js_req_3:
+                post_list.append(post)
+    except:
         pass
-    else:
-        js_req_3 = t3_req.json()['items']
-        for post in js_req_3:
-            post_list.append(post)
 
 
     #foreign posts from team 5
     t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/post/request_post_list?size=10000', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t5_req.status_code == 500:
+    try:
+        if t5_req.status_code == 500:
+            pass
+        else:
+            js_req_5 = t5_req.json()
+            for post in js_req_5:
+                post_list.append(post)
+    except:
         pass
-    else:
-        js_req_5 = t5_req.json()
-        for post in js_req_5:
-            post_list.append(post)
 
     #foreign posts from team 14
     t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts?size=10000', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
 
-    if t14_req.status_code == 500:
+    try:
+        if t14_req.status_code == 500:
+            pass
+        else:
+            js_req_14 = t14_req.json()
+            for post in js_req_14:
+                post_list.append(post)
+    except:
         pass
-    else:
-        js_req_14 = t14_req.json()
-        for post in js_req_14:
-            post_list.append(post)
 
    #foreign posts from team 17
     t17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/', auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t17_req.status_code == 500:
+    try:
+        if t17_req.status_code == 500:
+            pass
+        else:
+            js_req_17 = t17_req.json()['items']
+            for post in js_req_17:
+                if ":8000" not in post["source"]:
+                    post_list.append(post)
+    except:
         pass
-    else:
-        js_req_17 = t17_req.json()['items']
-        for post in js_req_17:
-            if ":8000" not in post["source"]:
-                post_list.append(post)
+
 
     #foreign posts from team 23
     # t23_req = requests.get('https://project-api-404.herokuapp.com/api/posts', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -107,39 +120,51 @@ def get_foreign_authors_list():
     # foreign authors from team 3
     author_list=[]
     t3_req = requests.get('https://social-dis.herokuapp.com/authors', auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t3_req.status_code == 500:
+    try:
+        if t3_req.status_code == 500:
+            pass
+        else:
+            js_req_3 = t3_req.json()['items']
+            for author in js_req_3:
+                author_list.append(author)
+    except:
         pass
-    else:
-        js_req_3 = t3_req.json()['items']
-        for author in js_req_3:
-            author_list.append(author)
 
     # foreign authors from team 5
     t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/authors/', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t5_req.status_code == 500:
+    try:
+        if t5_req.status_code == 500:
+            pass
+        else:
+            js_req_5 = t5_req.json()['items']
+            for author in js_req_5:
+                author_list.append(author)
+    except:
         pass
-    else:
-        js_req_5 = t5_req.json()['items']
-        for author in js_req_5:
-            author_list.append(author)
     
     #foreign authors from team 14
     t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/authors', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t14_req.status_code == 500:
+    try:
+        if t14_req.status_code == 500:
+            pass
+        else:
+            js_req_14 = t14_req.json()['items']
+            for author in js_req_14:
+                author_list.append(author)
+    except:
         pass
-    else:
-        js_req_14 = t14_req.json()['items']
-        for author in js_req_14:
-            author_list.append(author)
 
     #foreign authors from team 17
     t17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/author/', auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t17_req.status_code == 500:
+    try:
+        if t17_req.status_code == 500:
+            pass
+        else:
+            js_req_17 = t17_req.json()['items']
+            for author in js_req_17:
+                author_list.append(author)
+    except:
         pass
-    else:
-        js_req_17 = t17_req.json()['items']
-        for author in js_req_17:
-            author_list.append(author)
 
     #foreign authors from team 23
     # t23_req = requests.get('https://project-api-404.herokuapp.com/api/authors', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
