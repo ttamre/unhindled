@@ -1258,7 +1258,7 @@ def likeComment(request, user_id, id, comment_id):
     author = request.user 
 
     if type(post) is dict:
-        send_like_comment(post["id"],author,post["author"]["id"])
+        send_like_comment(post["id"],author,post["author"]["id"], comment_id)
         return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
     else:
         comment = Comment.objects.get(id = comment_id)

@@ -304,6 +304,7 @@ def get_likes_on_post(post):
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
             req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
+            print(req.json())
             if req.status_code == 500:
                 return ""
             else:
@@ -325,6 +326,8 @@ def send_like_object(post_url, author, post_author):
     data["object"] = post_url
     data["@context"] = "https://www.w3.org/ns/activitystreams"
     data["summary"] = str(author.username) + " likes your post"
+    data["author"]["id"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
+    data["author"]["url"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
     for server in servers:
         if server[0][:-4] in post_url:
             auth = server[1]
@@ -356,6 +359,8 @@ def send_like_comment(post_url, author, post_author,comment_id):
     data["object"] = post_url + "/comments/" + comment_id
     data["@context"] = "https://www.w3.org/ns/activitystreams"
     data["summary"] = str(author.username) + " likes your post"
+    data["author"]["id"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
+    data["author"]["url"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
     for server in servers:
         if server[0][:-4] in post_url:
             auth = server[1]
