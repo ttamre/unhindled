@@ -54,7 +54,7 @@
                 {{ form.profileImage.errors }}
                 <div class="my-5">
                     <input type="submit" value="Update" class="button mr-4">
-                    <input type="cancel" value="Cancel" class="cancel-button">
+                    <a href="{% url 'profile' user.pk %}"><input type="button" value="Cancel" class="cancel-button"></a>
                 </div>
             </form>
         </div>

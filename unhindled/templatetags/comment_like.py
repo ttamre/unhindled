@@ -5,8 +5,6 @@ from unhindled.connect import get_comment_likes
 from . .models import Comment, Post, Like
 from django.contrib.auth import get_user_model
 
-from django.contrib.auth import get_user_model
-
 register = template.Library()
 
 User = get_user_model()
@@ -40,7 +38,7 @@ def comment_liked(like_list, author):
 @register.simple_tag
 def comment_text(comment, author):
     if str(comment).startswith('http'):
-        return 'A'
+        return 'Like'
     else:
         comment = Comment.objects.get(id=comment)
         likes = Like.objects.filter(comment=comment, author=author)

@@ -1385,15 +1385,19 @@ class ProfileView(LoginRequiredMixin, View):
         except:
             profile = get_json_authors(id)
 
-       
         if type(profile) is dict:
             user = profile['displayName']
             user_post = []
+            for post in get_foreign_posts_list():
+                if post['author']['id'] == profile['id']:
+                    user_post.append(post)
+
         else:
             user = User.objects.get(id=id)
             profile = UserProfile.objects.get(user=user)
             user_post = Post.objects.filter(author=user).order_by('-published')
-        
+        # user_post = []
+        print(user_post)
         context = {
             'author': user,
             'profile': profile,
