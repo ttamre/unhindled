@@ -182,7 +182,10 @@ def send_like_to_local_inbox(sender, instance, created, **kwargs):
 			if instance.post.author != instance.author:
 				link = "https://unhindled.herokuapp.com/"
 				link += "author/" + str(instance.post.author.username) + "/posts/" + str(instance.post.id)
-				inbox = Inbox(inbox_of=instance.post.author, type="like",link=link, inbox_from=instance.author,like=instance)
+				if instance.author != None:
+					inbox = Inbox(inbox_of=instance.post.author, type="like",link=link, inbox_from=instance.author.username,like=instance)
+				else:
+					inbox = Inbox(inbox_of=instance.post.author, type="like",link=link, inbox_from=instance.foreign_author.displayName,like=instance)
 				inbox.save()
 
 @receiver(post_save, sender=Comment)
@@ -192,5 +195,8 @@ def send_comment_to_local_inbox(sender, instance, created, **kwargs):
 			if instance.post.author != instance.author:
 				link = "https://unhindled.herokuapp.com/"
 				link += "author/" + str(instance.post.author.username) + "/posts/" + str(instance.post.id)
-				inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.author,comment=instance)
+				if instance.author != None:
+					inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.author.username,comment=instance)
+				else:
+					inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.foreign_author.displayName,comment=instance)
 				inbox.save()
