@@ -1530,3 +1530,26 @@ def clearInbox(request, id):
         inboxItems.delete()
 
     return HttpResponseRedirect(reverse('inbox', args=[str(user.id)]))
+
+# servers = [
+#         ('social-dis.herokuapp.com', ('socialdistribution_t03','c404t03')),
+#         ('cmput404-socialdist-project.herokuapp.com', ('socialcircleauth','cmput404')),
+#         ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14')),
+#         ('cmput404f21t17.herokuapp.com/service', ('a50ee73d-ee34-4201-8258-ead20eb71857','123456')),
+#         ('project-api-404.herokuapp.com/api/authors', ('team15','team15'))
+#     ]
+
+@api_view(['GET'])
+def get_nodes(request, *args):
+    if request.user.is_superuser:
+        nodes = []
+        for server in servers:
+            nodes.append({
+                "endpoint": server[0],
+                "authentication": f"{server[1][0]}:{server[1][1]}"
+            })
+
+        context = {"request": request, "nodes": nodes}
+        return render(request, 'unhindled/admin_nodes.html', context)
+    else:
+        return Response({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
