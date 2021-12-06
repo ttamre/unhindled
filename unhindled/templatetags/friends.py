@@ -9,8 +9,20 @@ def getDisplayName(authorId):
     if "/" in authorId:
         #foreign
         author = foreign_get_author(authorId)
-        return author["displayName"]
+        if "displayName" in author:
+            return author["displayName"]
+        else: 
+            return authorId
     else:
         #local
-        author = User.objects.get(id=authorId).displayName
-        
+        displayName = User.objects.get(id=authorId).displayName
+        return displayName
+
+@register.filter(name='follow_check')
+def follow_check(follower_user): 
+    follower, user = follower_user.split(" ")
+    return follower == user
+    
+@register.filter(name='addstr')
+def addstr(a, b):
+     return str(a)+str(b)

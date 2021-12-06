@@ -776,8 +776,7 @@ class FollowerListViewset (viewsets.ViewSet):
         """
         List an author's followers
         """
-        authorObj = get_object_or_404(User, id=author)
-        user = Follower.objects.filter(author=authorObj)
+        user = Follower.objects.filter(author=author)
         serializer = FollowerListSerializer(user, many=True)
         return Response(serializer.data)
     
@@ -825,8 +824,7 @@ class FollowerViewset (viewsets.ViewSet):
         """
         Follow a user
         """
-        authorObj = get_object_or_404(User, id=author)
-        Follower.objects.create(author=authorObj, follower=follower)
+        Follower.objects.create(author=author, follower=follower)
         follow = get_object_or_404(Follower, id=author, follower=follower)
         serializer = FollowerSerializer(follow)
         return Response(serializer.data)
@@ -1190,8 +1188,9 @@ def follow(request):
                 if Follower.objects.filter(author=authorId,follower=request.user.id).count() == 0 :
                     Follower.objects.create(author=authorId, follower=request.user.id)
                     # will put to other servers once they are implemented
-                    x = foreign_add_follower(authorId,  getForeignId(request.user))
+                    #x = foreign_add_follower(authorId,  getForeignId(request.user))
            ### will need to send friend request here ###
+                    x = foreign_send_friend_request(authorId, request.user.id)
                     break
     next = request.POST.get('next', '/')
     return HttpResponseRedirect(next)

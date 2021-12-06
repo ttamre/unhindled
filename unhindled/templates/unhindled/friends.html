@@ -8,6 +8,7 @@
 {% /header %}
 {% load friends %}
 
+
 <main>
 <p class="non-white-title">Manage Friends</p>
 
@@ -20,10 +21,11 @@
 </form>
 {% if object_list %}
 	{% for follow in object_list %}
-	        {% if follow.follower.toString == user.id.toString %}
+		{% with follow.follower|addstr:" "|addstr:user.id as ids %}
+	        {% if ids|follow_check %}
 			<li>
-				Following: {{ follow.author }}
-				<!--getDisplayName follow.author "once implemented" -->  
+				
+				Following: {% getDisplayName follow.author %}
 				<form action="/unfollow" method="POST">
 					{% csrf_token %}
 					<input type="hidden" name="author" value="{{ follow.author }}">
@@ -32,6 +34,7 @@
 				</form>
 			</li>
 	        {% endif %}
+	        {% endwith %}
 	</ul>
 	{% endfor %}
 {% else %}

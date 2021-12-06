@@ -66,7 +66,6 @@ class CommentSerializer(serializers.HyperlinkedModelSerializer):
 
 #for URL: ://service/author/{AUTHOR_ID}/followers
 class FollowerListSerializer(serializers.HyperlinkedModelSerializer):
-    follower = UserSerializer()
     host = "https://unhindled.herokuapp.com/"
     class Meta:
         model = Follower

@@ -8,6 +8,8 @@ from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth import get_user_model
+#from .connect import foreign_send_post_to_inbox
+import logging
 
 class User(AbstractUser):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -142,7 +144,6 @@ class Inbox(models.Model):
 	like = models.ForeignKey(Like, on_delete=models.CASCADE, blank=True, null=True)
 	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
 
-
 @receiver(post_save, sender=Post)
 def send_post_to_inbox(sender, instance, created, **kwargs):
 	if created:
@@ -153,12 +154,19 @@ def send_post_to_inbox(sender, instance, created, **kwargs):
 			inbox.save()
 		
 		else:
-			followers = Follower.objects.filter(author=instance.author)
+			followers = Follower.objects.filter(author=instance.author.id)
 			for follower in followers:
 				link = "http://127.0.0.1:8000"
 				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
-				inbox = Inbox(inbox_of=follower.follower, type="post",link=link, inbox_from=instance.author.username,post=instance)
-				inbox.save()
+				if isinstance(follower.follower, uuid.UUID) and User.objects.filter(id=follower.follower) == 1:
+					reciever = User.objects.get(id=follower.follower)
+					inbox = Inbox(inbox_of=reciever, type="post",link=link, inbox_from=instance.author.username,post=instance)
+					inbox.save()
+				else:
+					continue
+					#need to send post to their inbox
+						#foreign_send_post_to_inbox(follower.follower, instance.author)
+				
 
 @receiver(post_save, sender=Like)
 def send_like_to_inbox(sender, instance, created, **kwargs):
@@ -179,3 +187,12 @@ def send_comment_to_inbox(sender, instance, created, **kwargs):
 				link += "/author/" + str(instance.post.author.id) + "/posts/" + str(instance.post.id)
 				inbox = Inbox(inbox_of=instance.post.author, type="comment",link=link, inbox_from=instance.author,comment=instance)
 				inbox.save()
+@receiver(post_save, sender=FollowRequest)
+def send_follow_request_to_inbox(sender, instance, created, **kwargs):
+	if created:
+		link = "http://127.0.0.1:8000/"
+		link += str(instance.follower) + "/friends"
+		author_user = User.objects.get(id = instance.follower)
+		follower_user = User.objects.get(id = instance.author)
+		inbox = Inbox(inbox_of=author_user, type="follow",link=link, inbox_from=follower_user.displayName)
+		inbox.save()
