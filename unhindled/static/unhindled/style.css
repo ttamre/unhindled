@@ -41,7 +41,7 @@ body {
   background-color: #3AAFA9;
   border: none;
   color: #FEFFFF;
-  padding: 12px 24px;
+  padding: 8px 12px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -61,7 +61,7 @@ body {
   background-color: #f03a5f;
   border: none;
   color: #FEFFFF;
-  padding: 12px 24px;
+  padding: 8px 12px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
@@ -73,8 +73,6 @@ body {
 .cancel-button:hover {
   cursor: pointer;
   background-color: #99253d;
-  border-color: transparent;
-  color: #fff;
 }
 
 .follow-button {
@@ -287,7 +285,7 @@ a.white-text:hover {
 }
 
 .label-field {
-  width: 7rem;
+  width: 9rem;
   margin: auto 0;
 }
 
