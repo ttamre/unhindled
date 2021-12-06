@@ -13,6 +13,11 @@ User = get_user_model()
 def get_likes(comment, post):
     if type(post) == dict:
         likes = get_comment_likes(comment["id"], post)
+        if type(likes) == dict:
+            try:
+                return likes["items"]
+            except:
+                return likes["item"]
         return likes
     else:
         return Like.objects.filter(comment=comment)
@@ -23,6 +28,8 @@ def likes_count(like_list):
 
 @register.simple_tag
 def object_liked(like_list, author):
+    if like_list == "0 Likes":
+        return False
     if type(like_list) == QuerySet:
         likes = like_list.filter(author=author)
         return len(likes) == 1

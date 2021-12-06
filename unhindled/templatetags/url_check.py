@@ -17,3 +17,11 @@ def valid_url_profile(string):
     return string[-1]
   else:
     return string
+
+@register.simple_tag
+def shorten_source(url):
+  split_url = url.split(".com/")
+  if len(split_url[-1]) > 0:
+    return split_url[0] + ".com/"
+  else:
+    return url

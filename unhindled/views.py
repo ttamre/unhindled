@@ -284,7 +284,7 @@ class PostViewSet(viewsets.ViewSet):
         if user != loggedInUser:
             return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        postData = request.POST
+        postData = json.loads(request.body)
         author = user
         contentType = 'txt'
         for types in Post.CONTENT_TYPES:
@@ -371,7 +371,7 @@ class PostViewSet(viewsets.ViewSet):
         Add comment to post
         """
         post = get_object_or_404(Post, id=post_id)
-        postData = request.POST
+        postData = json.loads(request.body)
         if "comment" in postData["type"]:
             existingAuthors = ForeignAuthor.objects.filter(id=postData["author"]["id"])
             if len(existingAuthors) >= 1:
@@ -555,7 +555,7 @@ class UserViewSet(viewsets.ViewSet):
 
         userProfile = UserProfile.objects.get(user=user)
         
-        updateData = request.POST
+        updateData = json.loads(request.body)
 
         if "user_id" in updateData.keys() and updateData["user_id"] != "":
             otherUser = User.objects.filter(user_id=updateData["user_id"])
@@ -1071,10 +1071,10 @@ class InboxViewSet(viewsets.ViewSet):
     host = "https://unhindled.herokuapp.com/"
 
     def post(self, request, id):
-        postData = request.POST
+        postData = json.loads(request.body)
         user = get_object_or_404(User,id=id)
-        if "type" not in postData.keys():
-            return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
+        # if "type" not in postData.keys():
+        #     return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
         
         if postData["type"].lower() == "post":
             link = postData["id"].replace(postData["source"], self.host)
@@ -1138,7 +1138,8 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         # See: https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#json-script
         username = UserProfile.objects.get(user=request.user).github
         headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{username}/events/public'}
-        return render(request, 'unhindled/mystream.html', {"headers": headers})
+        queryset = Post.objects.order_by('published')
+        return render(request, 'unhindled/mystream.html', {"headers": headers, "object_list": queryset})
 
 
 class AccountView(generic.CreateView):
@@ -1212,7 +1213,7 @@ class SharePost(LoginRequiredMixin, generic.View):
     login_url = 'accounts/login/'
     redirect_field_name = 'redirect_to'
 
-    def get(self, request, user, id):
+    def get(self, request, user_id, id):
         post_object = get_object_or_404(Post, pk=id)
         current_user = request.user
         if current_user == User:
@@ -1344,6 +1345,7 @@ def view_post(request, user_id, id):
         'comment_form': form_comment,
         'comment_size': len(comments)
     }
+
     return render(request, 'unhindled/view_post.html', context)
 
 
@@ -1379,7 +1381,6 @@ class ProfileView(LoginRequiredMixin, View):
     login_url = 'accounts/login/'
     redirect_field_name = 'redirect_to'
     def get(self, request, id, *args, **kwargs):
-
         try:
             profile = UserProfile.objects.get(pk=id)
         except:
@@ -1396,8 +1397,7 @@ class ProfileView(LoginRequiredMixin, View):
             user = User.objects.get(id=id)
             profile = UserProfile.objects.get(user=user)
             user_post = Post.objects.filter(author=user).order_by('-published')
-        # user_post = []
-        print(user_post)
+
         context = {
             'author': user,
             'profile': profile,
