@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
-from .models import Inbox, Like, Post, Follower, FollowRequest, UserProfile, Comment
+from .models import ForeignAuthor, Inbox, Like, Post, Follower, FollowRequest, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .forms import *
@@ -335,7 +335,7 @@ class PostViewSet(viewsets.ViewSet):
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        operation_description="Update a post",
+        operation_description="Posting a comment",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=['type', 'id', 'author', 'contentType', 'title', 'description', 'visibility', 'created_on', 'source', 'origin'],
@@ -370,62 +370,38 @@ class PostViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             ),
         })
-    def updatePost(self, request, id, pk):
+    def updatePost(self, request, id, post_id):
         """
-        Update a post
+        Add comment to post
         """
-        loggedInUser = request.user
-        user = User.objects.get(id=id)
-        try:
-            postToEdit = Post.objects.get(id=pk)
-        except:
-            return Response({}, status.HTTP_404_NOT_FOUND)
-            
-        if user != loggedInUser:
-            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
-
+        post = get_object_or_404(Post, id=post_id)
         postData = request.POST
-        warning = {}
-        if "contentType" in postData.keys():
-            if postData["contentType"] != "":
-                for types in Post.CONTENT_TYPES:
-                    if types[1] == postData["contentType"] or types[0] == postData["contentType"]:
-                        postToEdit.contentType = types[0]
-        if "title" in postData.keys() and postData["title"] != "":
-            if postData["contentType"] != "":
-                postToEdit.title = postData["title"]
-        if "description" in postData.keys() and postData["description"] != "":
-            postToEdit.description = postData["description"]
-        if "content" in postData.keys() and postData["content"] != "":
-            postToEdit.content = postData["content"]
-        if "visibility" in postData.keys() and postData["visibility"] != "":
-            for types in Post.VISIBILITY:
-                if types[1].lower() == postData["visibility"].lower():
-                    if types[0] != "send":
-                        postToEdit.visibility = types[0]
-                    else:
-                        warning["visibility"] =  "Post can't be converted to a Inbox post, please delete the post and repost with changed visibility"
-        if "send_to" in postData.keys() and postData["send_to"] != "":
-            warning["send_to"] =  "Post can't change receiver. Please delete post and resend"
-        if "published" in postData.keys() and postData["published"] != "":
-            warning["published"] = "Published date can't be changed"
-        if "images" in postData.keys() and postData["images"] != "":
-            postToEdit.images = postData["images"]
-    
-        try:
-            postToEdit.save()
-            serializer = PostSerializer(postToEdit)
-            data = {}
-            data["UpdatedPost"] = serializer.data
-            if len(warning.keys()) > 0:
-                data["Warnings"] = warning
-            return Response(data, status=status.HTTP_202_ACCEPTED)
+        if "comment" in postData["type"]:
+            existingAuthors = ForeignAuthor.objects.filter(id=postData["author"]["id"])
+            if len(existingAuthors) >= 1:
+                foreign_author = ForeignAuthor.objects.get(id=postData["author"]["id"])
+            else:
+                authorData = postData["author"]
+                foreign_author = ForeignAuthor(id=authorData["id"],host=authorData["host"],displayName=authorData["displayName"])
+                if "github" in authorData.keys():
+                    foreign_author.github = authorData["github"]
+                if "profileImage" in authorData.keys():
+                    foreign_author.profileImage = authorData["profileImage"]
+                foreign_author.save()
 
-        except:
-            errors = {}
-            errors["Error"] = "Invalid post format"
-            errors["ReceivedData"] = postData
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+            comment = postData["comment"]
+            contentType = "txt"
+            for types in Comment.CONTENT_TYPES:
+                if postData["contentType"] == types[1]:
+                    contentType = types[0]
+
+            newComment = Comment(post=post,comment=comment, contentType=contentType, foreign_author=foreign_author)
+            newComment.save()
+
+            serializer = CommentSerializer(newComment)
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
     @swagger_auto_schema(
         operation_description="Delete a post",
@@ -720,34 +696,9 @@ class CommentViewSet(viewsets.ViewSet):
         """
         Post a comment
         """
-        loggedInUser = request.user
-        try:
-            post = Post.objects.get(id=post_id)
-        except:
-            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+        pass
 
-        if loggedInUser.is_authenticated:
-            commentData = request.POST
-            if ("comment" not in commentData.keys()) or ("contentType" not in commentData.keys()):
-                return Response({"error": "missing comment text or contentType"}, status.HTTP_400_BAD_REQUEST)
-
-            if commentData["contentType"] not in ["md", "txt"]:
-                return Response({"error": "comment only supports md and txt"}, status.HTTP_400_BAD_REQUEST)
-
-            try:
-                newComment = Comment(post=post,author=loggedInUser,
-                    comment=commentData["comment"],contentType=commentData["contentType"])
-
-                newComment.save()
-
-                serializer = CommentSerializer(newComment)
-                return Response({"NewComment": serializer.data}, status.HTTP_201_CREATED)
-
-            except:
-                return Response({"error": "Could not save comment"}, status.HTTP_400_BAD_REQUEST)
-            
-        else:
-            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+        
 
 class FollowerListViewset (viewsets.ViewSet):
     """
@@ -1136,7 +1087,19 @@ class InboxViewSet(viewsets.ViewSet):
             return Response({"status": "Post received in inbox"}, status.HTTP_201_CREATED)
 
         elif postData["type"].lower() == "like":
-            foreign_author = postData["author"]["id"]
+            existingAuthors = ForeignAuthor.objects.filter(id=postData["author"]["id"])
+            if len(existingAuthors) >= 1:
+                foreign_author = ForeignAuthor.objects.get(id=postData["author"]["id"])
+            else:
+                authorData = postData["author"]
+                foreign_author = ForeignAuthor(id=authorData["id"],host=authorData["host"],displayName=authorData["displayName"])
+                if "github" in authorData.keys():
+                    foreign_author.github = authorData["github"]
+                if "profileImage" in authorData.keys():
+                    foreign_author.profileImage = authorData["profileImage"]
+                foreign_author.save()
+            
+
             obj = postData["object"]
             if "comment" in obj:
                 comment_id = obj.strip("/").split("/")[-1]

@@ -149,7 +149,7 @@ def send_post_to_inbox(author, post):
             auth = server[1]
             author_id = author.strip("/").split("/")[-1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
-            req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
             if req.status_code == 200:
                 return True
 
@@ -206,7 +206,33 @@ def get_foreign_comments_list(source, author, post):
                 return []
     return []
 
-        
+def get_comment_likes(comment_link, post):
+    comment_link = comment_link.strip("/")
+    host = post["author"]["host"]
+    for server in servers:
+        if server[0][:-4] in host:
+            auth = server[1]
+            if "/posts/" in post["id"]:
+                post_id = post["id"].split("/posts/")[-1]
+            else:
+                post_id = post["id"].split("/post/")[-1]
+
+            if "/comments/" in comment_link:
+                comment_id = comment_link.split("/comments/")[-1]
+                comment_id = "/comments/" + comment_id
+            else:
+                comment_id = comment_link.split("/comment/")[-1]
+                comment_id = "/comment/" + comment_id
+            author_id = post["author"]["id"].split("/author/")[-1]
+
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/"+ post_id + comment_id + "/likes"
+            req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
+            response = req.json()
+            if type(response) == list:
+                return response
+            else:
+                return response["items"]
+    return []
 
 def post_foreign_comments(request, comm, postJson):
     #print(request.user.id)
