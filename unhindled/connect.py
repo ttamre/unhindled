@@ -304,7 +304,6 @@ def get_likes_on_post(post):
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
             req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
-            print(req.json())
             if req.status_code == 500:
                 return ""
             else:
