@@ -14,36 +14,25 @@
     <main>
         <div>
             {% if user.is_authenticated %}
-            <p class="non-white-title">My Stream</p>
-            {% if object_list %}
-                {% for post in object_list %}
-                <!-- change this to ID when author and user are matched -->
-                {% if post.author.username == user.username %}
-                    <div class="post">
-                        <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                        By: {{ post.author }} <br>
-                        {{ post.description }}
+                {% if headers.posts %}
+                    <h2>Posts</h2>
+                    {% for post in headers.posts %}
+                    <div class="comment-box mt-3">
+                        {% if post.visibility != "unlisted" %}
+                            <a href="{{ post.id }}">{{ post.title }}</a> <br>
+                            <p>{{ post.published }}</p>
+                            <p>{{ post.description }}</p>
+                        {% endif %}
                     </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No Posts to show.</p>
                 {% endif %}
-                {% endfor %}
-                <h3>Sent to me</h3>
-                {% for post in object_list %}
-                {% if post.send_to.username == user.username and post.visibility == "send" %}
-                    <div class="post">
-                        <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                        By: {{ post.author }} <br>
-                        {{ post.description }}
-                    </div>
-                {% endif %}
-                {% endfor %}
-            {% else %}
-                <p>No Posts to show.</p>
-            {% endif %}
             {% endif %}
 
 
             <!-- Github Activity -->
-            <h3>Github Activity</h3>
+            <h2>Github Activity</h2>
             <table id="github_table">
                 <tr>
                     <th>Repository</th>

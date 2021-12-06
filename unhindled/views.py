@@ -1124,11 +1124,29 @@ class StreamView(generic.ListView):
     template_name = "unhindled/mystream.html"
     ordering = ['-published']
 
+    """
+    Converts posts from a collection of Post objects to list of ReturnDict objects
+    Params:   post        iterable collection of Post objects (typically of type QuerySet)
+    Return:   post_list   list of Post dictionaries
+    """
+    def posts_to_dict(self, posts):
+        post_list = []
+        for post in list(posts):
+            post_list.append(PostSerializer(post).data)
+        return post_list
+
+    """
+    On page load, send a dictionary of headers and posts to be displayed in the stream view
+    Params: request         Request object
+    Return: HTTPResponse    HTTPResponse object that contains context data with auth, github uri, and posts
+    """
     def get(self, request, **args):
+        user_posts = Post.objects.filter(author=request.user).order_by('-published')
+        user_posts = self.posts_to_dict(user_posts)
         # Passes the required headers for Github requests into the DOM and into JS through Django
         # See: https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#json-script
         username = UserProfile.objects.get(user=request.user).github
-        headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{username}/events/public'}
+        headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{username}/events/public', 'posts': user_posts}
         return render(request, 'unhindled/mystream.html', {"headers": headers})
 
 
