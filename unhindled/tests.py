@@ -32,10 +32,9 @@ class PostTests(TestCase):
 		existing_ID_query = Post.objects.filter(title="Test Title").values_list('id', flat=True)
 		
 		totalID = len(existing_ID_query)
-		response = self.client.post("/post/",data={"author":self.user.pk, "contentType":"md", 
+		response = self.client.post("/post/",data={"author":self.user.id, "contentType":"text/markdown",
 		"title":"Test Title", "description":"This is a test Post",
-		"visibility":"PUBLIC", "published":datetime.datetime.now(), "content":"TEST POST 2",
-		"images":"", "originalPost":"", "sharedBy":""})
+		"visibility":"PUBLIC", "published":datetime.datetime.now(), "content":"TEST POST 2"})
 		id_to_delete = ""
 
 		addedPost = Post.objects.filter(title="Test Title").values_list('id', flat=True)
@@ -46,25 +45,23 @@ class PostTests(TestCase):
 						self.posts_to_delete.append(id_to_delete)
 
 		self.assertEqual(response.status_code, 302)
-		self.assertEqual(response.url, "/" + self.user.username + "/posts/" + str(id_to_delete))
+		self.assertEqual(response.url, "/author/"+ str(self.user.username) + "/posts/" + str(id_to_delete))
 
 	def test_editingPosts(self):
 		# Editing post and checking if post is edited
-		response = self.client.post("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/edit",data={'author': ['1'], "contentType":["md"], 
+		response = self.client.post("/author/"+ str(self.user.id) + "/posts/" + str(self.new_post.id) + "/edit",data={'author': ['1'], "contentType":["text/markdown"],
 		"title":["Test Title"], "description":["This is a test Post"],
 		"visibility":["PUBLIC"], "content":["TEST POST(EDITED)"],
 		"images":[""], "originalPost":[""], "sharedBy":[""]})
-		print(response)
 
 		editedPost = Post.objects.filter(id=self.new_post.id)
-		# print(editedPost[0].content)
 		self.assertEqual(editedPost[0].content, "TEST POST(EDITED)")
 
 	def test_deletingPosts(self):
 		# Deleting post and checking if post is deleted
 		oldPost = Post.objects.filter(id=self.new_post.id)
 		self.assertEqual(len(oldPost), 1)
-		response = self.client.post("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/delete")
+		response = self.client.post("/author/"+ str(self.user.id) + "/posts/" + str(self.new_post.id) + "/delete")
 
 		oldPost = Post.objects.filter(id=self.new_post.id)
 		self.assertEqual(len(oldPost), 0)
@@ -73,10 +70,9 @@ class PostTests(TestCase):
 		# Sharing post and checking if post is shared
 		totalShare = Post.objects.filter(originalPost=self.new_post)
 		totalShares = len(totalShare)
-		response = self.client.get("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/share")
+		response = self.client.get("/author/"+ str(self.user.id) + "/posts/" + str(self.new_post.id) + "/share")
 
 		totalShare = Post.objects.filter(originalPost=self.new_post)
-		print(len(totalShare))
 		self.assertEqual(len(totalShare), totalShares + 1)
 
 	def test_restrictions(self):
@@ -94,7 +90,7 @@ class PostTests(TestCase):
 		self.assertEqual("Delete" in response_str, False)
 
 		login = self.client.login(username='testuser2', password='12345')
-		response = self.client.get("/"+self.other_user.username + "/posts/" + str(other_post.id))
+		response = self.client.get("/author/"+ str(self.other_user.id) + "/posts/" + str(other_post.id))
 
 		# Checking for authorized access
 		response_str = str(response.content)
@@ -124,11 +120,11 @@ class HTMLTests(TestCase):
 	def test_index(self):
 		resp = self.client.get(reverse("index"))
 		self.assertEqual(resp.status_code, 200)
-		self.assertContains(resp, '<div class="mb-5">')
+		self.assertContains(resp, '<div class="mb-6">')
 
 	def test_login_index(self):
 		resp = self.client.get(reverse("index"))
-		self.assertContains(resp, '<div class="mb-5">')
+		self.assertContains(resp, '<div class="mb-6">')
 
 		self.client.force_login(self.user)
 		resp = self.client.get(reverse("index"))
@@ -137,12 +133,12 @@ class HTMLTests(TestCase):
 	def test_logout_index(self):
 		self.client.force_login(self.user)
 		resp = self.client.get(reverse("index"))
-		self.assertContains(resp, '<div class="mb-5">')
+		self.assertContains(resp, '<div class="mb-6">')
 
 		resp = self.client.get(reverse("logout"))
 		self.assertEqual(resp.status_code, 302)
 		resp = self.client.get(reverse("index"))
-		self.assertContains(resp, '<div class="mb-5">')
+		self.assertContains(resp, '<div class="mb-6">')
 
 	def test_mystream(self):
 		self.client.force_login(self.user)

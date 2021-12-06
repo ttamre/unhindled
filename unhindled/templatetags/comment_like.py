@@ -28,6 +28,8 @@ def likes_count(like_list):
 
 @register.simple_tag
 def object_liked(like_list, author):
+    if like_list == "0 Likes":
+        return False
     if type(like_list) == QuerySet:
         likes = like_list.filter(author=author)
         return len(likes) == 1
