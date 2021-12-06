@@ -148,7 +148,7 @@ def send_post_to_inbox(author, post):
             auth = server[1]
             author_id = author.strip("/").split("/")[-1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
-            req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
             if req.status_code == 200:
                 return True
 
@@ -205,7 +205,33 @@ def get_foreign_comments_list(source, author, post):
                 return []
     return []
 
-        
+def get_comment_likes(comment_link, post):
+    comment_link = comment_link.strip("/")
+    host = post["author"]["host"]
+    for server in servers:
+        if server[0][:-4] in host:
+            auth = server[1]
+            if "/posts/" in post["id"]:
+                post_id = post["id"].split("/posts/")[-1]
+            else:
+                post_id = post["id"].split("/post/")[-1]
+
+            if "/comments/" in comment_link:
+                comment_id = comment_link.split("/comments/")[-1]
+                comment_id = "/comments/" + comment_id
+            else:
+                comment_id = comment_link.split("/comment/")[-1]
+                comment_id = "/comment/" + comment_id
+            author_id = post["author"]["id"].split("/author/")[-1]
+
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/"+ post_id + comment_id + "/likes"
+            req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
+            response = req.json()
+            if type(response) == list:
+                return response
+            else:
+                return response["items"]
+    return []
 
 def post_foreign_comments(request, comm, postJson):
     #print(request.user.id)
@@ -283,21 +309,60 @@ def get_likes_on_post(post):
                 return req.json()
 
     
-def send_like_object(post, author, post_author):
+def send_like_object(post_url, author, post_author):
     serializer = UserSerializer(author)
     author_id = post_author.strip("/").split("/author/")[-1]
+
+    if "posts" in post_url:
+        post_id = post_url.split("/posts/")[-1]
+    else:
+        post_id = post_url.split("/post/")[-1]
+
     data = {}
     data["type"] = "Like"
     data["author"] = serializer.data
-    data["object"] = post
+    data["object"] = post_url
     data["@context"] = "https://www.w3.org/ns/activitystreams"
     data["summary"] = str(author.username) + " likes your post"
     for server in servers:
-        if server[0][:-4] in post:
+        if server[0][:-4] in post_url:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
+            likeEndpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
             req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
-            if req.status_code == 200:
+            req2 = requests.post(likeEndpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            if req.status_code == 200 or req2.status_code == 200:
+                return True
+    
+    return False
+
+def send_like_comment(post_url, author, post_author,comment_id):
+    serializer = UserSerializer(author)
+    author_id = post_author.strip("/").split("/author/")[-1]
+    data = {}
+    if "posts" in post_url:
+        post_id = post_url.split("/posts/")[-1]
+    else:
+        post_id = post_url.split("/post/")[-1]
+
+    if "comments" in post_url:
+        comment_id = comment_id.split("/comments/")[-1]
+    else:
+        comment_id = comment_id.split("/comment/")[-1]
+    
+    data["type"] = "Like"
+    data["author"] = serializer.data
+    data["object"] = post_url + "/comments/" + comment_id
+    data["@context"] = "https://www.w3.org/ns/activitystreams"
+    data["summary"] = str(author.username) + " likes your post"
+    for server in servers:
+        if server[0][:-4] in post_url:
+            auth = server[1]
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
+            likeEndpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/comments/" + comment_id + "/likes"
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            req2 = requests.post(likeEndpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            if req.status_code == 200 or req2.status_code == 200:
                 return True
     
     return False

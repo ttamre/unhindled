@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.db.models.fields import EmailField
+from django.db.models.fields.related import ForeignKey
 from django.urls import reverse
 from datetime import datetime, date
 from django.core.exceptions import ValidationError
@@ -18,7 +19,14 @@ class User(AbstractUser):
 	def save(self, *args, **kwargs):
 		self.displayName = self.username
 		super(User, self).save(*args, **kwargs)
-	
+
+class ForeignAuthor(models.Model):
+	id = models.CharField(primary_key=True, max_length=200, unique=True)
+	host = models.CharField(max_length=200)
+	displayName = models.CharField(max_length=100)
+	github = models.CharField(max_length=200, null=True, blank=True, default="")
+	profileImage = models.CharField(max_length=200, null=True, blank=True, default="")
+
 #maybe not best implementation
 class Follower(models.Model):
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -88,7 +96,8 @@ class Comment(models.Model):
 		('txt','text/plain'),
 	)
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-	author = models.ForeignKey(User, on_delete=models.CASCADE)
+	author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True,default=None)
+	foreign_author = models.ForeignKey(ForeignAuthor, on_delete=models.CASCADE,blank=True,null=True,default=None)
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comment')
 	comment = models.TextField(blank=True, max_length=500)
 	contentType = models.CharField(max_length=4, choices=CONTENT_TYPES, default=CONTENT_TYPES[0][0],null=False)
@@ -102,7 +111,7 @@ class Like(models.Model):
 	post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
 	comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
 	author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-	foreign_author = models.URLField(blank=True,null=True)
+	foreign_author = models.ForeignKey(ForeignAuthor, on_delete=models.CASCADE,blank=True,null=True,default=None)
 
 class UserProfile(models.Model):
 	user = models.OneToOneField(User, primary_key=True, verbose_name='user', related_name='profile', on_delete=models.CASCADE)
