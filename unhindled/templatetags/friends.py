@@ -15,8 +15,11 @@ def getDisplayName(authorId):
             return authorId
     else:
         #local
-        displayName = User.objects.get(id=authorId).displayName
-        return displayName
+        try:
+            displayName = User.objects.get(id=authorId).displayName
+            return displayName
+        except:
+            return authorId
 
 @register.filter(name='follow_check')
 def follow_check(follower_user): 
