@@ -2,11 +2,10 @@
 
 
 ## Quick Links
-* [JIRA](https://cmput404.atlassian.net/jira/software/projects/PROJ/boards/1)
-* [Heroku](https://dashboard.heroku.com/apps/unhindled)
+* [App](https://dashboard.heroku.com/apps/unhindled)
+* [OpenAPI Documentation](https://unhindled.herokuapp.com/redoc/)
 * [Project Requirements](https://github.com/abramhindle/CMPUT404-project-socialdistribution/blob/master/project.org)
-* [Docs/Wiki](https://github.com/ttamre/CMPUT404Project/wiki) 
-* API Documentation: https://unhindled.herokuapp.com/redoc/
+
 ## Commands
 **Create user**
 ```bash
