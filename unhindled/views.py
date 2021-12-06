@@ -1345,6 +1345,7 @@ def view_post(request, user_id, id):
         'comment_form': form_comment,
         'comment_size': len(comments)
     }
+
     return render(request, 'unhindled/view_post.html', context)
 
 

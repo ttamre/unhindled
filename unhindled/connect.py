@@ -14,7 +14,7 @@ servers = [
         ('social-dis.herokuapp.com', ('socialdistribution_t03','c404t03')),
         ('cmput404-socialdist-project.herokuapp.com', ('socialcircleauth','cmput404')),
         ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14')),
-        ('cmput404f21t17.herokuapp.com/service/', ('a50ee73d-ee34-4201-8258-ead20eb71857','123456')),
+        ('cmput404f21t17.herokuapp.com/service', ('a50ee73d-ee34-4201-8258-ead20eb71857','123456')),
         ('project-api-404.herokuapp.com/api/authors', ('team15','team15'))
     ]
 
@@ -114,13 +114,13 @@ def get_foreign_authors_list():
             author_list.append(author)
 
     # foreign authors from team 5
-    t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/author/', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t5_req.status_code == 500:
-        pass
-    else:
-        js_req_5 = t5_req.json()['items']
-        for author in js_req_5:
-            author_list.append(author)
+    # t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/author/', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
+    # if t5_req.status_code == 500:
+    #     pass
+    # else:
+    #     js_req_5 = t5_req.json()['items']
+    #     for author in js_req_5:
+    #         author_list.append(author)
     
     #foreign authors from team 14
     t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/authors', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -334,12 +334,14 @@ def get_likes_on_post(post):
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
             req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
-            if req.status_code == 500:
+            if req.status_code == 404:
+                return ""
+            elif req.status_code == 500:
                 return ""
             else:
                 return req.json()
 
-    
+
 def send_like_object(post_url, author, post_author):
     serializer = UserSerializer(author)
     author_id = post_author.strip("/").split("/author/")[-1]
