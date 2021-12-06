@@ -11,22 +11,32 @@
 
 
 <main>
-    <div>
+    <div class="mb-6">
         {% if user.is_authenticated %}
         <p class="non-white-title">My Stream</p>
         {% if object_list %}
             {% for post in object_list %}
             <!-- change this to ID when author and user are matched -->
-            {% if post.author.username == user.username %}
-                <div class="post">
-                    <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
-                    By: {{ post.author }} <br>
-                    {{ post.description }}
-                </div>
-            {% endif %}
+                {% if post.author.username == user.username %}
+                    <div class="post">
+                        <div class="flex">
+                            <small>
+                                {% load tz %}
+                                {% localtime on %}
+                                <small>Created: {{post.published}}</small>
+                                {% endlocaltime %}
+                            </small>
+                            <div class="ml-auto">
+                                <small class="source-text">{{post.source}}</small>
+                            </div>
+                        </div>
+                        <a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">{{ post.title }}</a> <br>
+                        <p>{{ post.description }}</p>
+                    </div>
+                {% endif %}
             {% endfor %}
-            <h3>Sent to me</h3>
-            {% for post in object_list %}
+            <!-- <h3>Sent to me</h3> -->
+            <!-- {% for post in object_list %}
             {% if post.send_to.username == user.username and post.visibility == "send" %}
                 <div class="post">
                     <a href="{% url 'viewPost' post.author.username post.pk %}">{{ post.title }}</a> <br>
@@ -34,9 +44,9 @@
                     {{ post.description }}
                 </div>
             {% endif %}
-            {% endfor %}
+            {% endfor %} -->
         {% else %}
-            <p>No Posts to show.</p>
+            <p class="is-italic">No Posts to show.</p>
         {% endif %}
         {% endif %}
 

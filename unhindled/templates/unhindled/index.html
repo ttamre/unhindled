@@ -10,14 +10,14 @@
 {% /header %}
 
 <main>
-<div class="mb-5">
+<div class="mb-6">
     {% if user.is_authenticated %}
         <!-- <p class="non-white-title">Home</p> -->
         {% if object_list %}
             {% for post in object_list %}
                 {% with post.author.id|addstr:" "|addstr:user.id as ids %}
                 <!-- if need to bring back friend posts post.visibility == "FRIENDS" and ids|friend_check or  -->
-                {% if post.visibility == "PUBLIC" %}
+                {% if post.visibility == "PUBLIC" or "cmput404f21t17" in post.source%}
                     <div class="post">
                         <div class="is-flex">
                             <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
@@ -28,7 +28,7 @@
                                 {% endlocaltime %}
                             </small>
                             <div class="ml-auto">
-                                <small class="source-text">{{post.source}}</small>
+                                <small class="source-text">{% shorten_source post.source %}</small>
                             </div>
                         </div>
                         {% if post.is_shared_post %}
@@ -43,7 +43,7 @@
                 {% endwith %}
             {% endfor %}
         {% else %}
-            <p>No Posts to Show.</p>
+            <p class="mt-3 is-italic">No Posts to show.</p>
         {% endif %}
     {% else %}
         <!-- <p class="non-white-title">Home</p> -->
@@ -71,7 +71,7 @@
                 {% endif %}
             {% endfor %}
         {% else %}
-            <p>No Posts to show.</p>
+            <p class="mt-3 is-italic">No Posts to show.</p>
         {% endif %}
     {% endif %}
 </div>

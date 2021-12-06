@@ -1,62 +1,50 @@
 from django import template
+from django.db.models.query import QuerySet
+
+from unhindled.connect import get_comment_likes
 from . .models import Comment, Post, Like
-from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
-
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 register = template.Library()
 
 User = get_user_model()
- 
-@register.filter(name='comment_liked')
-def comment_liked(comment, author):
-    if str(comment).startswith('http'):
+
+@register.simple_tag
+def get_likes(comment, post):
+    if type(post) == dict:
+        likes = get_comment_likes(comment["id"], post)
+        if type(likes) == dict:
+            try:
+                return likes["items"]
+            except:
+                return likes["item"]
+        return likes
+    else:
+        return Like.objects.filter(comment=comment)
+
+@register.simple_tag
+def likes_count(like_list):
+    return len(like_list)
+
+@register.simple_tag
+def object_liked(like_list, author):
+    if like_list == "0 Likes":
         return False
-    else:
-        comment = Comment.objects.get(id=comment)
-        likes = Like.objects.filter(comment=comment, author=author)
+    if type(like_list) == QuerySet:
+        likes = like_list.filter(author=author)
         return len(likes) == 1
+    else:
+        for like in like_list:
+            id = str(author.id)
+            if id in like["author"]["id"]:
+                return True
 
+    return False
 
 @register.simple_tag
-def comment_text(comment, author):
-    if str(comment).startswith('http'):
-        return 'A'
+def singular_like(likes_list):
+    
+    if len(likes_list) == 1:
+        return "Like"
     else:
-        comment = Comment.objects.get(id=comment)
-        likes = Like.objects.filter(comment=comment, author=author)
-        if len(likes) >= 1:
-            return "Unlike"
-        else:
-            return "Like"
-
-@register.simple_tag
-def like_count_comment(comment):
-    if str(comment).startswith('http'):
-        return 0
-    else:
-        comment = Comment.objects.get(id=comment)
-        likes = Like.objects.filter(comment=comment)
-        return len(likes)
-
-@register.simple_tag
-def singular_like_comment(comment):
-    # if 'https://' in str(post):
-    #     post = post.split('/')[-1]
-    #     post = uuid.UUID(post)
-    # elif 'http://' in str(post):
-    #     post = post.split('/')[-1]
-    #     post = uuid.UUID(post)
-    likes = ""
-    if type(comment) != dict:
-        likes = Comment.objects.filter(comment=comment)
-    else:
-        pass
-
-    if len(likes) == 1:
-        return "like"
-    else:
-        return "likes"
+        return "Likes"

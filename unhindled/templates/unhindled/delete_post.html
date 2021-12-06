@@ -8,13 +8,15 @@
 {% #header user=user %}
 {% /header %}
 <main>
-    <p class="non-white-title">Create Post</h1>
+    <p class="non-white-title">Delete Post</h1>
 
     <form method="POST">
         {% csrf_token %}
         <strong>Are you sure you want to delete this post?</strong>
-        <input type="submit" value="Confirm" />
-        <input type="cancel" name="Cancel" value="Cancel" />
+        <div class="flex my-5">
+            <input type="submit" value="Delete" class="button mr-4">
+            <a href="{% url 'viewPost' post.author.displayName post.id %}"><input type="button" value="Cancel" class="cancel-button"></a>
+        </div>
     </form>
 </main>
 {% endblock %}

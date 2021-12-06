@@ -1,8 +1,10 @@
 from django.db.models import fields
 from django.db.models.fields import Field
+from project404.settings import MEDIA_ROOT
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Post, Follower, FollowRequest, UserProfile, Comment, Like
+from .models import ForeignAuthor, Post, Follower, FollowRequest, UserProfile, Comment, Like
+import base64
 
 User = get_user_model()
 
@@ -33,7 +35,19 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         data["type"] = "author"
         # data["github"] = str(userProfile.github)
         return data
-        
+
+class ForeignAuthorSerializer(serializers.HyperlinkedModelSerializer):
+
+    host = "https://unhindled.herokuapp.com/"
+    class Meta:
+        model = ForeignAuthor
+        fields = "__all__"
+
+    def to_representation(self, obj):
+        data = super().to_representation(obj)
+        data["url"] = data["id"]
+        data["type"] = "author"
+        return data
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
@@ -50,18 +64,32 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         data['source'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['origin'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['comments'] = data["id"] + "/comments"
+        if obj.images is not None:
+            img = MEDIA_ROOT + obj.images.url[6:]
+            with open(img, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            encoding = img.split(".")[-1]
+            # data['content'] = "data:image/" + encoding + ";base64," + str(encoded_string) Uncomment for easy encoding
+            data['content'] = encoded_string
+            data['contentType'] = "image/" + encoding
+
         return data
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
+    foreign_author = ForeignAuthorSerializer()
     class Meta:
         model = Comment
-        fields = ('author','comment','contentType','published','id')
+        fields = ('author','comment','contentType','published','id', 'foreign_author')
         depth = 1
         
     def to_representation(self, obj):
         data = super().to_representation(obj)
+        if obj.author is None:
+            data["author"] = data["foreign_author"]
+        data.pop("foreign_author", None)
         data["type"] = "comment"
+        
         return data
 
 #for URL: ://service/author/{AUTHOR_ID}/followers
@@ -100,11 +128,12 @@ class FollowRequestSerializer(serializers.HyperlinkedModelSerializer):
 class LikeSerializer(serializers.HyperlinkedModelSerializer):
     author = UserSerializer()
     comment = CommentSerializer()
+    foreign_author = ForeignAuthorSerializer()
     host = "https://unhindled.herokuapp.com/"
     post = PostSerializer()
     class Meta:
         model = Like
-        fields = ('author', 'comment', 'post', 'id')
+        fields = ('author', 'comment', 'post', 'id', 'foreign_author')
         depth = 1
 
     def to_representation(self, obj):
@@ -120,5 +149,9 @@ class LikeSerializer(serializers.HyperlinkedModelSerializer):
             data["comment"] = str(obj.comment.id)
             data["post"] = self.host + obj.author.id + "/posts/" + str(obj.comment.post.id)
         
+        if obj.author is None:
+            data["author"] = data["foreign_author"]
+        data.pop("foreign_author", None)
+
         return data
 

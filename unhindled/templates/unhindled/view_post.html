@@ -11,9 +11,11 @@
 {% load len_check %}
 {% load comment_like %}
 {% load post_like %}
+{% load image_helper %}
 
 <main>
 <div class="is-flex mt-3">
+  {% get_likes_post post as likes_list_post %}
   <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
   <small>
     &nbsp;• {% load tz %}
@@ -25,8 +27,11 @@
 <p class="non-white-title is-size-4 mb-2">{{post.title}}</p>
 <p>{{post.description}}</p>
 <div class="post-box">
+  {% image_type post.contentType as is_image %}
   {% if post.contentType == "text/markdown" %}
     {{post.content | markdown | safe }}
+  {% elif is_image %}
+    <img src="{% get_image_encoding post.contentType post.content%}">
   {% else %}
     <p>{{post.content}}</p>
   {% endif %}
@@ -37,13 +42,14 @@
 
 
 <div class="is-flex">
-  <p class="mb-3 mr-2 has-text-weight-bold">{% like_count_post post %} {% singular_like post %}</p>
+  <p class="mb-3 mr-2 has-text-weight-bold">{% likes_count likes_list_post %} {% singular_like likes_list_post %}</p>
 
 {% if user.is_authenticated %}
-  {% if post|post_liked:user %}
-    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
+  {% object_liked likes_list_post user as post_is_liked %}
+  {% if post_is_liked %}
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}">Unlike</a></span>
   {% else %}
-    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}">Like</a></span>
   {% endif %}
 {% endif %}
 
@@ -72,19 +78,25 @@
 {% endif %}
 
 
-<div class="mt-5 mb-5">
+<div class="mt-5 mb-6">
   <p class="mt-3">{{ comment_size}} Comment{{ comment_size|pluralize}}</p>
   <br>
   {% for comment in comments %}
+  {% get_likes comment post as likes_list %}
   <div class="comment-box mb-3">
-    <strong><a href="/author/{% valid_url_profile post.author.id %}">{{comment.author.displayName}}</a> - {{comment.published}}</strong>
+    {% if comment.foreign_author %}
+      <strong><a href="/author/{% valid_url_profile comment.foreign_author.id %}">{{comment.foreign_author.displayName}}</a> - {{comment.published}}</strong>
+    {% else %}
+      <strong><a href="/author/{% valid_url_profile comment.author.id %}">{{comment.author.displayName}}</a> - {{comment.published}}</strong>
+    {% endif %}
     <p>{{ comment.comment}}</p>
-    <p>{% like_count_comment comment.id %} {% singular_like_comment comment %}
+    <p>{% likes_count likes_list %} {% singular_like likes_list %}
     {% if user.is_authenticated %}
-      {% if comment.id|comment_liked:user %}
-      <a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile comment.id %}/comment">{% comment_text comment.id user %}</a>
+      {% object_liked likes_list user as comment_is_liked %}
+      {% if comment_is_liked %}
+      <a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/comment/{% valid_url_profile comment.id %}">Unlike</a>
       {% else %}
-      <a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile comment.id %}/comment">{% comment_text comment.id user %}</a>
+      <a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/comment/{% valid_url_profile comment.id %}">Like</a>
       {% endif %}
     {% endif %}</p>
   </div>

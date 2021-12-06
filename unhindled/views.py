@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
-from .models import Inbox, Like, Post, Follower, FollowRequest, UserProfile, Comment
+from .models import ForeignAuthor, Inbox, Like, Post, Follower, FollowRequest, UserProfile, Comment
 from requests.models import Response as MyResponse
 from rest_framework.response import Response
 from .forms import *
@@ -284,7 +284,7 @@ class PostViewSet(viewsets.ViewSet):
         if user != loggedInUser:
             return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        postData = request.POST
+        postData = json.loads(request.body)
         author = user
         contentType = 'txt'
         for types in Post.CONTENT_TYPES:
@@ -335,21 +335,17 @@ class PostViewSet(viewsets.ViewSet):
             return Response(request.data, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
-        operation_description="Update a post",
+        operation_description="Posting a comment",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['type', 'id', 'author', 'contentType', 'title', 'description', 'visibility', 'created_on', 'source', 'origin'],
+            required=['type', 'author', 'contentType', 'title', 'description', 'visibility', 'created_on', 'source', 'origin'],
             properties={  # TODO ^ are all these required?
                 "type": openapi.Schema(type=openapi.TYPE_STRING),
-                "ID": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
                 "author": openapi.Schema(type=openapi.TYPE_OBJECT),
                 "contentType": openapi.Schema(type=openapi.TYPE_STRING),
-                "title": openapi.Schema(type=openapi.TYPE_STRING),
-                "description": openapi.Schema(type=openapi.TYPE_STRING),
-                "visibility": openapi.Schema(type=openapi.TYPE_STRING),
-                "created_on": openapi.Schema(type=openapi.TYPE_STRING),
-                "source": openapi.Schema(type=openapi.TYPE_STRING),
-                "origin": openapi.Schema(type=openapi.TYPE_STRING)
+                "comment": openapi.Schema(type=openapi.TYPE_STRING),
+                "published": openapi.Schema(type=openapi.TYPE_STRING),
             }
         ),
         responses={
@@ -370,62 +366,38 @@ class PostViewSet(viewsets.ViewSet):
                 examples={"application/json": {"message": "Not found"}}
             ),
         })
-    def updatePost(self, request, id, pk):
+    def updatePost(self, request, id, post_id):
         """
-        Update a post
+        Add comment to post
         """
-        loggedInUser = request.user
-        user = User.objects.get(id=id)
-        try:
-            postToEdit = Post.objects.get(id=pk)
-        except:
-            return Response({}, status.HTTP_404_NOT_FOUND)
-            
-        if user != loggedInUser:
-            return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
+        post = get_object_or_404(Post, id=post_id)
+        postData = json.loads(request.body)
+        if "comment" in postData["type"]:
+            existingAuthors = ForeignAuthor.objects.filter(id=postData["author"]["id"])
+            if len(existingAuthors) >= 1:
+                foreign_author = ForeignAuthor.objects.get(id=postData["author"]["id"])
+            else:
+                authorData = postData["author"]
+                foreign_author = ForeignAuthor(id=authorData["id"],host=authorData["host"],displayName=authorData["displayName"])
+                if "github" in authorData.keys():
+                    foreign_author.github = authorData["github"]
+                if "profileImage" in authorData.keys():
+                    foreign_author.profileImage = authorData["profileImage"]
+                foreign_author.save()
 
-        postData = request.POST
-        warning = {}
-        if "contentType" in postData.keys():
-            if postData["contentType"] != "":
-                for types in Post.CONTENT_TYPES:
-                    if types[1] == postData["contentType"] or types[0] == postData["contentType"]:
-                        postToEdit.contentType = types[0]
-        if "title" in postData.keys() and postData["title"] != "":
-            if postData["contentType"] != "":
-                postToEdit.title = postData["title"]
-        if "description" in postData.keys() and postData["description"] != "":
-            postToEdit.description = postData["description"]
-        if "content" in postData.keys() and postData["content"] != "":
-            postToEdit.content = postData["content"]
-        if "visibility" in postData.keys() and postData["visibility"] != "":
-            for types in Post.VISIBILITY:
-                if types[1].lower() == postData["visibility"].lower():
-                    if types[0] != "send":
-                        postToEdit.visibility = types[0]
-                    else:
-                        warning["visibility"] =  "Post can't be converted to a Inbox post, please delete the post and repost with changed visibility"
-        if "send_to" in postData.keys() and postData["send_to"] != "":
-            warning["send_to"] =  "Post can't change receiver. Please delete post and resend"
-        if "published" in postData.keys() and postData["published"] != "":
-            warning["published"] = "Published date can't be changed"
-        if "images" in postData.keys() and postData["images"] != "":
-            postToEdit.images = postData["images"]
-    
-        try:
-            postToEdit.save()
-            serializer = PostSerializer(postToEdit)
-            data = {}
-            data["UpdatedPost"] = serializer.data
-            if len(warning.keys()) > 0:
-                data["Warnings"] = warning
-            return Response(data, status=status.HTTP_202_ACCEPTED)
+            comment = postData["comment"]
+            contentType = "txt"
+            for types in Comment.CONTENT_TYPES:
+                if postData["contentType"] == types[1]:
+                    contentType = types[0]
 
-        except:
-            errors = {}
-            errors["Error"] = "Invalid post format"
-            errors["ReceivedData"] = postData
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+            newComment = Comment(post=post,comment=comment, contentType=contentType, foreign_author=foreign_author)
+            newComment.save()
+
+            serializer = CommentSerializer(newComment)
+
+            return Response({'addedComment':serializer.data}, status=status.HTTP_201_CREATED)
+
 
     @swagger_auto_schema(
         operation_description="Delete a post",
@@ -583,7 +555,7 @@ class UserViewSet(viewsets.ViewSet):
 
         userProfile = UserProfile.objects.get(user=user)
         
-        updateData = request.POST
+        updateData = json.loads(request.body)
 
         if "user_id" in updateData.keys() and updateData["user_id"] != "":
             otherUser = User.objects.filter(user_id=updateData["user_id"])
@@ -720,34 +692,9 @@ class CommentViewSet(viewsets.ViewSet):
         """
         Post a comment
         """
-        loggedInUser = request.user
-        try:
-            post = Post.objects.get(id=post_id)
-        except:
-            return Response({"error": "post not found"}, status.HTTP_404_NOT_FOUND)
+        pass
 
-        if loggedInUser.is_authenticated:
-            commentData = request.POST
-            if ("comment" not in commentData.keys()) or ("contentType" not in commentData.keys()):
-                return Response({"error": "missing comment text or contentType"}, status.HTTP_400_BAD_REQUEST)
-
-            if commentData["contentType"] not in ["md", "txt"]:
-                return Response({"error": "comment only supports md and txt"}, status.HTTP_400_BAD_REQUEST)
-
-            try:
-                newComment = Comment(post=post,author=loggedInUser,
-                    comment=commentData["comment"],contentType=commentData["contentType"])
-
-                newComment.save()
-
-                serializer = CommentSerializer(newComment)
-                return Response({"NewComment": serializer.data}, status.HTTP_201_CREATED)
-
-            except:
-                return Response({"error": "Could not save comment"}, status.HTTP_400_BAD_REQUEST)
-            
-        else:
-            return Response({"author":"Need to login"}, status=status.HTTP_401_UNAUTHORIZED)
+        
 
 class FollowerListViewset (viewsets.ViewSet):
     """
@@ -1122,18 +1069,53 @@ class InboxViewSet(viewsets.ViewSet):
     host = "https://unhindled.herokuapp.com/"
 
     def post(self, request, id):
-        postData = request.POST
+        postData = json.loads(request.body)
         user = get_object_or_404(User,id=id)
-        if "type" not in postData.keys():
-            return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
+        # if "type" not in postData.keys():
+        #     return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
         
         if postData["type"].lower() == "post":
             link = postData["id"].replace(postData["source"], self.host)
             inbox = Inbox(inbox_of=user,inbox_from=postData["author"]["displayName"], link=link, type="post")
             inbox.save()
+            return Response({"status": "Post received in inbox"}, status.HTTP_201_CREATED)
 
         elif postData["type"].lower() == "like":
-            pass
+            existingAuthors = ForeignAuthor.objects.filter(id=postData["author"]["id"])
+            if len(existingAuthors) >= 1:
+                foreign_author = ForeignAuthor.objects.get(id=postData["author"]["id"])
+            else:
+                authorData = postData["author"]
+                foreign_author = ForeignAuthor(id=authorData["id"],host=authorData["host"],displayName=authorData["displayName"])
+                if "github" in authorData.keys():
+                    foreign_author.github = authorData["github"]
+                if "profileImage" in authorData.keys():
+                    foreign_author.profileImage = authorData["profileImage"]
+                foreign_author.save()
+            
+
+            obj = postData["object"]
+            if "comment" in obj:
+                comment_id = obj.strip("/").split("/")[-1]
+                comment = get_object_or_404(Comment, id=comment_id)
+                likes = Like.objects.filter(comment=comment, foreign_author=foreign_author)
+                if len(likes) < 1:
+                    newLike = Like(comment=comment,foreign_author=foreign_author)
+                    newLike.save()
+                    return Response({"status": "Comment like received in inbox"}, status.HTTP_201_CREATED)
+                else:
+                    return Response({"status": "Comment already liked by user"}, status.HTTP_208_ALREADY_REPORTED)
+            else:
+                post_id = obj.strip("/").split("/")[-1]
+                post = get_object_or_404(Post, id=post_id)
+                likes = Like.objects.filter(post=post, foreign_author=foreign_author)
+                if len(likes) < 1:
+                    newLike = Like(post=post,foreign_author=foreign_author)
+                    newLike.save()
+                    return Response({"status": "Post like received in inbox"}, status.HTTP_201_CREATED)
+                else:
+                    return Response({"status": "Post already liked by user"}, status.HTTP_208_ALREADY_REPORTED)
+
 
         elif postData["type"].lower() == "follow":
             pass
@@ -1154,7 +1136,8 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         # See: https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#json-script
         username = UserProfile.objects.get(user=request.user).github
         headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{username}/events/public'}
-        return render(request, 'unhindled/mystream.html', {"headers": headers})
+        queryset = Post.objects.order_by('published')
+        return render(request, 'unhindled/mystream.html', {"headers": headers, "object_list": queryset})
 
 
 class AccountView(generic.CreateView):
@@ -1214,7 +1197,7 @@ class CreatePostView(LoginRequiredMixin, generic.CreateView):
     redirect_field_name = 'redirect_to'
     model = Post
     template_name = "unhindled/create_post.html"
-    fields = "__all__"
+    form_class = CreatePostForm
     
     def form_valid(self, form):
         form.instance.author = self.request.user
@@ -1229,7 +1212,7 @@ class SharePost(LoginRequiredMixin, generic.View):
     login_url = 'accounts/login/'
     redirect_field_name = 'redirect_to'
 
-    def get(self, request, user, id):
+    def get(self, request, user_id, id):
         post_object = get_object_or_404(Post, pk=id)
         current_user = request.user
         if current_user == User:
@@ -1244,7 +1227,7 @@ class SharePost(LoginRequiredMixin, generic.View):
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
         return HttpResponseRedirect(reverse('index'))
   
-def likeObject(request, user_id, id, obj_type):
+def likeObject(request, user_id, id):
 
     try:
         post = get_object_or_404(Post, id=id)
@@ -1255,43 +1238,72 @@ def likeObject(request, user_id, id, obj_type):
 
     if type(post) is dict:
         send_like_object(post["id"],author,post["author"]["id"])
-        post["id"] = post["id"].strip("/")
-        post["author"]["id"] = post["author"]["id"].strip("/")
         return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
     else:
-        if obj_type == "comment":
-            comment = Comment.objects.get(id = id)
-            existingLike = Like.objects.filter(comment=comment,author=author)
-            if (len(existingLike) == 0):
-                like = Like(comment=comment,author=author)
-                like.save()
-            post = comment.post
-        elif obj_type == "post":
-            post = Post.objects.get(id = id)
-            existingLike = Like.objects.filter(post=post,author=author)
-            if (len(existingLike) == 0):
-                like = Like(post=post,author=author)
-                like.save()
+        post = Post.objects.get(id = id)
+        existingLike = Like.objects.filter(post=post,author=author)
+        if (len(existingLike) == 0):
+            like = Like(post=post,author=author)
+            like.save()
 
-    return HttpResponseRedirect(post.get_absolute_url())
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
-def unlikeObject(request, user_id, id, obj_type):
-    author = request.user
-    if obj_type == "comment":
-        comment = Comment.objects.get(id = id)
+def likeComment(request, user_id, id, comment_id):
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    author = request.user 
+
+    if type(post) is dict:
+        send_like_comment(post["id"],author,post["author"]["id"], comment_id)
+        return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
+    else:
+        comment = Comment.objects.get(id = comment_id)
         existingLike = Like.objects.filter(comment=comment,author=author)
-        if (len(existingLike) >= 1):
-            existingLike.delete()
+        if (len(existingLike) == 0):
+            like = Like(comment=comment,author=author)
+            like.save()
         post = comment.post
-    elif obj_type == "post":
+        
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
+
+def unlikeObject(request, user_id, id):
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    if type(post) is dict:
+        pass
+    else:
+        author = request.user
         post = Post.objects.get(id = id)
         existingLike = Like.objects.filter(post=post,author=author)
         if (len(existingLike) >= 1):
             existingLike.delete()
 
-    return HttpResponseRedirect(post.get_absolute_url())
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
+def unlikeComment(request, user_id, id, comment_id):
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    if type(post) is dict:
+        pass
+    else:
+        author = request.user
+        comment = Comment.objects.get(id = comment_id)
+        existingLike = Like.objects.filter(comment=comment,author=author)
+        if (len(existingLike) >= 1):
+            existingLike.delete()
+        post = comment.post
+
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
 def view_post(request, user_id, id):
     try:
@@ -1332,6 +1344,7 @@ def view_post(request, user_id, id):
         'comment_form': form_comment,
         'comment_size': len(comments)
     }
+
     return render(request, 'unhindled/view_post.html', context)
 
 
@@ -1367,21 +1380,23 @@ class ProfileView(LoginRequiredMixin, View):
     login_url = 'accounts/login/'
     redirect_field_name = 'redirect_to'
     def get(self, request, id, *args, **kwargs):
-
         try:
             profile = UserProfile.objects.get(pk=id)
         except:
             profile = get_json_authors(id)
 
-       
         if type(profile) is dict:
             user = profile['displayName']
             user_post = []
+            for post in get_foreign_posts_list():
+                if post['author']['id'] == profile['id']:
+                    user_post.append(post)
+
         else:
             user = User.objects.get(id=id)
             profile = UserProfile.objects.get(user=user)
             user_post = Post.objects.filter(author=user).order_by('-published')
-        
+
         context = {
             'author': user,
             'profile': profile,

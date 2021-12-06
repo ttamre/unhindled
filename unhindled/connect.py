@@ -8,23 +8,16 @@ from .serializers import UserSerializer
 import requests
 import logging
 
-from unhindled.serializers import UserSerializer
+from unhindled.serializers import PostSerializer, UserSerializer
 
 
 servers = [
         ('social-dis.herokuapp.com', ('socialdistribution_t03','c404t03')),
         ('cmput404-socialdist-project.herokuapp.com', ('socialcircleauth','cmput404')),
-        ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14'))
+        ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14')),
+        ('cmput404f21t17.herokuapp.com/service', ('a50ee73d-ee34-4201-8258-ead20eb71857','123456')),
+        ('project-api-404.herokuapp.com/api/authors', ('team15','team15'))
     ]
-
-def test():
-    test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
-    # test = requests.get('http://127.0.0.1:8000/service/allposts', auth=('q','q'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if test.status_code == 500:
-        pass
-    else:
-        t = test.json()
-    return t
 
 def get_json_post(id):
     found_post = ''
@@ -39,15 +32,6 @@ def get_json_post(id):
             found_post = post
 
     return found_post
-    
-#get our own authors
-def test_authors():
-    test = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if test.status_code == 500:
-        pass
-    else:
-        t = test.json()
-    return t  
 
 def get_json_authors(id):
     found_authors = ''
@@ -61,10 +45,8 @@ def get_json_authors(id):
         if split == id:
             found_authors = authors
     return found_authors
-    
 
 
-    
 #get foreign posts
 def get_foreign_posts_list():
     post_list=[]
@@ -78,16 +60,15 @@ def get_foreign_posts_list():
         for post in js_req_3:
             post_list.append(post)
 
-       
-    # #foreign posts from team 5
-    # t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=10000', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
 
-    # if t5_req.status_code == 500:
-    #     pass
-    # else:
-    #     js_req_5 = t5_req.json()
-    #     for post in js_req_5:
-    #         post_list.append(post)
+    #foreign posts from team 5
+    t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/post/request_post_list?size=10000', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if t5_req.status_code == 500:
+        pass
+    else:
+        js_req_5 = t5_req.json()
+        for post in js_req_5:
+            post_list.append(post)
 
     #foreign posts from team 14
     t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts?size=10000', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -98,7 +79,27 @@ def get_foreign_posts_list():
         js_req_14 = t14_req.json()
         for post in js_req_14:
             post_list.append(post)
-            
+
+   #foreign posts from team 17
+    t17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/', auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if t17_req.status_code == 500:
+        pass
+    else:
+        js_req_17 = t17_req.json()['items']
+        for post in js_req_17:
+            if ":8000" not in post["source"]:
+                post_list.append(post)
+
+    #foreign posts from team 23
+    # t23_req = requests.get('https://project-api-404.herokuapp.com/api/posts', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
+    # if t23_req.status_code == 500:
+    #     pass
+    # else:
+    #     print(t23_req)
+    #     js_req_23 = t23_req.json()['items']
+    #     for post in js_req_23:
+    #         post_list.append(post)
+
     return post_list
 
 #get foreign authors
@@ -114,11 +115,11 @@ def get_foreign_authors_list():
             author_list.append(author)
 
     # foreign authors from team 5
-    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/authors/', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/authors/', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
     if t5_req.status_code == 500:
         pass
     else:
-        js_req_5 = t5_req.json()
+        js_req_5 = t5_req.json()['items']
         for author in js_req_5:
             author_list.append(author)
     
@@ -130,7 +131,25 @@ def get_foreign_authors_list():
         js_req_14 = t14_req.json()['items']
         for author in js_req_14:
             author_list.append(author)
-            
+
+    #foreign authors from team 17
+    t17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/author/', auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if t17_req.status_code == 500:
+        pass
+    else:
+        js_req_17 = t17_req.json()['items']
+        for author in js_req_17:
+            author_list.append(author)
+
+    #foreign authors from team 23
+    # t23_req = requests.get('https://project-api-404.herokuapp.com/api/authors', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
+    # if t23_req.status_code == 500:
+    #     pass
+    # else:
+    #     js_req_23 = t23_req.json()['items']
+    #     for author in js_req_23:
+    #         author_list.append(author)
+
     #foreign authors from our own heroku for testing 
     #t15_req = requests.get('https://unhindled.herokuapp.com/service/authors', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
     #if t15_req.status_code == 500:
@@ -140,7 +159,21 @@ def get_foreign_authors_list():
         #for author in js_req_15:
             #author_list.append(author)
     return author_list
- 
+
+def send_post_to_inbox(author, post):
+    for server in servers:
+        if server[0][:-4] in author:
+            serializer = PostSerializer(post)
+            data = serializer.data
+            auth = server[1]
+            author_id = author.strip("/").split("/")[-1]
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            if req.status_code == 200:
+                return True
+
+    return False
+
 #get author given author.id NOT CURRENTLY IN USE  
 def foreign_get_author(author):
     #team 3 once implemented
@@ -201,10 +234,35 @@ def get_foreign_comments_list(source, author, post):
                 return []
     return []
 
-        
+def get_comment_likes(comment_link, post):
+    comment_link = comment_link.strip("/")
+    host = post["author"]["host"]
+    for server in servers:
+        if server[0][:-4] in host:
+            auth = server[1]
+            if "/posts/" in post["id"]:
+                post_id = post["id"].split("/posts/")[-1]
+            else:
+                post_id = post["id"].split("/post/")[-1]
+
+            if "/comments/" in comment_link:
+                comment_id = comment_link.split("/comments/")[-1]
+                comment_id = "/comments/" + comment_id
+            else:
+                comment_id = comment_link.split("/comment/")[-1]
+                comment_id = "/comment/" + comment_id
+            author_id = post["author"]["id"].split("/author/")[-1]
+
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/"+ post_id + comment_id + "/likes"
+            req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
+            response = req.json()
+            if type(response) == list:
+                return response
+            else:
+                return response["items"]
+    return []
 
 def post_foreign_comments(request, comm, postJson):
-    #print(request.user.id)
     author = User.objects.get(id=request.user.id)
     author = UserSerializer(author).data
     # author['id'] = "https://unhindled.herokuapp.com/author/35fc41c5-7f34-4d5b-aae4-5310b23d2b02"
@@ -226,13 +284,11 @@ def post_foreign_comments(request, comm, postJson):
         print(api_url)
         if t14_req.status_code == 200:
             pass    
-        else: 
+        else:
             return t14_req.json()
 
     #post comment on team 3
     if "social-dis.herokuapp.com" in postJson['id']:
-        print('team 3\n\n\n')
-       
         payload = { "type": "comments",
                     "author": json.dumps(author),
                     "comment": comm,
@@ -240,15 +296,29 @@ def post_foreign_comments(request, comm, postJson):
                     "published": str(datetime.now()),
                     "id": postJson['id'].split('/')[-1]
                 }
-        print(payload)
-        print(postJson['id']+"/comments")
         t3_req = requests.post(postJson['id']+"/comments", auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"}, json=payload)
         
         if t3_req.status_code == 200:
             pass
         else:
-            print(t3_req.json())
             return t3_req.json()
+
+    #print('team 14\n\n\n')
+    #post comment on team 14
+    if "linkedspace-staging.herokuapp.com" in postJson['id']:
+        
+        payload = {'Post_pk': postJson['comments'].replace('/comments', '').replace("/author/", "/api/author/"), 
+                    'auth_pk': str(request.user.pk), 
+                    'contentType': 'text/plain',
+                    'text': comm
+                    }
+        # print(payload)
+        api_url = postJson["comments"].replace("/author/", "/api/author/")
+        t14_req = requests.post(api_url, auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"}, json=payload)
+        if t14_req.status_code == 200:
+            pass    
+        else: 
+            return t14_req.json()
 
     #post comment on team 5
     # if "cmput404-socialdist-project.herokuapp.com" in postJson['id']:
@@ -272,34 +342,74 @@ def get_likes_on_post(post):
         if server[0][:-4] in source:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
-            # print(endpoint)
             req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
-            # print(req.json())
-            if req.status_code == 500:
+            if req.status_code == 404:
+                return ""
+            elif req.status_code == 500:
                 return ""
             else:
                 return req.json()
+                
 def foreign_send_post_to_inbox(follower_id, author):
     foreign_author = foreign_get_author()
     #for server in servers: 
         #if server[0][:-4] in post:
+
+
+def send_like_object(post_url, author, post_author):
+    serializer = UserSerializer(author)
+    author_id = post_author.strip("/").split("/author/")[-1]
+
+    if "posts" in post_url:
+        post_id = post_url.split("/posts/")[-1]
+    else:
+        post_id = post_url.split("/post/")[-1]
+
+    data = {}
+    data["type"] = "Like"
+    data["author"] = serializer.data
+    data["object"] = post_url
+    data["@context"] = "https://www.w3.org/ns/activitystreams"
+    data["summary"] = str(author.username) + " likes your post"
+    for server in servers:
+        if server[0][:-4] in post_url:
+            auth = server[1]
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
+            likeEndpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            req2 = requests.post(likeEndpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            if req.status_code == 200 or req2.status_code == 200:
+                return True
     
-def send_like_object(post, author, post_author):
+    return False
+
+def send_like_comment(post_url, author, post_author,comment_id):
     serializer = UserSerializer(author)
     author_id = post_author.strip("/").split("/author/")[-1]
     data = {}
-    data["type"] = "like"
+    if "posts" in post_url:
+        post_id = post_url.split("/posts/")[-1]
+    else:
+        post_id = post_url.split("/post/")[-1]
+
+    if "comments" in post_url:
+        comment_id = comment_id.split("/comments/")[-1]
+    else:
+        comment_id = comment_id.split("/comment/")[-1]
+    
+    data["type"] = "Like"
     data["author"] = serializer.data
-    data["object"] = post
+    data["object"] = post_url + "/comments/" + comment_id
     data["@context"] = "https://www.w3.org/ns/activitystreams"
+    data["summary"] = str(author.username) + " likes your post"
     for server in servers:
-        if server[0][:-4] in post:
+        if server[0][:-4] in post_url:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
-            req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
-            # print(endpoint)
-            # print(data)
-            if req.status_code == 200:
+            likeEndpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/comments/" + comment_id + "/likes"
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            req2 = requests.post(likeEndpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            if req.status_code == 200 or req2.status_code == 200:
                 return True
     
     return False
