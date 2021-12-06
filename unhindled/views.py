@@ -1227,7 +1227,7 @@ class SharePost(LoginRequiredMixin, generic.View):
         images=post_object.images, originalPost=post_object, sharedBy=current_user).save()
         return HttpResponseRedirect(reverse('index'))
   
-def likeObject(request, user_id, id, obj_type):
+def likeObject(request, user_id, id):
 
     try:
         post = get_object_or_404(Post, id=id)
@@ -1238,43 +1238,72 @@ def likeObject(request, user_id, id, obj_type):
 
     if type(post) is dict:
         send_like_object(post["id"],author,post["author"]["id"])
-        post["id"] = post["id"].strip("/")
-        post["author"]["id"] = post["author"]["id"].strip("/")
         return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
     else:
-        if obj_type == "comment":
-            comment = Comment.objects.get(id = id)
-            existingLike = Like.objects.filter(comment=comment,author=author)
-            if (len(existingLike) == 0):
-                like = Like(comment=comment,author=author)
-                like.save()
-            post = comment.post
-        elif obj_type == "post":
-            post = Post.objects.get(id = id)
-            existingLike = Like.objects.filter(post=post,author=author)
-            if (len(existingLike) == 0):
-                like = Like(post=post,author=author)
-                like.save()
+        post = Post.objects.get(id = id)
+        existingLike = Like.objects.filter(post=post,author=author)
+        if (len(existingLike) == 0):
+            like = Like(post=post,author=author)
+            like.save()
 
-    return HttpResponseRedirect(post.get_absolute_url())
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
-def unlikeObject(request, user_id, id, obj_type):
-    author = request.user
-    if obj_type == "comment":
-        comment = Comment.objects.get(id = id)
+def likeComment(request, user_id, id, comment_id):
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    author = request.user 
+
+    if type(post) is dict:
+        send_like_comment(post["id"],author,post["author"]["id"])
+        return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
+    else:
+        comment = Comment.objects.get(id = comment_id)
         existingLike = Like.objects.filter(comment=comment,author=author)
-        if (len(existingLike) >= 1):
-            existingLike.delete()
+        if (len(existingLike) == 0):
+            like = Like(comment=comment,author=author)
+            like.save()
         post = comment.post
-    elif obj_type == "post":
+        
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
+
+def unlikeObject(request, user_id, id):
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    if type(post) is dict:
+        pass
+    else:
+        author = request.user
         post = Post.objects.get(id = id)
         existingLike = Like.objects.filter(post=post,author=author)
         if (len(existingLike) >= 1):
             existingLike.delete()
 
-    return HttpResponseRedirect(post.get_absolute_url())
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
+def unlikeComment(request, user_id, id, comment_id):
+    try:
+        post = get_object_or_404(Post, id=id)
+    except:
+        post = get_json_post(id)
+
+    if type(post) is dict:
+        pass
+    else:
+        author = request.user
+        comment = Comment.objects.get(id = comment_id)
+        existingLike = Like.objects.filter(comment=comment,author=author)
+        if (len(existingLike) >= 1):
+            existingLike.delete()
+        post = comment.post
+
+    return HttpResponseRedirect(reverse('viewPost', args=[user_id, id]))
 
 def view_post(request, user_id, id):
     try:

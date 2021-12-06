@@ -19,6 +19,8 @@ urlpatterns = [
     path('author/<str:user_id>/posts/<str:pk>/edit', views.UpdatePostView.as_view(), name='updatePost'),
     path('author/<str:user_id>/posts/<str:pk>/delete', views.DeletePostView.as_view(), name='deletePost'),
     path('author/<str:user_id>/posts/<str:id>/share', views.SharePost.as_view(), name='sharePost'),
-    path('author/<str:user_id>/like/<str:id>/<str:obj_type>', views.likeObject, name='likeObject'),
-    path('author/<str:user_id>/unlike/<str:id>/<str:obj_type>', views.unlikeObject, name='unlikeObject'),
+    path('author/<str:user_id>/like/<str:id>', views.likeObject, name='likeObject'),
+    path('author/<str:user_id>/like/<str:id>/comment/<str:comment_id>', views.likeComment, name='likeComment'),
+    path('author/<str:user_id>/unlike/<str:id>', views.unlikeObject, name='unlikeObject'),
+    path('author/<str:user_id>/unlike/<str:id>/comment/<str:comment_id>', views.unlikeComment, name='unlikeComment'),
 ]

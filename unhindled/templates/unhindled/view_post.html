@@ -41,9 +41,9 @@
 
 {% if user.is_authenticated %}
   {% if post|post_liked:user %}
-    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}">{% post_text post user %}</a></span>
   {% else %}
-    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/post">{% post_text post user %}</a></span>
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}">{% post_text post user %}</a></span>
   {% endif %}
 {% endif %}
 
@@ -88,9 +88,9 @@
     {% if user.is_authenticated %}
       {% comment_liked likes_list user as comment_is_liked %}
       {% if comment_is_liked %}
-      <a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile comment.id %}/comment">Unlike</a>
+      <a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile post.id %}/comment/{% valid_url_profile comment.id %}">Unlike</a>
       {% else %}
-      <a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile comment.id %}/comment">Like</a>
+      <a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile post.id %}/comment/{% valid_url_profile comment.id %}">Like</a>
       {% endif %}
     {% endif %}</p>
   </div>
