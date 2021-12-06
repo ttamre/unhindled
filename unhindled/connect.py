@@ -6,6 +6,7 @@ from django.contrib import auth
 from .models import User
 from .serializers import UserSerializer
 import requests
+import logging
 
 from unhindled.serializers import PostSerializer, UserSerializer
 
@@ -157,7 +158,6 @@ def get_foreign_authors_list():
         #js_req_15 = t15_req.json()['items']
         #for author in js_req_15:
             #author_list.append(author)
-    
     return author_list
 
 def send_post_to_inbox(author, post):
@@ -178,21 +178,23 @@ def send_post_to_inbox(author, post):
 def foreign_get_author(author):
     #team 3 once implemented
     if "social-dis.herokuapp.com" in author:
-        url = author
+        author = author.split("/")[4]
+        url = "https://social-dis.herokuapp.com/connection/author-detail/"+author
         t3_req = requests.get(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
         if t3_req.status_code == 500:
             return ""
         else:
             return t3_req.json()
-    #our own heroku for local testing
-    if "unhindled.herokuapp.com" in author:
-        url = author
-        t15_req = requests.put(url, auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
-        if t15_req.status_code == 500:
+def foreign_send_friend_request(author, follower):
+    #team 3 once implemented
+    if "social-dis.herokuapp.com" in author:
+        author = author.split("/")[4]
+        url = "https://social-dis.herokuapp.com/connection/friend-request/"+author +'/'+ str(follower)
+        t3_req = requests.post(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t3_req.status_code == 500:
             return ""
         else:
-            return t15_req.json()
-
+            return t3_req.json()
 #sends put request to add one of our authors as a follower NOT CURRENTLY IN USE
 def foreign_add_follower(author, follower):
     #team 3 once implemented
@@ -203,14 +205,21 @@ def foreign_add_follower(author, follower):
             return ""
         else:
             return t3_req.json()
-    #our own heroku for local testing
-    if "unhindled.herokuapp.com" in author:
+    if "cmput404-socialdist-project.herokuapp.com" in author:
         url = author +'/followers/'+ follower
-        t15_req = requests.put(url, auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
-        if t15_req.status_code == 500:
+        t3_req = requests.put(url, auth=('socialdistribution_t03','c404t03'), headers={'Referer': "http://127.0.0.1:8000/"})
+        if t3_req.status_code == 500:
             return ""
         else:
-            return t15_req.json()
+            return t3_req.json()
+    #our own heroku for local testing
+    #if "unhindled.herokuapp.com" in author:
+        #url = author +'/followers/'+ follower
+        #t15_req = requests.put(url, auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
+        #if t15_req.status_code == 500:
+           # return ""
+       # else:
+           # return t15_req.json()
 
 #get foreign comments
 def get_foreign_comments_list(source, author, post):
@@ -340,6 +349,11 @@ def get_likes_on_post(post):
                 return ""
             else:
                 return req.json()
+                
+def foreign_send_post_to_inbox(follower_id, author):
+    foreign_author = foreign_get_author()
+    #for server in servers: 
+        #if server[0][:-4] in post:
 
 
 def send_like_object(post_url, author, post_author):

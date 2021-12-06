@@ -16,7 +16,8 @@
         {% if object_list %}
             {% for post in object_list %}
                 {% with post.author.id|addstr:" "|addstr:user.id as ids %}
-                {% if post.visibility == "FRIENDS" and ids|friend_check or post.visibility == "PUBLIC" or "cmput404f21t17" in post.source %}
+                <!-- if need to bring back friend posts post.visibility == "FRIENDS" and ids|friend_check or  -->
+                {% if post.visibility == "PUBLIC" or "cmput404f21t17" in post.source%}
                     <div class="post">
                         <div class="is-flex">
                             <small>Posted by: <a href="/author/{% valid_url_profile post.author.id %}">{{post.author.displayName}}</a></small>
