@@ -1,5 +1,7 @@
 from django.urls import path, include
+from django.contrib import admin
 from . import views
+
 urlpatterns = [
     #internal
     path('', views.HomeView.as_view(), name='index'),
@@ -23,4 +25,6 @@ urlpatterns = [
     path('author/<str:user_id>/like/<str:id>/comment/<str:comment_id>', views.likeComment, name='likeComment'),
     path('author/<str:user_id>/unlike/<str:id>', views.unlikeObject, name='unlikeObject'),
     path('author/<str:user_id>/unlike/<str:id>/comment/<str:comment_id>', views.unlikeComment, name='unlikeComment'),
+    path('admin/nodes', views.get_nodes, name="admin_nodes"),
+    path('admin/', admin.site.urls)
 ]
