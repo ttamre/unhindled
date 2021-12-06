@@ -7,7 +7,7 @@ from .models import User
 from .serializers import UserSerializer
 import requests
 
-from unhindled.serializers import UserSerializer
+from unhindled.serializers import PostSerializer, UserSerializer
 
 
 servers = [
@@ -96,7 +96,7 @@ def get_foreign_posts_list():
         js_req_14 = t14_req.json()
         for post in js_req_14:
             post_list.append(post)
-            
+
     return post_list
 
 #get foreign authors
@@ -128,7 +128,7 @@ def get_foreign_authors_list():
         js_req_14 = t14_req.json()['items']
         for author in js_req_14:
             author_list.append(author)
-            
+
     #foreign authors from our own heroku for testing 
     #t15_req = requests.get('https://unhindled.herokuapp.com/service/authors', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
     #if t15_req.status_code == 500:
@@ -139,7 +139,21 @@ def get_foreign_authors_list():
             #author_list.append(author)
     
     return author_list
- 
+
+def send_post_to_inbox(author, post):
+    for server in servers:
+        if server[0][:-4] in author:
+            serializer = PostSerializer(post)
+            data = serializer.data
+            auth = server[1]
+            author_id = author.strip("/").split("/")[-1]
+            endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
+            req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
+            if req.status_code == 200:
+                return True
+
+    return False
+
 #get author given author.id NOT CURRENTLY IN USE  
 def foreign_get_author(author):
     #team 3 once implemented
@@ -262,9 +276,7 @@ def get_likes_on_post(post):
         if server[0][:-4] in source:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/posts/" + post_id + "/likes"
-            # print(endpoint)
             req = requests.get(endpoint, auth=auth, headers={'Referer': "http://127.0.0.1:8000/"})
-            # print(req.json())
             if req.status_code == 500:
                 return ""
             else:
@@ -275,17 +287,16 @@ def send_like_object(post, author, post_author):
     serializer = UserSerializer(author)
     author_id = post_author.strip("/").split("/author/")[-1]
     data = {}
-    data["type"] = "like"
+    data["type"] = "Like"
     data["author"] = serializer.data
     data["object"] = post
     data["@context"] = "https://www.w3.org/ns/activitystreams"
+    data["summary"] = str(author.username) + " likes your post"
     for server in servers:
         if server[0][:-4] in post:
             auth = server[1]
             endpoint = "https://" + server[0] + "/author/" + author_id + "/inbox"
-            req = requests.post(endpoint, auth=auth,data=data, headers={'Referer': "http://127.0.0.1:8000/"})
-            # print(endpoint)
-            # print(data)
+            req = requests.post(endpoint, auth=auth,json=data, headers={'Referer': "http://127.0.0.1:8000/"})
             if req.status_code == 200:
                 return True
     
