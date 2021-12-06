@@ -14,7 +14,10 @@ def get_likes_post(post):
     if type(post) == dict:
         likes = get_likes_on_post(post)
         if type(likes) == dict:
-            return likes["items"]
+            try:
+                return likes["items"]
+            except:
+                return likes["item"]
         return likes
     else:
         likes = Like.objects.filter(post=post)
