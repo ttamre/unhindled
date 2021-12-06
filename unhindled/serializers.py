@@ -65,13 +65,18 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         data['origin'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['comments'] = data["id"] + "/comments"
         if obj.images is not None:
-            img = MEDIA_ROOT + obj.images.url[6:]
-            with open(img, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            encoding = img.split(".")[-1]
-            # data['content'] = "data:image/" + encoding + ";base64," + str(encoded_string) Uncomment for easy encoding
-            data['content'] = encoded_string
-            data['contentType'] = "image/" + encoding
+            image = obj.images
+            try:
+                images_url = image.url
+                img = MEDIA_ROOT + images_url[6:]
+                with open(img, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read())
+                encoding = img.split(".")[-1]
+                # data['content'] = "data:image/" + encoding + ";base64," + str(encoded_string) Uncomment for easy encoding
+                data['content'] = encoded_string
+                data['contentType'] = "image/" + encoding
+            except:
+                pass
 
         return data
 
