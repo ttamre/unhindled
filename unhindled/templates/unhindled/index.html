@@ -27,7 +27,7 @@
                                 {% endlocaltime %}
                             </small>
                             <div class="ml-auto">
-                                <small class="source-text">{{post.source}}</small>
+                                <small class="source-text">{% shorten_source post.source %}</small>
                             </div>
                         </div>
                         {% if post.is_shared_post %}

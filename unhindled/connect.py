@@ -18,15 +18,6 @@ servers = [
         ('project-api-404.herokuapp.com/api/authors', ('team15','team15'))
     ]
 
-def test():
-    test = requests.get('https://unhindled.herokuapp.com/service/allposts/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
-    # test = requests.get('http://127.0.0.1:8000/service/allposts', auth=('q','q'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if test.status_code == 500:
-        pass
-    else:
-        t = test.json()
-    return t
-
 def get_json_post(id):
     found_post = ''
     for post in get_foreign_posts_list():
@@ -40,15 +31,6 @@ def get_json_post(id):
             found_post = post
 
     return found_post
-    
-#get our own authors
-def test_authors():
-    test = requests.get('https://unhindled.herokuapp.com/service/authors/', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if test.status_code == 500:
-        pass
-    else:
-        t = test.json()
-    return t  
 
 def get_json_authors(id):
     found_authors = ''
@@ -62,8 +44,6 @@ def get_json_authors(id):
         if split == id:
             found_authors = authors
     return found_authors
-    
-
 
     
 #get foreign posts
@@ -79,7 +59,7 @@ def get_foreign_posts_list():
         for post in js_req_3:
             post_list.append(post)
 
-       
+
     #foreign posts from team 5
     t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/post/request_post_list?size=10000', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
 
@@ -105,9 +85,10 @@ def get_foreign_posts_list():
     if t17_req.status_code == 500:
         pass
     else:
-        js_req_17 = t17_req.json()
+        js_req_17 = t17_req.json()['items']
         for post in js_req_17:
-            post_list.append(post)
+            if ":8000" not in post["source"]:
+                post_list.append(post)
 
     #foreign posts from team 23
     # t23_req = requests.get('https://project-api-404.herokuapp.com/api/posts', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -156,18 +137,18 @@ def get_foreign_authors_list():
     if t17_req.status_code == 500:
         pass
     else:
-        js_req_17 = t17_req.json()
+        js_req_17 = t17_req.json()['items']
         for author in js_req_17:
             author_list.append(author)
 
     #foreign authors from team 23
-    t23_req = requests.get('https://project-api-404.herokuapp.com/api/authors', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
-    if t23_req.status_code == 500:
-        pass
-    else:
-        js_req_23 = t23_req.json()['items']
-        for author in js_req_23:
-            author_list.append(author)
+    # t23_req = requests.get('https://project-api-404.herokuapp.com/api/authors', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
+    # if t23_req.status_code == 500:
+    #     pass
+    # else:
+    #     js_req_23 = t23_req.json()['items']
+    #     for author in js_req_23:
+    #         author_list.append(author)
 
     #foreign authors from our own heroku for testing 
     #t15_req = requests.get('https://unhindled.herokuapp.com/service/authors', auth=('connectionsuperuser','404connection'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -296,7 +277,7 @@ def post_foreign_comments(request, comm, postJson):
         print(api_url)
         if t14_req.status_code == 200:
             pass    
-        else: 
+        else:
             return t14_req.json()
 
     #post comment on team 3

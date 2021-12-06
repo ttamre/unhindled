@@ -1380,7 +1380,6 @@ class ProfileView(LoginRequiredMixin, View):
     login_url = 'accounts/login/'
     redirect_field_name = 'redirect_to'
     def get(self, request, id, *args, **kwargs):
-
         try:
             profile = UserProfile.objects.get(pk=id)
         except:
