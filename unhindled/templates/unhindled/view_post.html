@@ -11,6 +11,7 @@
 {% load len_check %}
 {% load comment_like %}
 {% load post_like %}
+{% load image_helper %}
 
 <main>
 <div class="is-flex mt-3">
@@ -26,8 +27,11 @@
 <p class="non-white-title is-size-4 mb-2">{{post.title}}</p>
 <p>{{post.description}}</p>
 <div class="post-box">
+  {% image_type post.contentType as is_image %}
   {% if post.contentType == "text/markdown" %}
     {{post.content | markdown | safe }}
+  {% elif is_image %}
+    <img src="{% get_image_encoding post.contentType post.content%}">
   {% else %}
     <p>{{post.content}}</p>
   {% endif %}

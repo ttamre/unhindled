@@ -1,8 +1,10 @@
 from django.db.models import fields
 from django.db.models.fields import Field
+from project404.settings import MEDIA_ROOT
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import ForeignAuthor, Post, Follower, FollowRequest, UserProfile, Comment, Like
+import base64
 
 User = get_user_model()
 
@@ -62,6 +64,15 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
         data['source'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['origin'] = self.host + "author/" + str(obj.author.id) + "/posts/" + str(obj.id)
         data['comments'] = data["id"] + "/comments"
+        if obj.images is not None:
+            img = MEDIA_ROOT + obj.images.url[6:]
+            with open(img, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            encoding = img.split(".")[-1]
+            # data['content'] = "data:image/" + encoding + ";base64," + str(encoded_string) Uncomment for easy encoding
+            data['content'] = encoded_string
+            data['contentType'] = "image/" + encoding
+
         return data
 
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
