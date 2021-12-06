@@ -72,8 +72,8 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
                 with open(img, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read())
                 encoding = img.split(".")[-1]
-                # data['content'] = "data:image/" + encoding + ";base64," + str(encoded_string) Uncomment for easy encoding
-                data['content'] = encoded_string
+                data['content'] = "data:image/" + encoding + ";base64," + str(encoded_string)
+                # data['content'] = encoded_string
                 data['contentType'] = "image/" + encoding
             except:
                 pass
