@@ -338,18 +338,14 @@ class PostViewSet(viewsets.ViewSet):
         operation_description="Posting a comment",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['type', 'id', 'author', 'contentType', 'title', 'description', 'visibility', 'created_on', 'source', 'origin'],
+            required=['type', 'author', 'contentType', 'title', 'description', 'visibility', 'created_on', 'source', 'origin'],
             properties={  # TODO ^ are all these required?
                 "type": openapi.Schema(type=openapi.TYPE_STRING),
-                "ID": openapi.Schema(type=openapi.TYPE_STRING),
+                "id": openapi.Schema(type=openapi.TYPE_STRING),
                 "author": openapi.Schema(type=openapi.TYPE_OBJECT),
                 "contentType": openapi.Schema(type=openapi.TYPE_STRING),
-                "title": openapi.Schema(type=openapi.TYPE_STRING),
-                "description": openapi.Schema(type=openapi.TYPE_STRING),
-                "visibility": openapi.Schema(type=openapi.TYPE_STRING),
-                "created_on": openapi.Schema(type=openapi.TYPE_STRING),
-                "source": openapi.Schema(type=openapi.TYPE_STRING),
-                "origin": openapi.Schema(type=openapi.TYPE_STRING)
+                "comment": openapi.Schema(type=openapi.TYPE_STRING),
+                "published": openapi.Schema(type=openapi.TYPE_STRING),
             }
         ),
         responses={
@@ -400,7 +396,7 @@ class PostViewSet(viewsets.ViewSet):
 
             serializer = CommentSerializer(newComment)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response({'addedComment':serializer.data}, status=status.HTTP_201_CREATED)
 
 
     @swagger_auto_schema(
