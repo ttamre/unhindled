@@ -284,7 +284,7 @@ class PostViewSet(viewsets.ViewSet):
         if user != loggedInUser:
             return Response({"author":"Unauthorized Access"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        postData = request.POST
+        postData = json.loads(request.body)
         author = user
         contentType = 'txt'
         for types in Post.CONTENT_TYPES:
@@ -371,7 +371,7 @@ class PostViewSet(viewsets.ViewSet):
         Add comment to post
         """
         post = get_object_or_404(Post, id=post_id)
-        postData = request.POST
+        postData = json.loads(request.body)
         if "comment" in postData["type"]:
             existingAuthors = ForeignAuthor.objects.filter(id=postData["author"]["id"])
             if len(existingAuthors) >= 1:
@@ -555,7 +555,7 @@ class UserViewSet(viewsets.ViewSet):
 
         userProfile = UserProfile.objects.get(user=user)
         
-        updateData = request.POST
+        updateData = json.loads(request.body)
 
         if "user_id" in updateData.keys() and updateData["user_id"] != "":
             otherUser = User.objects.filter(user_id=updateData["user_id"])
@@ -1071,10 +1071,10 @@ class InboxViewSet(viewsets.ViewSet):
     host = "https://unhindled.herokuapp.com/"
 
     def post(self, request, id):
-        postData = request.POST
+        postData = json.loads(request.body)
         user = get_object_or_404(User,id=id)
-        if "type" not in postData.keys():
-            return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
+        # if "type" not in postData.keys():
+        #     return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
         
         if postData["type"].lower() == "post":
             link = postData["id"].replace(postData["source"], self.host)

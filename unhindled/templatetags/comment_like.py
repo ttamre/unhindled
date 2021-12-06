@@ -13,6 +13,8 @@ User = get_user_model()
 def get_likes(comment, post):
     if type(post) == dict:
         likes = get_comment_likes(comment["id"], post)
+        if type(likes) == dict:
+            return likes["items"]
         return likes
     else:
         return Like.objects.filter(comment=comment)
