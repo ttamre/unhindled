@@ -1540,13 +1540,17 @@ def clearInbox(request, id):
 #         ('project-api-404.herokuapp.com/api/authors', ('team15','team15'))
 #     ]
 
+@api_view(['GET'])
 def get_nodes(request, *args):
-    nodes = []
-    for server in servers:
-        nodes.append({
-            "endpoint": server[0],
-            "authentication": f"{server[1][0]}:{server[1][1]}"
-        })
+    if request.user.is_superuser:
+        nodes = []
+        for server in servers:
+            nodes.append({
+                "endpoint": server[0],
+                "authentication": f"{server[1][0]}:{server[1][1]}"
+            })
 
-    context = {"request": request, "nodes": nodes}
-    return render(request, 'unhindled/admin_nodes.html', context)
+        context = {"request": request, "nodes": nodes}
+        return render(request, 'unhindled/admin_nodes.html', context)
+    else:
+        return Response({"message": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
