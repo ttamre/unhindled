@@ -74,6 +74,7 @@ class PostSerializer(serializers.HyperlinkedModelSerializer):
                 encoding = img.split(".")[-1]
                 data['content'] = "data:image/" + encoding + ";base64," + encoded_string.decode()
                 # data['content'] = encoded_string
+                data['contentType'] = "image/" + encoding
             except:
                 pass
 
