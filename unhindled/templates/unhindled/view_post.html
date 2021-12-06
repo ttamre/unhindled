@@ -61,7 +61,9 @@
   {% endif %}
   <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/delete">Delete</a></span>
 {% else %}
-  <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/share" onclick="return confirm('Are you sure?');">Share</a></span>
+  {% if request.user.is_authenticated %}
+    <span class="mr-2"><a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}/share" onclick="return confirm('Are you sure?');">Share</a></span>
+  {% endif %}
 {% endif %}
 </div>
 
