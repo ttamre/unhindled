@@ -307,6 +307,7 @@ def get_likes_on_post(post):
             if req.status_code == 500:
                 return ""
             else:
+                print(req.json())
                 return req.json()
 
     

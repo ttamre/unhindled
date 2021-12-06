@@ -22,7 +22,7 @@ def likes_count(like_list):
     return len(like_list)
 
 @register.simple_tag
-def comment_liked(like_list, author):
+def object_liked(like_list, author):
     if type(like_list) == QuerySet:
         likes = like_list.filter(author=author)
         return len(likes) == 1
@@ -31,33 +31,11 @@ def comment_liked(like_list, author):
             id = str(author.id)
             if id in like["author"]["id"]:
                 return True
-            else:
-                return False
 
-
-@register.simple_tag
-def comment_text(comment, author):
-    if str(comment).startswith('http'):
-        return 'Like'
-    else:
-        comment = Comment.objects.get(id=comment)
-        likes = Like.objects.filter(comment=comment, author=author)
-        if len(likes) >= 1:
-            return "Unlike"
-        else:
-            return "Like"
+    return False
 
 @register.simple_tag
-def like_count_comment(comment):
-    if str(comment).startswith('http'):
-        return 0
-    else:
-        comment = Comment.objects.get(id=comment)
-        likes = Like.objects.filter(comment=comment)
-        return len(likes)
-
-@register.simple_tag
-def singular_like_comment(likes_list):
+def singular_like(likes_list):
     
     if len(likes_list) == 1:
         return "Like"
