@@ -12,7 +12,7 @@ from unhindled.serializers import UserSerializer
 
 servers = [
         ('social-dis.herokuapp.com', ('socialdistribution_t03','c404t03')),
-        ('cmput404-socialdist-project.herokuapp.com', ('socialcircleauth','cmput404')),
+        ('cmput404-social-circle.herokuapp.com', ('socialdistribution_t05','c404t05')),
         ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14'))
     ]
 
@@ -78,15 +78,14 @@ def get_foreign_posts_list():
             post_list.append(post)
 
        
-    # #foreign posts from team 5
-    # t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=10000', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
-
-    # if t5_req.status_code == 500:
-    #     pass
-    # else:
-    #     js_req_5 = t5_req.json()
-    #     for post in js_req_5:
-    #         post_list.append(post)
+    #foreign posts from team 5
+    t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/post/request_post_list?size=10000', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if t5_req.status_code == 500:
+        pass
+    else:
+        js_req_5 = t5_req.json()
+        for post in js_req_5:
+            post_list.append(post)
 
     #foreign posts from team 14
     t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts?size=10000', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})
@@ -113,11 +112,11 @@ def get_foreign_authors_list():
             author_list.append(author)
 
     # foreign authors from team 5
-    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/authors/', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
+    t5_req = requests.get('https://cmput404-social-circle.herokuapp.com/author/', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
     if t5_req.status_code == 500:
         pass
     else:
-        js_req_5 = t5_req.json()
+        js_req_5 = t5_req.json()['items']
         for author in js_req_5:
             author_list.append(author)
     
