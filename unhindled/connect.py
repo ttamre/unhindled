@@ -78,15 +78,15 @@ def get_foreign_posts_list():
             post_list.append(post)
 
        
-    # #foreign posts from team 5
-    # t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=10000', auth=('socialcircleauth','cmput404'), headers={'Referer': "http://127.0.0.1:8000/"})
+    #foreign posts from team 5
+    t5_req = requests.get('https://cmput404-socialdist-project.herokuapp.com/post/request_post_list?size=10000', auth=('socialdistribution_t05','c404t05'), headers={'Referer': "http://127.0.0.1:8000/"})
 
-    # if t5_req.status_code == 500:
-    #     pass
-    # else:
-    #     js_req_5 = t5_req.json()
-    #     for post in js_req_5:
-    #         post_list.append(post)
+    if t5_req.status_code == 500:
+        pass
+    else:
+        js_req_5 = t5_req.json()
+        for post in js_req_5:
+            post_list.append(post)
 
     #foreign posts from team 14
     t14_req = requests.get('https://linkedspace-staging.herokuapp.com/api/posts?size=10000', auth=('socialdistribution_t14','c404t14'), headers={'Referer': "http://127.0.0.1:8000/"})

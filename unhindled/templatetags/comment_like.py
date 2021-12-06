@@ -3,8 +3,6 @@ from . .models import Comment, Post, Like
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
 register = template.Library()
 
 User = get_user_model()
@@ -22,7 +20,7 @@ def comment_liked(comment, author):
 @register.simple_tag
 def comment_text(comment, author):
     if str(comment).startswith('http'):
-        return 'A'
+        return 'Like'
     else:
         comment = Comment.objects.get(id=comment)
         likes = Like.objects.filter(comment=comment, author=author)
@@ -50,10 +48,9 @@ def singular_like_comment(comment):
     #     post = uuid.UUID(post)
     likes = ""
     if type(comment) != dict:
-        likes = Comment.objects.filter(comment=comment)
+        likes = Like.objects.filter(comment=comment)
     else:
         pass
-
     if len(likes) == 1:
         return "like"
     else:
