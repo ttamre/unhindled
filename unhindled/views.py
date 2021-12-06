@@ -1071,7 +1071,8 @@ class InboxViewSet(viewsets.ViewSet):
     host = "https://unhindled.herokuapp.com/"
 
     def post(self, request, id):
-        postData = request.POST
+        postData = json.load(request.body)
+        
         user = get_object_or_404(User,id=id)
         if "type" not in postData.keys():
             return Response({"error": "could not find type in post message"}, status.HTTP_400_BAD_REQUEST)
