@@ -326,8 +326,6 @@ def send_like_object(post_url, author, post_author):
     data["object"] = post_url
     data["@context"] = "https://www.w3.org/ns/activitystreams"
     data["summary"] = str(author.username) + " likes your post"
-    data["author"]["id"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
-    data["author"]["url"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
     for server in servers:
         if server[0][:-4] in post_url:
             auth = server[1]
@@ -359,8 +357,6 @@ def send_like_comment(post_url, author, post_author,comment_id):
     data["object"] = post_url + "/comments/" + comment_id
     data["@context"] = "https://www.w3.org/ns/activitystreams"
     data["summary"] = str(author.username) + " likes your post"
-    data["author"]["id"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
-    data["author"]["url"] = "https://unhindled.herokuapp.com/author/f6c3d233-103d-4c09-ad1a-f703f07e8b98"
     for server in servers:
         if server[0][:-4] in post_url:
             auth = server[1]
