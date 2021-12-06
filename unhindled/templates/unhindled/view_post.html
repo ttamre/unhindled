@@ -79,12 +79,12 @@
   <div class="comment-box mb-3">
     <strong><a href="/author/{% valid_url_profile post.author.id %}">{{comment.author.displayName}}</a> - {{comment.published}}</strong>
     <p>{{ comment.comment}}</p>
-    <p>{% like_count_comment comment.id %} {% singular_like_comment comment %}
+    <p><b>{% like_count_comment comment.id %} {% singular_like_comment comment %}</b>
     {% if user.is_authenticated %}
       {% if comment.id|comment_liked:user %}
-      <a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile comment.id %}/comment">{% comment_text comment.id user %}</a>
+        <a href="/author/{% valid_url_profile post.author.id %}/unlike/{% valid_url_profile comment.id %}/comment">{% comment_text comment.id user %}</a>
       {% else %}
-      <a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile comment.id %}/comment">{% comment_text comment.id user %}</a>
+        <a href="/author/{% valid_url_profile post.author.id %}/like/{% valid_url_profile comment.id %}/comment">{% comment_text comment.id user %}</a>
       {% endif %}
     {% endif %}</p>
   </div>

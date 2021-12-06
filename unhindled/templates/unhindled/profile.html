@@ -6,6 +6,7 @@
 {% /header %}
 
 {% load image_helper %}
+{% load url_check %}
 
 <main>
 <div class="container my-5">
@@ -57,8 +58,18 @@
             {% for post in posts %}
             <div class="comment-box mt-3">
                 {% if post.visibility != "unlisted" %}
-                    <a href="{% url 'viewPost' post.author.displayName post.id %}">{{ post.title }}</a> <br>
-                    <p>{{ post.published }}</p>
+                <div class="flex">
+                    <small>
+                        {% load tz %}
+                        {% localtime on %}
+                        <small>Created: {{post.published}}</small>
+                        {% endlocaltime %}
+                    </small>
+                    <div class="ml-auto">
+                        <small class="source-text">{{post.source}}</small>
+                    </div>
+                </div>
+                    <a href="/author/{% valid_url_profile post.author.id %}/posts/{% valid_url_profile post.id %}">{{ post.title }}</a> <br>
                     <p>{{ post.description }}</p>
                 {% endif %}
             </div>

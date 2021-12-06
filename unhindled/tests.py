@@ -1,8 +1,10 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from django.contrib.auth.models import User
-from .models import Post, Friendship, Comment, UserProfile
+from django.contrib.auth import get_user_model
+from .models import Post, Comment, Follower, UserProfile
 import datetime
+
+User = get_user_model()
 
 # Create your tests here.
 
@@ -14,9 +16,8 @@ class PostTests(TestCase):
 		self.other_user.save()
 		login = self.client.login(username='testuser', password='12345')
 		self.posts_to_delete = []
-		self.new_post = Post.objects.create(author=self.user, contentType=Post.CONTENT_TYPES[0], 
-		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
+		self.new_post = Post.objects.create(author=self.user,
+		title="Test Title", description="This is a test Post", published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
 		self.new_post.save()
 
@@ -36,7 +37,7 @@ class PostTests(TestCase):
 		"visibility":"PUBLIC", "published":datetime.datetime.now(), "content":"TEST POST 2",
 		"images":"", "originalPost":"", "sharedBy":""})
 		id_to_delete = ""
-		
+
 		addedPost = Post.objects.filter(title="Test Title").values_list('id', flat=True)
 		self.assertEqual(len(addedPost), totalID + 1)
 		for id_val in list(addedPost):
@@ -47,14 +48,16 @@ class PostTests(TestCase):
 		self.assertEqual(response.status_code, 302)
 		self.assertEqual(response.url, "/" + self.user.username + "/posts/" + str(id_to_delete))
 
-	def test_edittingPosts(self):
+	def test_editingPosts(self):
 		# Editing post and checking if post is edited
 		response = self.client.post("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/edit",data={'author': ['1'], "contentType":["md"], 
 		"title":["Test Title"], "description":["This is a test Post"],
 		"visibility":["PUBLIC"], "content":["TEST POST(EDITED)"],
 		"images":[""], "originalPost":[""], "sharedBy":[""]})
+		print(response)
 
 		editedPost = Post.objects.filter(id=self.new_post.id)
+		# print(editedPost[0].content)
 		self.assertEqual(editedPost[0].content, "TEST POST(EDITED)")
 
 	def test_deletingPosts(self):
@@ -73,12 +76,12 @@ class PostTests(TestCase):
 		response = self.client.get("/"+self.user.username + "/posts/" + str(self.new_post.id) + "/share")
 
 		totalShare = Post.objects.filter(originalPost=self.new_post)
+		print(len(totalShare))
 		self.assertEqual(len(totalShare), totalShares + 1)
 
 	def test_restrictions(self):
-		other_post = Post.objects.create(author=self.other_user, contentType=Post.CONTENT_TYPES[0], 
-		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
+		other_post = Post.objects.create(author=self.other_user,
+		title="Test Title", description="This is a test Post", published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
 		other_post.save()
 
@@ -121,11 +124,11 @@ class HTMLTests(TestCase):
 	def test_index(self):
 		resp = self.client.get(reverse("index"))
 		self.assertEqual(resp.status_code, 200)
-		self.assertContains(resp, '<p>No Posts to show.</p>')
+		self.assertContains(resp, '<div class="mb-5">')
 
 	def test_login_index(self):
 		resp = self.client.get(reverse("index"))
-		self.assertContains(resp, '<p>No Posts to show.</p>')
+		self.assertContains(resp, '<div class="mb-5">')
 
 		self.client.force_login(self.user)
 		resp = self.client.get(reverse("index"))
@@ -134,29 +137,34 @@ class HTMLTests(TestCase):
 	def test_logout_index(self):
 		self.client.force_login(self.user)
 		resp = self.client.get(reverse("index"))
-		self.assertContains(resp, '<p class="non-white-title">Home</p>')
+		self.assertContains(resp, '<div class="mb-5">')
 
 		resp = self.client.get(reverse("logout"))
 		self.assertEqual(resp.status_code, 302)
 		resp = self.client.get(reverse("index"))
-		self.assertContains(resp, '<p>No Posts to show.</p>')
+		self.assertContains(resp, '<div class="mb-5">')
 
 	def test_mystream(self):
 		self.client.force_login(self.user)
-		resp = self.client.get(reverse("mystream"))
+		resp = self.client.get(reverse("mystream", args=[self.user.id]))
 		self.assertContains(resp, '<p class="non-white-title">My Stream</p>')
 
 	def test_profile(self):
 		self.client.force_login(self.user)
 		resp = self.client.get(reverse("profile", args=[self.user.id]))
-		self.assertContains(resp, '<p class="mr-2">Username: </p>')
+		self.assertContains(resp, '<p class="label-field has-text-weight-bold">Username: </p>')
 
 	def test_manage_friends(self):
 		self.client.force_login(self.user)
 		resp = self.client.get(reverse("friends", args=['user']))
 		self.assertContains(resp, '<p class="non-white-title">Manage Friends</p>')
 
-class FriendshipTests(TestCase):
+	def test_inbox(self):
+		self.client.force_login(self.user)
+		resp = self.client.get(reverse("inbox", args=['user']))
+		self.assertContains(resp, '<p class="non-white-title mb-1">Inbox</p>')
+
+class FollowerTests(TestCase):
    def setUp(self):
         self.user1 = User.objects.create_user(username='testuser', password='12345')
         self.user1.save()
@@ -165,20 +173,19 @@ class FriendshipTests(TestCase):
         login = self.client.login(username='testuser', password='12345')
         
    def test_friendships(self):
-   	friendship = Friendship.objects.create(requesterId='testuser',adresseeId='testuser2')
+   	friendship = Follower.objects.create(author='testuser',follower='testuser2')
    	friendship.save()
-   	self.assertEqual(len(Friendship.objects.filter(requesterId = self.user1.username).values_list('id', flat=True)),1)
-   	friendship = Friendship.objects.filter(requesterId = self.user1.username)[0]
-   	self.assertEqual(friendship.status, "pending")
+   	self.assertEqual(len(Follower.objects.filter(author = self.user1.username).values_list('id', flat=True)),1)
+   	friendship = Follower.objects.filter(author = self.user1.username)[0]
+   	self.assertEqual(friendship.follower, "testuser2")
    	
 class CommentTests(TestCase):
    def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='12345')
         self.user.save()
         login = self.client.login(username='testuser', password='12345')
-        self.new_post = Post.objects.create(author=self.user, 
-		title="Test Title", description="This is a test Post",
-		visibility=Post.VISIBILITY[0], published=datetime.datetime.now(), content="TEST POST 1",
+        self.new_post = Post.objects.create(author=self.user,
+		title="Test Title", description="This is a test Post", published=datetime.datetime.now(), content="TEST POST 1",
 		images=None, originalPost=None, sharedBy=None)
         self.new_post.save()
         
