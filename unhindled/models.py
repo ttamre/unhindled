@@ -156,6 +156,7 @@ class Inbox(models.Model):
 @receiver(post_save, sender=Post)
 def send_post_to_local_inbox(sender, instance, created, **kwargs):
 	from unhindled.connect import send_post_to_inbox
+	l = logging.getLogger("sf")
 	if created:
 		if (instance.send_to is not None) and instance.visibility == "SEND":
 			if str(instance.send_to).startswith("http"):
@@ -165,6 +166,9 @@ def send_post_to_local_inbox(sender, instance, created, **kwargs):
 				link += "author/" + str(instance.author.id) + "/posts/" + str(instance.id)
 				id = uuid.UUID(instance.send_to)
 				receiver = User.objects.get(id=id)
+				l.error(receiver)
+				l.error(instance.author.username)
+				l.error(instance)
 				inbox = Inbox(inbox_of=receiver, type="post",link=link, inbox_from=instance.author.username,post=instance)
 				inbox.save()
 		
@@ -172,9 +176,14 @@ def send_post_to_local_inbox(sender, instance, created, **kwargs):
 			followers = Follower.objects.filter(author=instance.author.id)
 			for follower in followers:
 				link = "https://unhindled.herokuapp.com/"
-				link += "/author/" + str(instance.author.id) + "/posts/" + str(instance.id)
-				if isinstance(follower.follower, uuid.UUID) and User.objects.filter(id=follower.follower) == 1:
+				link += "author/" + str(instance.author.id) + "/posts/" + str(instance.id)
+				#36 is length of uuid
+				l.error(follower.follower)
+				if (len(follower.follower) == 36) and (len(User.objects.filter(id=follower.follower)) == 1):
 					reciever = User.objects.get(id=follower.follower)
+					l.error(reciever)
+					l.error(instance.author.username)
+					l.error(instance)
 					inbox = Inbox(inbox_of=reciever, type="post",link=link, inbox_from=instance.author.username,post=instance)
 					inbox.save()
 				else:
