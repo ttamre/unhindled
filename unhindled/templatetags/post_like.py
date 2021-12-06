@@ -13,6 +13,11 @@ def get_likes_post(post):
     print("Post TIME")
     if type(post) == dict:
         likes = get_likes_on_post(post)
+        if type(likes) == dict:
+            try:
+                return likes["items"]
+            except:
+                return likes["item"]
         return likes
     else:
         likes = Like.objects.filter(post=post)
