@@ -1138,7 +1138,8 @@ class StreamView(LoginRequiredMixin, generic.ListView):
         # See: https://docs.djangoproject.com/en/3.2/ref/templates/builtins/#json-script
         username = UserProfile.objects.get(user=request.user).github
         headers = {"auth": GITHUB_AUTH, "uri": f'https://api.github.com/users/{username}/events/public'}
-        return render(request, 'unhindled/mystream.html', {"headers": headers})
+        queryset = Post.objects.order_by('published')
+        return render(request, 'unhindled/mystream.html', {"headers": headers, "object_list": queryset})
 
 
 class AccountView(generic.CreateView):
@@ -1212,7 +1213,7 @@ class SharePost(LoginRequiredMixin, generic.View):
     login_url = 'accounts/login/'
     redirect_field_name = 'redirect_to'
 
-    def get(self, request, user, id):
+    def get(self, request, user_id, id):
         post_object = get_object_or_404(Post, pk=id)
         current_user = request.user
         if current_user == User:
@@ -1396,8 +1397,7 @@ class ProfileView(LoginRequiredMixin, View):
             user = User.objects.get(id=id)
             profile = UserProfile.objects.get(user=user)
             user_post = Post.objects.filter(author=user).order_by('-published')
-        # user_post = []
-        print(user_post)
+
         context = {
             'author': user,
             'profile': profile,

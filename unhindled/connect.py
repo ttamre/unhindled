@@ -13,7 +13,9 @@ from unhindled.serializers import PostSerializer, UserSerializer
 servers = [
         ('social-dis.herokuapp.com', ('socialdistribution_t03','c404t03')),
         ('cmput404-socialdist-project.herokuapp.com', ('socialcircleauth','cmput404')),
-        ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14'))
+        ('linkedspace-staging.herokuapp.com/api', ('socialdistribution_t14','c404t14')),
+        ('cmput404f21t17.herokuapp.com/service/', ('a50ee73d-ee34-4201-8258-ead20eb71857','123456')),
+        ('project-api-404.herokuapp.com/api/authors', ('team15','team15'))
     ]
 
 def test():
@@ -98,6 +100,25 @@ def get_foreign_posts_list():
         for post in js_req_14:
             post_list.append(post)
 
+   #foreign posts from team 17
+    t17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/', auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if t17_req.status_code == 500:
+        pass
+    else:
+        js_req_17 = t17_req.json()
+        for post in js_req_17:
+            post_list.append(post)
+
+    #foreign posts from team 23
+    # t23_req = requests.get('https://project-api-404.herokuapp.com/api/posts', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
+    # if t23_req.status_code == 500:
+    #     pass
+    # else:
+    #     print(t23_req)
+    #     js_req_23 = t23_req.json()['items']
+    #     for post in js_req_23:
+    #         post_list.append(post)
+
     return post_list
 
 #get foreign authors
@@ -128,6 +149,24 @@ def get_foreign_authors_list():
     else:
         js_req_14 = t14_req.json()['items']
         for author in js_req_14:
+            author_list.append(author)
+
+    #foreign authors from team 17
+    t17_req = requests.get('https://cmput404f21t17.herokuapp.com/service/connect/public/author/', auth=('a50ee73d-ee34-4201-8258-ead20eb71857','123456'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if t17_req.status_code == 500:
+        pass
+    else:
+        js_req_17 = t17_req.json()
+        for author in js_req_17:
+            author_list.append(author)
+
+    #foreign authors from team 23
+    t23_req = requests.get('https://project-api-404.herokuapp.com/api/authors', auth=('team15','team15'), headers={'Referer': "http://127.0.0.1:8000/"})
+    if t23_req.status_code == 500:
+        pass
+    else:
+        js_req_23 = t23_req.json()['items']
+        for author in js_req_23:
             author_list.append(author)
 
     #foreign authors from our own heroku for testing 
