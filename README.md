@@ -5,6 +5,7 @@
 * [App](https://dashboard.heroku.com/apps/unhindled)
 * [OpenAPI Documentation](https://unhindled.herokuapp.com/redoc/)
 * [Project Requirements](https://github.com/abramhindle/CMPUT404-project-socialdistribution/blob/master/project.org)
+* [Video Demo](https://youtu.be/X_gNzF058u0)
 
 ## Commands
 **Create user**
